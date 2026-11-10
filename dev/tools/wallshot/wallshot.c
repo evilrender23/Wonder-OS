@@ -8,7 +8,11 @@
 // Wayland connection and can be used in parallel.
 //
 //   wallshot SHADER.glsl OUT.png [--size WxH] [--time T] [--camera X,Y]
-//            [--zoom Z] [--bench N]
+//            [--zoom Z] [--bench N] [--texture FILE.rgba --texsize WxH]
+//
+// --texture binds raw 8-bit RGBA rows (top row first, as `magick IN -depth 8
+// rgba:FILE` writes them) as `tex`, with `u_texture_size` and
+// `u_output_size`, like a driftwm texture shader gets them.
 //
 // Exit 0 on success, 2 when the shader fails to compile or link (log on
 // stderr), 1 for any other error. --bench N renders N extra frames and
@@ -145,10 +149,12 @@ static double now_ms(void) {
 int main(int argc, char **argv) {
     if (argc < 3) {
         fprintf(stderr, "usage: wallshot SHADER.glsl OUT.png [--size WxH] [--time T] "
-                        "[--camera X,Y] [--zoom Z] [--bench N]\n");
+                        "[--camera X,Y] [--zoom Z] [--bench N] "
+                        "[--texture FILE.rgba --texsize WxH]\n");
         return 1;
     }
-    int w = 1280, h = 720, bench = 0;
+    int w = 1280, h = 720, bench = 0, tw = 0, th = 0;
+    const char *texture = NULL;
     float t = 3.0f, camx = 0, camy = 0, zoom = 1.0f;
     for (int i = 3; i + 1 < argc; i += 2) {
         if (!strcmp(argv[i], "--size")) sscanf(argv[i + 1], "%dx%d", &w, &h);
@@ -156,6 +162,8 @@ int main(int argc, char **argv) {
         else if (!strcmp(argv[i], "--camera")) sscanf(argv[i + 1], "%f,%f", &camx, &camy);
         else if (!strcmp(argv[i], "--zoom")) zoom = atof(argv[i + 1]);
         else if (!strcmp(argv[i], "--bench")) bench = atoi(argv[i + 1]);
+        else if (!strcmp(argv[i], "--texture")) texture = argv[i + 1];
+        else if (!strcmp(argv[i], "--texsize")) sscanf(argv[i + 1], "%dx%d", &tw, &th);
     }
     char *body = slurp(argv[1]);
     if (!body) { fprintf(stderr, "cannot read %s\n", argv[1]); return 1; }
@@ -216,6 +224,29 @@ int main(int argc, char **argv) {
     glUniform1f(glGetUniformLocation(prog, "alpha"), 1.0f);
     glUniform2f(glGetUniformLocation(prog, "u_camera"), camx, camy);
     glUniform1f(glGetUniformLocation(prog, "u_zoom"), zoom);
+    glUniform2f(glGetUniformLocation(prog, "u_output_size"), (float)w, (float)h);
+    if (texture) {
+        if (tw < 1 || th < 1) { fprintf(stderr, "--texture needs --texsize WxH\n"); return 1; }
+        size_t bytes = (size_t)tw * th * 4;
+        uint8_t *data = malloc(bytes);
+        FILE *f = fopen(texture, "rb");
+        if (!f || fread(data, 1, bytes, f) != bytes) {
+            fprintf(stderr, "cannot read %dx%d RGBA from %s\n", tw, th, texture);
+            return 1;
+        }
+        fclose(f);
+        GLuint tex;
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        free(data);
+        glUniform1i(glGetUniformLocation(prog, "tex"), 0);
+        glUniform2f(glGetUniformLocation(prog, "u_texture_size"), (float)tw, (float)th);
+    }
     GLint ut = glGetUniformLocation(prog, "u_time");
     glViewport(0, 0, w, h);
 

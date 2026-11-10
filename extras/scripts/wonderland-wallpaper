@@ -20,6 +20,10 @@ like the others, under the id `img-<hash>`. Its shader is
 `<live>/lib/image.glsl`, which samples the picture through
 `[background] texture`.
 
+A live wallpaper can be blended with one of those pictures («Mezclar con
+imagen» in the panel, the `blend_*` settings): `<live>/lib/blend.glsl`,
+appended to the generated shader, multiplies the picture over the animation.
+
   wonderland-wallpaper list                    JSON: wallpapers + state
   wonderland-wallpaper current                 JSON: state
   wonderland-wallpaper render ID [JSON] [-o F] generated shader (stdout or F)
@@ -81,6 +85,27 @@ GLOBAL_PARAMS = [
 ]
 
 PARALLAX, ZOOM_FOLLOW = GLOBAL_PARAMS[1], GLOBAL_PARAMS[2]
+
+# Settings every live wallpaper gets to blend it with an imported picture,
+# shown under «Mezclar con imagen». `blend_image` is one of the user's
+# pictures (its options are filled in by `blend_params`) or "none".
+BLEND_NONE = "none"
+BLEND_PARAMS = [
+    {"key": "blend_image", "label": "Imagen", "type": "enum", "default": BLEND_NONE,
+     "options": [{"value": BLEND_NONE, "label": "Ninguna"}]},
+    {"key": "blend_amount", "label": "Intensidad", "type": "float", "min": 0.0, "max": 1.0,
+     "step": 0.05, "default": 1.0,
+     "description": "Cuánto se multiplica la imagen sobre el fondo animado."},
+    {"key": "blend_shadows", "label": "Imagen en las sombras", "type": "float", "min": 0.0,
+     "max": 1.0, "step": 0.05, "default": 0.35,
+     "description": "Deja ver la imagen también donde el fondo animado es oscuro."},
+    {"key": "blend_brightness", "label": "Brillo de la mezcla", "type": "float", "min": 0.5,
+     "max": 3.0, "step": 0.05, "default": 1.6,
+     "description": "Multiplicar oscurece: súbelo para compensar."},
+    {"key": "blend_saturation", "label": "Color de la imagen", "type": "float", "min": 0.0,
+     "max": 2.0, "step": 0.05, "default": 1.0,
+     "description": "En 0 la imagen pasa a blanco y negro y solo tiñe el fondo animado."},
+]
 
 # Settings of an imported picture.
 IMAGE_PARAMS = [
@@ -169,12 +194,36 @@ def load_image_manifest(wid):
     }
 
 
+def blend_params():
+    """BLEND_PARAMS with the imported pictures as options of `blend_image`."""
+    options = list(BLEND_PARAMS[0]["options"])
+    pictures = []
+    for wid in image_ids():
+        try:
+            pictures.append(load_image_manifest(wid))
+        except SystemExit:
+            continue  # a folder without its picture
+    pictures.sort(key=lambda m: (-float(m["imported"] or 0), m["name"].lower()))
+    for m in pictures:
+        options.append({"value": m["id"], "label": m["name"], "preview": m["preview"]})
+    return ([dict(BLEND_PARAMS[0], options=options, group="blend")]
+            + [dict(p, group="blend") for p in BLEND_PARAMS[1:]])
+
+
 def all_params(manifest):
     if manifest.get("kind") == "image":
         return ([dict(p, group="wallpaper") for p in IMAGE_PARAMS]
                 + [dict(PARALLAX), dict(ZOOM_FOLLOW)])
     own = [dict(p, group=p.get("group", "wallpaper")) for p in manifest.get("params", [])]
-    return own + [dict(p) for p in GLOBAL_PARAMS]
+    return own + blend_params() + [dict(p) for p in GLOBAL_PARAMS]
+
+
+def blend_image(values):
+    """Path of the picture a live wallpaper is blended with, or None."""
+    wid = values.get("blend_image", BLEND_NONE)
+    if wid == BLEND_NONE or not is_image(wid):
+        return None
+    return load_image_manifest(wid)["image"]
 
 
 def coerce(param, value):
@@ -267,8 +316,17 @@ def render(root, manifest, values):
     head.append(f"// WonderlandWM live wallpaper: {manifest['id']} (generated, do not edit)")
     animated = values.get("speed", 0) > 0 and not manifest.get("static", False)
     head.append(f"#define WL_ANIMATED {1 if animated else 0}")
+    blend = blend_image(values) is not None
+    # With a picture bound driftwm draws the shader as a texture shader, which
+    # gets the viewport as `u_output_size` instead of smithay's `size`.
+    head.append(f"#define WL_VIEWPORT {'u_output_size' if blend else 'size'}")
     for p in all_params(manifest):
-        head.append(define(p, values[p["key"]]))
+        if p["key"] != "blend_image":
+            head.append(define(p, values[p["key"]]))
+    if blend:
+        # The wallpaper's `main` becomes a function the blend calls first.
+        body = ("#define main wl_live_main\n" + body + "\n#undef main\n"
+                + (root / "lib" / "blend.glsl").read_text())
     src = "\n".join(head) + "\n" + prelude + "\n" + body
     if not animated:
         # driftwm redraws every frame while the source declares u_time.
@@ -407,7 +465,8 @@ def cmd_apply(root, wid, overrides, keep=True):
     preview = state.pop("preview", None)
     covered = preview.get("background") if preview else background_block(text)
     fps = values["fps"] if values.get("speed", 0) > 0 else 0
-    texture = f'texture = {toml_string(manifest["image"])}\n' if "image" in manifest else ""
+    image = manifest.get("image") or blend_image(values)
+    texture = f'texture = {toml_string(image)}\n' if image else ""
     block = ("[background]\n"
              "# Managed by wonderland-wallpaper (Spotlight → «wallpapers»).\n"
              'type = "shader"\n'
@@ -652,6 +711,10 @@ def cmd_remove(wid):
     if state.get("settings", {}).pop(wid, None) is not None:
         save_state(state)
     shutil.rmtree(IMAGES / wid)
+    # A live wallpaper blended with it goes on without the picture.
+    current = state.get("current")
+    if current and state.get("settings", {}).get(current, {}).get("blend_image") == wid:
+        cmd_apply(live_dir(), current, {"blend_image": BLEND_NONE})
     print("removed")
 
 

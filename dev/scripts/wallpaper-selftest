@@ -193,6 +193,37 @@ with tempfile.TemporaryDirectory() as tmp:
     check("a live wallpaper after a picture drops the texture", "texture =" not in cfg.read_text())
     run("apply", img)
 
+    # ── a live wallpaper blended with a picture ──────────────────────────
+    silk = next(w for w in json.loads(run("list").stdout)["wallpapers"] if w["id"] == "silk")
+    blend = next(p for p in silk["params"] if p["key"] == "blend_image")
+    check("live wallpapers offer the pictures to blend with",
+          [o["value"] for o in blend["options"]] == ["none", img] and blend["default"] == "none")
+    keys = [p["key"] for p in silk["params"]]
+    check("the globals still come last", keys[-4:] == ["speed", "parallax", "zoom_follow", "fps"])
+    src = run("render", "silk").stdout
+    check("without a picture the shader is a plain one",
+          "sampler2D" not in src and "#define WL_VIEWPORT size\n" in src)
+    src = run("render", "silk", json.dumps({"blend_image": img, "blend_amount": 0.5})).stdout
+    check("blending samples the picture over the wallpaper's main",
+          "uniform sampler2D tex;" in src and "#define main wl_live_main" in src
+          and "#define WL_VIEWPORT u_output_size\n" in src and "#define P_BLEND_AMOUNT 0.5" in src)
+    check("a blended wallpaper still animates", "uniform float u_time;" in src)
+    run("apply", "silk", json.dumps({"blend_image": img}))
+    text = cfg.read_text()
+    check("apply binds the blended picture and keeps animating",
+          'texture = "' + entry["image"] + '"' in text and "current.glsl" in text and "animate_fps = 60" in text)
+    out = json.loads(run("apply", "silk", '{"blend_image": "img-000000000000"}').stdout)
+    check("an unknown picture keeps the previous one", out["values"]["blend_image"] == img)
+    run("remove", img)
+    state = json.loads(run("current").stdout)
+    check("removing the blended picture leaves the wallpaper without it",
+          state["current"] == "silk" and state["settings"]["silk"]["blend_image"] == "none"
+          and "texture =" not in cfg.read_text()
+          and "sampler2D" not in (cfg_dir / "wallpapers" / "current.glsl").read_text())
+    img = json.loads(run("import", str(photo)).stdout)["imported"][0]
+    cfg.write_text(CONFIG)
+    run("apply", img)
+
     check("remove refuses bundled wallpapers", run("remove", "silk", ok=False).returncode != 0)
     run("remove", img)
     check("removing the applied picture restores the old background", cfg.read_text() == CONFIG)

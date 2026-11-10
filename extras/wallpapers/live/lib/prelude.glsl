@@ -8,7 +8,8 @@ precision mediump float;
 #endif
 
 varying vec2 v_coords;
-uniform vec2 size;
+// `size`, or `u_output_size` when the wallpaper is blended with a picture.
+uniform vec2 WL_VIEWPORT;
 uniform vec2 u_camera;
 uniform float u_zoom;
 uniform float u_time;
@@ -18,9 +19,9 @@ uniform float u_time;
 // should zoom with the canvas.
 vec2 wl_res() {
 #if P_ZOOM_FOLLOW
-    return size;
+    return WL_VIEWPORT;
 #else
-    return size * u_zoom;
+    return WL_VIEWPORT * u_zoom;
 #endif
 }
 

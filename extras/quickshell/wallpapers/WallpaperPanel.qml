@@ -14,7 +14,8 @@ import ".."
 // «Descartar», Escape or closing the panel go back to what was applied.
 // «Importar imagen» adds pictures of the user's own to the grid, ahead of the
 // live ones; they have their own settings (fit, framing, brightness…) and an
-// «Eliminar» button.
+// «Eliminar» button. A live wallpaper can be blended with one of them
+// («Mezclar con imagen»): the picture is multiplied over the animation.
 // Opened from Spotlight («wallpapers», «fondos») or
 // `qs ipc call wallpapers toggle`.
 Scope {
@@ -50,12 +51,30 @@ Scope {
         // A picture just imported is selected and previewed, like a click on
         // its card; «Aplicar» keeps it.
         function onImported(ids) {
-            if (root.open && ids.length) root.pick(ids[0])
+            if (!root.open || !ids.length) return
+            if (root.importForBlend && root.selected && !root.selectedIsImage)
+                root.set("blend_image", ids[0])
+            else root.pick(ids[0])
+        }
+        function onImportingChanged() {
+            // After `imported`, which is emitted right behind this change.
+            if (!Wallpapers.importing) Qt.callLater(() => { root.importForBlend = false })
         }
     }
 
     readonly property var selected: Wallpapers.byId(sel)
     readonly property bool selectedIsImage: !!selected && selected.kind === "image"
+    // The user's pictures, to blend a live wallpaper with.
+    readonly property var pictures: Wallpapers.list.filter(w => w.kind === "image")
+    // The picture the selected live wallpaper is blended with, "" for none
+    // (also when the stored one was deleted since).
+    readonly property string blendImage: {
+        const id = vals.blend_image
+        return id && id !== "none" && Wallpapers.byId(id) ? id : ""
+    }
+    // The file dialog was opened from «Mezclar con imagen»: what it brings is
+    // blended with the selected wallpaper instead of replacing it.
+    property bool importForBlend: false
     // Unapplied edits to the selected wallpaper's settings, over the stored
     // ones.
     property var draft: ({})
@@ -118,8 +137,9 @@ Scope {
     }
     // Ask for pictures to add. The panel is an overlay, so it steps aside
     // while the file dialog (an ordinary window) is open.
-    function importImages() {
+    function importImages(forBlend) {
         debounce.stop()
+        importForBlend = !!forBlend
         Wallpapers.importImages()
     }
     function removeSelected() {
@@ -136,6 +156,41 @@ Scope {
         sel = id
         draft = ({})
         Wallpapers.apply(id, {})
+    }
+
+    // A picture to blend with, in «Mezclar con imagen»; `picture` is null for
+    // «Ninguna» and `add` makes it the tile that imports one.
+    // Declared ahead of the other components: used as a Repeater delegate it
+    // is "not a type" for Quickshell when it comes after them.
+    component BlendTile: Rectangle {
+        id: tile
+        property var picture: null
+        property bool add: false
+        property bool checked: false
+        signal clicked()
+        width: 64; height: 36
+        radius: 6
+        color: Theme.p.surface
+        border.width: checked ? 2 : 1
+        border.color: checked ? Theme.p.accent : (tileMouse.containsMouse ? Theme.p.stroke1 : Theme.p.stroke3)
+        clip: true
+        Image {
+            anchors.fill: parent
+            anchors.margins: tile.checked ? 2 : 1
+            visible: !!tile.picture
+            source: tile.picture && tile.picture.preview ? "file://" + tile.picture.preview : ""
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            sourceSize: Qt.size(128, 72)
+        }
+        Icon {
+            anchors.centerIn: parent
+            visible: !tile.picture
+            name: tile.add ? "plus" : "x"
+            size: 14
+            color: Theme.p.text3
+        }
+        MouseArea { id: tileMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: tile.clicked() }
     }
 
     // ── widgets ─────────────────────────────────────────────────────────
@@ -503,8 +558,48 @@ Scope {
                                 spacing: 12
 
                                 Repeater {
-                                    model: root.selected ? root.selected.params.filter(p => p.group !== "general") : []
+                                    model: root.selected ? root.selected.params.filter(p => p.group !== "general" && p.group !== "blend") : []
                                     delegate: Setting {}
+                                }
+                                // Blend with a picture: live wallpapers only.
+                                Rectangle { visible: blendCol.visible; Layout.fillWidth: true; implicitHeight: 1; color: Theme.p.stroke3 }
+                                ColumnLayout {
+                                    id: blendCol
+                                    visible: !!root.selected && !root.selectedIsImage
+                                    Layout.fillWidth: true
+                                    spacing: 12
+                                    Text { text: "Mezclar con imagen"; font.family: Theme.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.p.text }
+                                    Flow {
+                                        Layout.fillWidth: true
+                                        spacing: 6
+                                        BlendTile {
+                                            checked: root.blendImage === ""
+                                            onClicked: root.set("blend_image", "none")
+                                        }
+                                        Repeater {
+                                            model: root.pictures
+                                            delegate: BlendTile {
+                                                required property var modelData
+                                                picture: modelData
+                                                checked: root.blendImage === modelData.id
+                                                onClicked: root.set("blend_image", modelData.id)
+                                            }
+                                        }
+                                        BlendTile { add: true; onClicked: root.importImages(true) }
+                                    }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.blendImage !== ""
+                                            ? "La imagen se multiplica sobre el fondo animado, que la ilumina y la tiñe."
+                                            : "Elige una de tus imágenes, o añade una con +, para multiplicarla sobre el fondo animado."
+                                        wrapMode: Text.Wrap
+                                        font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3
+                                    }
+                                    Repeater {
+                                        model: root.selected && root.blendImage !== ""
+                                            ? root.selected.params.filter(p => p.group === "blend" && p.key !== "blend_image") : []
+                                        delegate: Setting {}
+                                    }
                                 }
                                 Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.p.stroke3 }
                                 Text { text: "General"; font.family: Theme.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.p.text }

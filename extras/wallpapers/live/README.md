@@ -16,6 +16,7 @@ wallpaper pack. `lib/` and the tooling are WonderlandWM's (GPL-3.0-or-later).
 live/
   lib/prelude.glsl        shared prelude (uniforms + helpers)
   lib/image.glsl          shader for the user's imported pictures (ids img-…)
+  lib/blend.glsl          multiplies one of those pictures over a live wallpaper
   <id>/wallpaper.glsl     shader body
   <id>/manifest.json      name + settings schema
   <id>/preview.png        480x270, built by dev/scripts/wallpaper-check
@@ -40,6 +41,13 @@ shader driftwm loads (`render`), and `apply` writes it to
    `u_time`, and the helpers below.
 4. `wallpaper.glsl`, your body. It must define `void main()` and write an
    **opaque** `gl_FragColor` (alpha 1).
+
+When the wallpaper is blended with a picture («Mezclar con imagen», the
+`blend_*` settings every live wallpaper gets), the body's `main` is renamed
+with a `#define` and `lib/blend.glsl` follows it: its `main` runs the
+wallpaper and multiplies the picture, bound as `tex`, over the result. Nothing
+changes for the body, as long as it has no global named `tex` or
+`u_texture_size`.
 
 driftwm prepends `#version 100`: the body is **GLSL ES 1.00**. Do not declare
 `#version`, `precision` or any `uniform` in it.
