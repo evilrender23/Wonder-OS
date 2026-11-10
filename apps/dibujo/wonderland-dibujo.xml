@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-wonderland-dibujo">
+    <comment>Wonderland drawing</comment>
+    <comment xml:lang="es">Dibujo de Wonderland</comment>
+    <sub-class-of type="application/zip"/>
+    <icon name="wonderland-dibujo"/>
+    <glob pattern="*.wdib"/>
+    <magic priority="70">
+      <match type="string" offset="30" value="mimetypeapplication/x-wonderland-dibujo"/>
+    </magic>
+  </mime-type>
+</mime-info>

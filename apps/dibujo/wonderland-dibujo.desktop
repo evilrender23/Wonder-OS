@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Dibujo
+Name[en]=Drawing
+GenericName=Dibujo vectorial
+GenericName[en]=Vector Drawing
+Comment=Dibujos y diagramas en un lienzo sin fin
+Comment[en]=Drawings and diagrams on an endless canvas
+Exec=wonderland-dibujo %F
+Icon=wonderland-dibujo
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-dibujo
+MimeType=application/x-wonderland-dibujo;image/svg+xml;
+Categories=Office;Graphics;VectorGraphics;FlowChart;Qt;
+Keywords=dibujo;vectorial;diagrama;flujo;lienzo;svg;draw;drawing;vector;diagram;flowchart;canvas;
