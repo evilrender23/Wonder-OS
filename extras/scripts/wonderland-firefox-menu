@@ -1,0 +1,47 @@
+#!/bin/sh
+# Make Firefox export its menu bar (Archivo, Editar… Ayuda) to the bar's app
+# menu instead of keeping it hidden inside the window.
+#
+# Firefox only does it with widget.gtk.global-menu.enabled, which is off by
+# default; this writes it into the user.js of every profile, old location
+# (~/.mozilla/firefox) and new ($XDG_CONFIG_HOME/mozilla/firefox). Idempotent.
+# Firefox reads user.js at startup: restart it to see the menus.
+#
+#   wonderland-firefox-menu          enable
+#   wonderland-firefox-menu off      back to Firefox's default
+set -eu
+
+begin='// >>> wonderland-appmenu'
+end='// <<< wonderland-appmenu'
+mode="${1:-on}"
+done_any=0
+
+for root in "$HOME/.mozilla/firefox" "${XDG_CONFIG_HOME:-$HOME/.config}/mozilla/firefox"; do
+    [ -d "$root" ] || continue
+    for profile in "$root"/*/; do
+        # A profile is a directory Firefox has written its prefs into.
+        [ -f "${profile}prefs.js" ] || [ -f "${profile}times.json" ] || continue
+        file="${profile}user.js"
+        if [ -f "$file" ]; then
+            tmp=$(mktemp)
+            sed "\|^$begin\$|,\|^$end\$|d" "$file" > "$tmp"
+            cat "$tmp" > "$file"
+            rm -f "$tmp"
+        fi
+        if [ "$mode" != off ]; then
+            {
+                echo "$begin"
+                echo 'user_pref("widget.gtk.global-menu.enabled", true);'
+                echo 'user_pref("widget.gtk.global-menu.wayland.enabled", true);'
+                echo "$end"
+            } >> "$file"
+        elif [ -f "$file" ] && [ ! -s "$file" ]; then
+            rm -f "$file"
+        fi
+        done_any=1
+    done
+done
+
+if [ "$done_any" -eq 0 ]; then
+    echo "wonderland-firefox-menu: no Firefox profile yet; run it again after the first start of Firefox" >&2
+fi

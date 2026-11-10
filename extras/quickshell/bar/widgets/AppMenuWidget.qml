@@ -5,12 +5,9 @@ import "../.."
 import "../../services"
 import "../../components"
 
-// The macOS app menus: the focused app's name in bold, the app's own menu bar
-// when it exports one (Archivo, Editar…: services/AppMenu.qml), then Ventana,
-// Lienzo and Ayuda. Window actions go to the compositor (they act on the
-// focused window: the bar takes no keyboard focus, so it stays focused while a
-// menu is open). Hovering a title while one of these menus is open switches
-// menus.
+// The macOS app menus: the focused app's name in bold, then the app's own
+// menu bar when it exports one (Archivo, Editar… Ayuda: services/AppMenu.qml).
+// Hovering a title while one of these menus is open switches menus.
 Item {
     id: root
 
@@ -34,20 +31,11 @@ Item {
         return last ? last.charAt(0).toUpperCase() + last.slice(1) : "App"
     }
 
-    readonly property var menus: ({ app: appPanel, window: windowPanel, canvas: canvasPanel, help: helpPanel })
+    readonly property var menus: ({ app: appPanel })
 
     function toggle(id) { menus[id].visible = !menus[id].visible }
     function hoverTo(id) { if (current !== "" && current !== id) menus[id].visible = true }
-    function act(cmd) { Compositor.action(cmd) }
     function closeAll() { if (Popups.current) Popups.current.visible = false }
-
-    // The app's own menus go between its name and Ventana. Its Ayuda stays
-    // last, as on macOS: it takes the place of the bar's own Ayuda and carries
-    // WonderlandWM's help entries too.
-    function isHelpLabel(label) { return ["ayuda", "help"].includes((label || "").trim().toLowerCase()) }
-    readonly property var appItems: AppMenu.items.filter(i => !isHelpLabel(i.label))
-    readonly property var appHelp: AppMenu.items.filter(i => isHelpLabel(i.label)).slice(0, 1)
-    readonly property bool appHasHelp: appHelp.length > 0
 
     // `qs ipc call appmenu menu <n>` opens the app's n-th menu.
     Connections {
@@ -56,11 +44,9 @@ Item {
             if (!root.QsWindow.window || root.QsWindow.window.screen !== Quickshell.screens[0]) return
             const wanted = AppMenu.items[index]
             if (!wanted) return
-            for (const titles of [appTitles, appHelpTitle]) {
-                for (let i = 0; i < titles.count; i++) {
-                    const title = titles.itemAt(i)
-                    if (title && title.entry.id === wanted.id) { title.show(true); return }
-                }
+            for (let i = 0; i < appTitles.count; i++) {
+                const title = appTitles.itemAt(i)
+                if (title && title.entry.id === wanted.id) { title.show(true); return }
             }
         }
     }
@@ -85,19 +71,7 @@ Item {
         MenuTitle { id: appTitle; text: root.appName; bold: true; open: root.current === "app"; onPressed: root.toggle("app"); onEntered: root.hoverTo("app") }
         Repeater {
             id: appTitles
-            model: root.appItems
-            delegate: AppMenuTitle {
-                required property var modelData
-                owner: root
-                entry: modelData
-            }
-        }
-        MenuTitle { id: windowTitle; text: I18n.tr("Ventana"); open: root.current === "window"; onPressed: root.toggle("window"); onEntered: root.hoverTo("window") }
-        MenuTitle { id: canvasTitle; text: I18n.tr("Lienzo"); open: root.current === "canvas"; onPressed: root.toggle("canvas"); onEntered: root.hoverTo("canvas") }
-        MenuTitle { id: helpTitle; visible: !root.appHasHelp; text: I18n.tr("Ayuda"); open: root.current === "help"; onPressed: root.toggle("help"); onEntered: root.hoverTo("help") }
-        Repeater {
-            id: appHelpTitle
-            model: root.appHelp
+            model: AppMenu.items
             delegate: AppMenuTitle {
                 required property var modelData
                 owner: root
@@ -135,67 +109,5 @@ Item {
             enabled: root.hasWindow
             onTriggered: { appPanel.close(); Compositor.closeWindow(root.target.id) }
         }
-    }
-
-    // ── Ventana ─────────────────────────────────────────────────────────
-    MenuPanel {
-        id: windowPanel
-        target: windowTitle
-        contentWidth: 270
-        onVisibleChanged: root.current = visible ? "window" : (root.current === "window" ? "" : root.current)
-
-        MenuRow { text: I18n.tr("Ajustar a la rejilla"); shortcut: "❖ M"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fit-window-snapped") } }
-        MenuRow { text: I18n.tr("Ajustar a la pantalla"); shortcut: "⇧❖ M"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fit-window") } }
-        MenuRow { text: I18n.tr("Rellenar"); enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fill-window") } }
-        MenuRow { text: I18n.tr("Centrar"); shortcut: "❖ C"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("center-window") } }
-        MenuSeparator {}
-        MenuRow { text: I18n.tr("Pantalla completa"); shortcut: "❖ F"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("toggle-fullscreen") } }
-        MenuRow { text: I18n.tr("Fijar a la pantalla"); shortcut: "❖ T"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("toggle-pin-to-screen") } }
-        MenuSeparator { visible: Compositor.windows.length > 0 }
-        Repeater {
-            model: Compositor.windows
-            delegate: MenuRow {
-                required property var modelData
-                readonly property bool isTarget: root.target !== null && modelData.id === root.target.id
-                text: `${isTarget ? "✓  " : "     "}${modelData.title || modelData.app_id}`
-                onTriggered: {
-                    windowPanel.close()
-                    if (modelData.suspended) Compositor.relaunch(modelData.id)
-                    else Compositor.focusWindow(modelData.id)
-                }
-            }
-        }
-    }
-
-    // ── Lienzo ──────────────────────────────────────────────────────────
-    MenuPanel {
-        id: canvasPanel
-        target: canvasTitle
-        onVisibleChanged: root.current = visible ? "canvas" : (root.current === "canvas" ? "" : root.current)
-
-        MenuRow { text: I18n.tr("Acercar"); shortcut: "❖ +"; onTriggered: root.act("zoom-in") }
-        MenuRow { text: I18n.tr("Alejar"); shortcut: "❖ −"; onTriggered: root.act("zoom-out") }
-        MenuRow { text: I18n.tr("Tamaño real"); shortcut: "❖ 0"; onTriggered: { canvasPanel.close(); root.act("zoom-reset") } }
-        MenuSeparator {}
-        MenuRow { text: I18n.tr("Vista general"); shortcut: "❖ W"; onTriggered: { canvasPanel.close(); root.act("zoom-to-fit") } }
-        MenuRow { text: I18n.tr("Ir al inicio"); shortcut: "❖ A"; onTriggered: { canvasPanel.close(); root.act("home-toggle") } }
-        MenuSeparator { visible: Compositor.bookmarkNames.length > 0 }
-        Repeater {
-            model: Compositor.bookmarkNames
-            delegate: MenuRow {
-                required property string modelData
-                text: `${modelData === Compositor.activeBookmark ? "✓  " : "     "}${modelData}`
-                onTriggered: { canvasPanel.close(); Compositor.goToBookmark(modelData) }
-            }
-        }
-    }
-
-    // ── Ayuda ───────────────────────────────────────────────────────────
-    MenuPanel {
-        id: helpPanel
-        target: helpTitle
-        onVisibleChanged: root.current = visible ? "help" : (root.current === "help" ? "" : root.current)
-
-        ShellHelpRows { onDone: helpPanel.close() }
     }
 }

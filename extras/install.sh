@@ -64,6 +64,9 @@ if ! sh "$src/scripts/wonderland-icons" install; then
     fi
 fi
 
+# Firefox hands its menu bar to the bar's app menu (off by default in Firefox).
+sh "$src/scripts/wonderland-firefox-menu" || true
+
 # Fuzzel + swaync themes matching the shell. These live in their own config
 # dirs, so they're copied (and backed up) separately from the driftwm dir.
 install_themed() {

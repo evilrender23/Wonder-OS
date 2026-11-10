@@ -2,7 +2,8 @@
 """Global-menu bridge for the WonderlandWM bar.
 
 Apps that export their menu bar over D-Bus (Qt/KDE apps under the KDE platform
-theme, anything else speaking com.canonical.dbusmenu) look for the
+theme, Firefox with widget.gtk.global-menu.enabled, anything else speaking
+com.canonical.dbusmenu) look for the
 `com.canonical.AppMenu.Registrar` service and hand it their menu instead of
 drawing it inside the window. This script is that registrar, plus a line
 protocol for the bar (extras/quickshell/services/AppMenu.qml):
@@ -35,6 +36,8 @@ REGISTRAR_NAME = "com.canonical.AppMenu.Registrar"
 REGISTRAR_PATH = "/com/canonical/AppMenu/Registrar"
 MENU_IFACE = "com.canonical.dbusmenu"
 DEBUG_IFACE = "org.wonderlandwm.AppMenu"
+# Where apps put the menu bars they export, one child per window.
+MENU_ROOTS = ("/MenuBar", "/com/canonical/menu")
 
 REGISTRAR_XML = f"""
 <node>
@@ -240,20 +243,23 @@ class Bridge:
         return [n for n in names if self.name_pids.get(n) == pid]
 
     def discover(self, pid):
-        """Qt on Wayland exports its menu bars as /MenuBar/<n> and expects the
-        compositor to say which window each belongs to (org_kde_kwin_appmenu);
-        without that, find them on the app's own bus connection."""
+        """Menus an app exports without a RegisterWindow call. On Wayland the
+        app expects the compositor to say which window each one belongs to
+        (org_kde_kwin_appmenu); without that, find them on the app's own bus
+        connection: Qt exports /MenuBar/<n>, Firefox and the other
+        libdbusmenu apps /com/canonical/menu/<n>."""
         found = []
         for name in self.bus_names_of(pid):
-            try:
-                xml = self.bus.call_sync(
-                    name, "/MenuBar", "org.freedesktop.DBus.Introspectable", "Introspect",
-                    None, None, Gio.DBusCallFlags.NONE, 400, None).unpack()[0]
-                children = [n.path for n in Gio.DBusNodeInfo.new_for_xml(xml).nodes]
-            except GLib.Error:
-                continue
-            for child in sorted((c for c in children if c and c.isdigit()), key=int):
-                found.append((name, f"/MenuBar/{child}", int(child)))
+            for root in MENU_ROOTS:
+                try:
+                    xml = self.bus.call_sync(
+                        name, root, "org.freedesktop.DBus.Introspectable", "Introspect",
+                        None, None, Gio.DBusCallFlags.NONE, 400, None).unpack()[0]
+                    children = [n.path for n in Gio.DBusNodeInfo.new_for_xml(xml).nodes]
+                except GLib.Error:
+                    continue
+                for child in sorted((c for c in children if c and c.isdigit()), key=int):
+                    found.append((name, f"{root}/{child}", int(child)))
         known = {(e["sender"], e["path"]) for e in self.entries}
         live = {(n, p) for n, p, _ in found}
         self.entries = [e for e in self.entries

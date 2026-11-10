@@ -15,7 +15,7 @@ Requiere Quickshell ≥ 0.3. `extras/install.sh` lo instala todo en `~/.config/d
 | id | Barra | Clic izq. | Clic der. | Rueda |
 |---|---|---|---|---|
 | `launcher` | ☤ | AquilesAI, el agente del escritorio, en el monitor con el foco | menú del sistema estilo Apple (AquilesAI, acerca de: ventana de créditos del proyecto, ajustes, pantallas, Spotlight, forzar salida, reposo/reiniciar/apagar, bloquear, cerrar sesión) | — (clic central: ajustes) |
-| `appmenu` | menús de la app enfocada, como en macOS: nombre en negrita, los menús propios de la app si los exporta (*Archivo*, *Editar*…; ver «Menús de la app»), *Ventana* (ajustar, centrar, pantalla completa, fijar, lista de ventanas), *Lienzo* (zoom, vista general, inicio, bookmarks) y *Ayuda*; con un menú abierto, pasar el ratón por otro título cambia de menú | abre el menú | — | — |
+| `appmenu` | menús de la app enfocada, como en macOS: nombre en negrita y los menús propios de la app (*Archivo*, *Editar*… *Ayuda*; ver «Menús de la app»); con un menú abierto, pasar el ratón por otro título cambia de menú | abre el menú | — | — |
 | `privacy` | punto naranja (micrófono) / verde (cámara) mientras algo graba (solo entonces) | — | — | — |
 | `capture` | cámara; durante una grabación, su tiempo en rojo | capturas (o detener la grabación) | — | elegir qué grabar |
 | `spotlight` | lupa | Spotlight | — | — |
@@ -47,12 +47,12 @@ Por defecto, la barra muestra todos los widgets salvo `zoom`, `windows` y `keybo
 
 ## Menús de la app
 
-Las apps que exportan su barra de menús por D-Bus (`com.canonical.dbusmenu`: las apps Qt/KDE con `QT_QPA_PLATFORMTHEME=kde`, como Dolphin, Kate, KWrite, Konsole, Gwenview u Okular) la muestran en la barra, entre el nombre de la app y *Ventana*, y dejan de dibujarla dentro de la ventana. Un submenú se despliega en el sitio al pulsarlo. La *Ayuda* de la app queda la última y añade las entradas de ayuda de WonderlandWM.
+Las apps que exportan su barra de menús por D-Bus (`com.canonical.dbusmenu`) la muestran en la barra, a continuación del nombre de la app, y dejan de dibujarla dentro de la ventana. Un submenú se despliega en el sitio al pulsarlo. Lo hacen las apps Qt/KDE con `QT_QPA_PLATFORMTHEME=kde` (Dolphin, Kate, KWrite, Konsole, Gwenview, Okular…) y Firefox con la preferencia `widget.gtk.global-menu.enabled`, que `scripts/wonderland-firefox-menu` activa en cada perfil al instalar el escritorio (Firefox la lee al arrancar).
 
 Lo hace `scripts/wonderland-appmenu` (Python + `python-gobject`), que la barra arranca sola: es el registrador `com.canonical.AppMenu.Registrar` que esas apps buscan al iniciarse, y lee el menú de la ventana enfocada.
 
 - Solo cuenta para las apps abiertas **después** de arrancar la barra; las que ya estaban abiertas siguen con su menú dentro de la ventana hasta reiniciarlas.
-- Las apps que no exportan menú (GTK, Electron, Firefox, las X11) se quedan como estaban: nombre, *Ventana*, *Lienzo* y *Ayuda*.
+- Las apps que no exportan menú (las GTK, Electron, las X11) muestran solo su nombre, con el menú de la app (acerca de, nueva ventana, suspender, cerrar). Las acciones de ventana y del lienzo siguen en el clic derecho de la barra de título y del lienzo, y en sus atajos.
 - Con varias ventanas de un mismo proceso, cada menú se empareja con su ventana por orden de apertura.
 - Para que una app Qt conserve su menú dentro de la ventana, lánzala con `KDE_NO_GLOBAL_MENU=1`.
 - Comprobar qué hay: `qs -p ~/.config/driftwm/quickshell ipc call appmenu list`; abrir el menú n: `… ipc call appmenu menu <n>`.

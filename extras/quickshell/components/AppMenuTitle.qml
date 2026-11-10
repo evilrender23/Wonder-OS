@@ -12,9 +12,6 @@ MenuTitle {
     required property var owner
     required property var entry          // { id, label } from AppMenu.items
     readonly property string key: `app:${entry.id}`
-    // The app's Ayuda also carries WonderlandWM's help entries, so the bar
-    // shows one Ayuda, not two.
-    readonly property bool isHelp: owner.isHelpLabel(entry.label)
 
     text: entry.label
     open: owner.current === key
@@ -52,8 +49,6 @@ MenuTitle {
                     items: panel.visible ? AppMenu.childrenOf(root.entry) : []
                     onActivated: id => { panel.close(); AppMenu.activate(id) }
                 }
-                MenuSeparator { visible: root.isHelp }
-                ShellHelpRows { visible: root.isHelp; onDone: panel.close() }
             }
         }
     }

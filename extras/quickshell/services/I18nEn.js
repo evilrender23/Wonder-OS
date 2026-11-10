@@ -93,18 +93,10 @@ var table = {
     "Escritorio": "Desktop",
     "Ventana": "Window",
     "Lienzo": "Canvas",
-    "Ayuda": "Help",
     "Nueva ventana": "New Window",
-    "Ajustar a la rejilla": "Fit to Grid",
     "Ajustar a la pantalla": "Fit to Screen",
-    "Rellenar": "Fill",
-    "Centrar": "Center",
     "Pantalla completa": "Full Screen",
     "Fijar a la pantalla": "Pin to Screen",
-    "Acercar": "Zoom In",
-    "Alejar": "Zoom Out",
-    "Tamaño real": "Actual Size",
-    "Vista general": "Overview",
     "Ir al inicio": "Go Home",
     "Acerca de %1": "About %1",
     "Suspender %1": "Suspend %1",
@@ -196,11 +188,6 @@ var table = {
 
     // components/BarPanel.qml
     "Cerrar": "Close",
-
-    // components/ShellHelpRows.qml
-    "Buscar…": "Search…",
-    "Ayuda de WonderlandWM": "WonderlandWM Help",
-    "Atajos de teclado": "Keyboard Shortcuts",
 
     // contextmenu/ContextMenu.qml
     " del portapapeles": " from clipboard",
