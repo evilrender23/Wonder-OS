@@ -42,6 +42,8 @@ Requiere Quickshell ≥ 0.3. `extras/install.sh` lo instala todo en `~/.config/d
 
 Por defecto, la barra muestra todos los widgets salvo `zoom`, `windows` y `keyboard`. Puedes añadirlos desde Ajustes.
 
+**Progreso de archivos.** Mientras Wonderland Finder copia, mueve o borra, el centro de la barra muestra la operación, una barra de progreso y cuánto lleva («1,7 GB de 4 GB»). No es un widget del diseño: aparece solo, delante de lo que haya en la sección central, y desaparece al terminar. Las operaciones de menos de un tercio de segundo no llegan a mostrarse. El estado lo publica el Finder en `$XDG_RUNTIME_DIR/wonderland/finder-ops.json` (`services/FinderOps.qml` lo sigue; `bar/FileProgress.qml` lo dibuja).
+
 
 ## Menús de la app
 

@@ -84,13 +84,20 @@ PanelWindow {
 
     // Centred when there's room; otherwise slides away from whichever side
     // section it would overlap (narrow outputs, long media titles).
-    BarSection {
-        id: center
-        section: "center"
-        bar: bar
+    // The Finder's file operations come first there, while one runs.
+    Row {
         anchors.verticalCenter: parent.verticalCenter
         x: Math.round(Math.max(left.x + left.width + 12,
                                Math.min((bar.width - width) / 2, right.x - width - 12)))
+        spacing: fileProgress.width > 0 && center.width > 0 ? 10 : 0
+
+        FileProgress { id: fileProgress }
+
+        BarSection {
+            id: center
+            section: "center"
+            bar: bar
+        }
     }
 
     BarSection {

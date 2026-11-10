@@ -31,6 +31,11 @@ Quick Look (Space) · Get Info · rename, duplicate, alias, compress / extract �
 undo · colour tags · drag and drop between windows and other apps · light and dark, following the
 desktop · English and Spanish.
 
+While it copies, moves or deletes, the top bar shows the progress in its centre: the operation, a bar
+and how much is done ("1.2 GB of 4 GB"). Finder writes that state to
+`$XDG_RUNTIME_DIR/wonderland/finder-ops.json`, which the bar watches; operations shorter than a blink
+never show.
+
 **Customize Folder…** (right-click a folder) gives it a colour and a symbol or an emoji on its front,
 as Finder does on macOS. Every choice applies at once; **Reset** brings the plain folder back. The look
 is kept on the folder itself (the `user.wonderland.folder` attribute), so it follows the folder when it

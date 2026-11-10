@@ -1,5 +1,7 @@
 #include "app.h"
+#include "fileops.h"
 #include "folderlook.h"
+#include "opsreport.h"
 #include "providers.h"
 
 #include <QApplication>
@@ -150,7 +152,10 @@ int main(int argc, char *argv[])
         }
         finder.setTest(QFileInfo(parser.value(shotOption)).absoluteFilePath(), parser.value(doOption).split(QLatin1Char(';'), Qt::SkipEmptyParts), size);
         finder.setTestLook(look);
-    } else if (bus.isConnected()) {
+    } else {
+        finder.ops()->reportTo(OpsReport::defaultPath());
+    }
+    if (!testing && bus.isConnected()) {
         new FileManagerAdaptor(&finder);
         new FinderAdaptor(&finder);
         new LookAdaptor(&finder);

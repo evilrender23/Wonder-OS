@@ -1,6 +1,7 @@
 #include "fileops.h"
 
 #include "format.h"
+#include "opsreport.h"
 
 #include <KIO/CopyJob>
 #include <KIO/DeleteJob>
@@ -41,6 +42,42 @@ FileOps::FileOps(QObject *parent)
     auto *undo = KIO::FileUndoManager::self();
     connect(undo, &KIO::FileUndoManager::undoAvailable, this, &FileOps::undoChanged);
     connect(undo, &KIO::FileUndoManager::undoTextChanged, this, &FileOps::undoChanged);
+    connect(this, &FileOps::busyChanged, this, &FileOps::publish);
+    connect(this, &FileOps::progressChanged, this, &FileOps::publish);
+}
+
+void FileOps::reportTo(const QString &path)
+{
+    delete m_report;
+    m_report = new OpsReport(path, this);
+}
+
+void FileOps::publish()
+{
+    if (m_report) {
+        m_report->set(busy(), m_kind, m_status, progress(), detail());
+    }
+}
+
+QString FileOps::detail() const
+{
+    qulonglong bytes = 0;
+    qulonglong allBytes = 0;
+    qulonglong items = 0;
+    qulonglong allItems = 0;
+    for (const KJob *job : m_jobs) {
+        bytes += job->processedAmount(KJob::Bytes);
+        allBytes += job->totalAmount(KJob::Bytes);
+        items += job->processedAmount(KJob::Files) + job->processedAmount(KJob::Directories);
+        allItems += job->totalAmount(KJob::Files) + job->totalAmount(KJob::Directories);
+    }
+    if (allBytes > 0) {
+        return tr("%1 of %2").arg(Format::size(qMin(bytes, allBytes)), Format::size(allBytes));
+    }
+    if (allItems > 1) {
+        return tr("%1 of %2").arg(qMin(items, allItems)).arg(allItems);
+    }
+    return QString();
 }
 
 QList<QUrl> FileOps::clipboardUrls() const
@@ -114,15 +151,17 @@ void FileOps::copyText(const QString &text)
     QGuiApplication::clipboard()->setText(text);
 }
 
-void FileOps::track(KJob *job, const QString &status)
+void FileOps::track(KJob *job, const QString &status, const QString &kind)
 {
     // No UI delegate: conflicts and errors come back through failed(), drawn
     // by the window itself instead of a KDE dialog.
     m_jobs << job;
     m_status = status;
+    m_kind = kind;
     Q_EMIT busyChanged();
     Q_EMIT progressChanged();
     connect(job, &KJob::percentChanged, this, &FileOps::progressChanged);
+    connect(job, &KJob::processedAmountChanged, this, &FileOps::progressChanged);
     connect(job, &KJob::result, this, [this](KJob *finished) {
         m_jobs.removeAll(finished);
         if (finished->error() && finished->error() != KJob::KilledJobError) {
@@ -133,7 +172,7 @@ void FileOps::track(KJob *job, const QString &status)
     });
 }
 
-void FileOps::trackCopy(KIO::CopyJob *job, const QString &status)
+void FileOps::trackCopy(KIO::CopyJob *job, const QString &status, const QString &kind)
 {
     KIO::FileUndoManager::self()->recordCopyJob(job);
     const QUrl destination = job->destUrl().adjusted(QUrl::StripTrailingSlash);
@@ -154,7 +193,7 @@ void FileOps::trackCopy(KIO::CopyJob *job, const QString &status)
             Q_EMIT created(*made);
         }
     });
-    track(job, status);
+    track(job, status, kind);
 }
 
 void FileOps::paste(const QUrl &destination)
@@ -180,13 +219,13 @@ void FileOps::paste(const QUrl &destination)
             QGuiApplication::clipboard()->clear();
         }
     });
-    track(job, cut ? tr("Moving…") : tr("Copying…"));
+    track(job, cut ? tr("Moving…") : tr("Copying…"), cut ? QStringLiteral("move") : QStringLiteral("copy"));
 }
 
 void FileOps::copyTo(const QList<QUrl> &urls, const QUrl &destination)
 {
     if (!urls.isEmpty()) {
-        trackCopy(KIO::copy(urls, destination, KIO::HideProgressInfo), tr("Copying…"));
+        trackCopy(KIO::copy(urls, destination, KIO::HideProgressInfo), tr("Copying…"), QStringLiteral("copy"));
     }
 }
 
@@ -200,7 +239,7 @@ void FileOps::moveTo(const QList<QUrl> &urls, const QUrl &destination)
         }
     }
     if (!moving.isEmpty()) {
-        trackCopy(KIO::move(moving, destination, KIO::HideProgressInfo), tr("Moving…"));
+        trackCopy(KIO::move(moving, destination, KIO::HideProgressInfo), tr("Moving…"), QStringLiteral("move"));
     }
 }
 
@@ -250,7 +289,7 @@ void FileOps::trash(const QList<QUrl> &urls)
     KIO::CopyJob *job = KIO::trash(urls, KIO::HideProgressInfo);
     KIO::FileUndoManager::self()->recordJob(KIO::FileUndoManager::Trash, urls, QUrl(QStringLiteral("trash:/")), job);
     connect(job, &KJob::result, this, &FileOps::trashChanged);
-    track(job, tr("Moving to Trash…"));
+    track(job, tr("Moving to Trash…"), QStringLiteral("trash"));
 }
 
 void FileOps::remove(const QList<QUrl> &urls)
@@ -260,14 +299,14 @@ void FileOps::remove(const QList<QUrl> &urls)
     }
     KJob *job = KIO::del(urls, KIO::HideProgressInfo);
     connect(job, &KJob::result, this, &FileOps::trashChanged);
-    track(job, tr("Deleting…"));
+    track(job, tr("Deleting…"), QStringLiteral("delete"));
 }
 
 void FileOps::emptyTrash()
 {
     KJob *job = KIO::emptyTrash();
     connect(job, &KJob::result, this, &FileOps::trashChanged);
-    track(job, tr("Emptying the Trash…"));
+    track(job, tr("Emptying the Trash…"), QStringLiteral("delete"));
 }
 
 void FileOps::restore(const QList<QUrl> &urls)
@@ -277,7 +316,7 @@ void FileOps::restore(const QList<QUrl> &urls)
     }
     KJob *job = KIO::restoreFromTrash(urls, KIO::HideProgressInfo);
     connect(job, &KJob::result, this, &FileOps::trashChanged);
-    track(job, tr("Putting back…"));
+    track(job, tr("Putting back…"), QStringLiteral("move"));
 }
 
 QStringList FileOps::namesIn(const QString &directory)
@@ -354,7 +393,7 @@ void FileOps::duplicate(const QList<QUrl> &urls)
                 Q_EMIT created({target});
             }
         });
-        track(job, tr("Duplicating…"));
+        track(job, tr("Duplicating…"), QStringLiteral("copy"));
     }
 }
 
@@ -407,6 +446,7 @@ void FileOps::runArchiver(const QStringList &arguments, const QString &workingDi
     process->setProcessChannelMode(QProcess::MergedChannels);
     ++m_processes;
     m_status = status;
+    m_kind = QStringLiteral("other");
     Q_EMIT busyChanged();
     Q_EMIT progressChanged();
 

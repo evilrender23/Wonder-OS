@@ -24,6 +24,7 @@ set(core_sources
     src/folderlook.cpp src/folderlook.h
     src/dirmodel.cpp src/dirmodel.h
     src/fileops.cpp src/fileops.h
+    src/opsreport.cpp src/opsreport.h
     src/places.cpp src/places.h
     src/layout.cpp src/layout.h
     src/app.cpp src/app.h
@@ -86,7 +87,7 @@ option(FINDER_BUILD_TESTS "Build the Finder tests" ON)
 if(FINDER_BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     enable_testing()
-    foreach(t format layout dirmodel places openwith dragnotice look folderlook)
+    foreach(t format layout dirmodel places openwith dragnotice look folderlook opsreport)
         qt_add_executable(tst_${t} tests/tst_${t}.cpp ${core_sources})
         target_include_directories(tst_${t} PRIVATE src)
         target_link_libraries(tst_${t} PRIVATE ${core_libs} Qt6::Test)

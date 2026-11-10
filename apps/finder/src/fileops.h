@@ -5,6 +5,7 @@
 #include <QtQml/qqmlregistration.h>
 
 class KJob;
+class OpsReport;
 namespace KIO
 {
 class CopyJob;
@@ -35,6 +36,10 @@ public:
     bool busy() const { return !m_jobs.isEmpty() || m_processes > 0; }
     double progress() const;
     QString status() const { return m_status; }
+    /// "1.2 GB of 4 GB" or "3 of 12", empty while the amount is unknown.
+    QString detail() const;
+    /// Publishes what is running to this file, for the top bar (see OpsReport).
+    void reportTo(const QString &path);
 
     Q_INVOKABLE void copyToClipboard(const QList<QUrl> &urls);
     Q_INVOKABLE void cutToClipboard(const QList<QUrl> &urls);
@@ -78,12 +83,15 @@ Q_SIGNALS:
     void trashChanged();
 
 private:
-    void track(KJob *job, const QString &status);
-    void trackCopy(KIO::CopyJob *job, const QString &status);
+    void track(KJob *job, const QString &status, const QString &kind = QStringLiteral("other"));
+    void trackCopy(KIO::CopyJob *job, const QString &status, const QString &kind);
+    void publish();
     void runArchiver(const QStringList &arguments, const QString &workingDirectory, const QUrl &result, const QString &status);
     static QStringList namesIn(const QString &directory);
 
     QList<KJob *> m_jobs;
     QString m_status;
+    QString m_kind;
     int m_processes = 0;
+    OpsReport *m_report = nullptr;
 };

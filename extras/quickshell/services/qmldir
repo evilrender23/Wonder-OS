@@ -14,3 +14,4 @@ singleton Session 1.0 Session.qml
 singleton Wallpapers 1.0 Wallpapers.qml
 singleton Capture 1.0 Capture.qml
 singleton AppMenu 1.0 AppMenu.qml
+singleton FinderOps 1.0 FinderOps.qml

@@ -4,67 +4,67 @@
 <context>
     <name>App</name>
     <message>
-        <location filename="../src/app.cpp" line="174"/>
+        <location filename="../src/app.cpp" line="177"/>
         <source>“%1” can’t be opened.</source>
         <translation>No se puede abrir «%1».</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="247"/>
+        <location filename="../src/app.cpp" line="250"/>
         <source>No terminal application was found.</source>
         <translation>No se ha encontrado ninguna aplicación de terminal.</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="352"/>
+        <location filename="../src/app.cpp" line="355"/>
         <source>%1 available</source>
         <translation>%1 disponibles</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="366"/>
+        <location filename="../src/app.cpp" line="369"/>
         <source>Folder</source>
         <translation>Carpeta</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="384"/>
+        <location filename="../src/app.cpp" line="387"/>
         <source>%1 (%2 bytes)</source>
         <translation>%1 (%2 bytes)</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="398"/>
+        <location filename="../src/app.cpp" line="401"/>
         <source>Read &amp; Write</source>
         <translation>Leer y escribir</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="398"/>
+        <location filename="../src/app.cpp" line="401"/>
         <source>Read only</source>
         <translation>Solo lectura</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="398"/>
+        <location filename="../src/app.cpp" line="401"/>
         <source>Write only</source>
         <translation>Solo escritura</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="398"/>
+        <location filename="../src/app.cpp" line="401"/>
         <source>No Access</source>
         <translation>Sin acceso</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="421"/>
+        <location filename="../src/app.cpp" line="424"/>
         <source>%1 for %2</source>
         <translation>%1 en %2</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="421"/>
+        <location filename="../src/app.cpp" line="424"/>
         <source>1 item</source>
         <translation>1 ítem</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="421"/>
+        <location filename="../src/app.cpp" line="424"/>
         <source>%1 items</source>
         <translation>%1 ítems</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="456"/>
+        <location filename="../src/app.cpp" line="459"/>
         <source>Tags can’t be saved on this disk.</source>
         <translation>Las etiquetas no se pueden guardar en este disco.</translation>
     </message>
@@ -130,109 +130,115 @@
 <context>
     <name>FileOps</name>
     <message>
-        <location filename="../src/fileops.cpp" line="183"/>
-        <location filename="../src/fileops.cpp" line="203"/>
+        <location filename="../src/fileops.cpp" line="75"/>
+        <location filename="../src/fileops.cpp" line="78"/>
+        <source>%1 of %2</source>
+        <translation>%1 de %2</translation>
+    </message>
+    <message>
+        <location filename="../src/fileops.cpp" line="222"/>
+        <location filename="../src/fileops.cpp" line="242"/>
         <source>Moving…</source>
         <translation>Trasladando…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="183"/>
-        <location filename="../src/fileops.cpp" line="189"/>
+        <location filename="../src/fileops.cpp" line="222"/>
+        <location filename="../src/fileops.cpp" line="228"/>
         <source>Copying…</source>
         <translation>Copiando…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="253"/>
+        <location filename="../src/fileops.cpp" line="292"/>
         <source>Moving to Trash…</source>
         <translation>Trasladando a la papelera…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="263"/>
+        <location filename="../src/fileops.cpp" line="302"/>
         <source>Deleting…</source>
         <translation>Eliminando…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="270"/>
+        <location filename="../src/fileops.cpp" line="309"/>
         <source>Emptying the Trash…</source>
         <translation>Vaciando la papelera…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="280"/>
+        <location filename="../src/fileops.cpp" line="319"/>
         <source>Putting back…</source>
         <translation>Restaurando…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="296"/>
+        <location filename="../src/fileops.cpp" line="335"/>
         <source>The name can’t contain “/”.</source>
         <translation>El nombre no puede contener «/».</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="299"/>
+        <location filename="../src/fileops.cpp" line="338"/>
         <source>The name “%1” can’t be used.</source>
         <translation>No se puede usar el nombre «%1».</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="303"/>
+        <location filename="../src/fileops.cpp" line="342"/>
         <source>The name “%1” is already taken. Please choose a different name.</source>
         <translation>El nombre «%1» ya está en uso. Elige otro nombre.</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="312"/>
+        <location filename="../src/fileops.cpp" line="351"/>
         <source>Renaming…</source>
         <translation>Renombrando…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="318"/>
+        <location filename="../src/fileops.cpp" line="357"/>
         <source>untitled folder</source>
         <translation>carpeta sin título</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="330"/>
+        <location filename="../src/fileops.cpp" line="369"/>
         <source>Creating folder…</source>
         <translation>Creando carpeta…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="347"/>
+        <location filename="../src/fileops.cpp" line="386"/>
         <source>copy</source>
         <translation>copia</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="357"/>
+        <location filename="../src/fileops.cpp" line="396"/>
         <source>Duplicating…</source>
         <translation>Duplicando…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="373"/>
+        <location filename="../src/fileops.cpp" line="412"/>
         <source>alias</source>
         <translation>alias</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="383"/>
+        <location filename="../src/fileops.cpp" line="422"/>
         <source>Making alias…</source>
         <translation>Creando alias…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="432"/>
+        <location filename="../src/fileops.cpp" line="472"/>
         <source>The archive tool (bsdtar) could not be run.</source>
         <translation>No se ha podido ejecutar la herramienta de archivado (bsdtar).</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="467"/>
+        <location filename="../src/fileops.cpp" line="507"/>
         <source>Archive</source>
         <translation>Archivo</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="471"/>
+        <location filename="../src/fileops.cpp" line="511"/>
         <source>Compressing…</source>
         <translation>Comprimiendo…</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="487"/>
+        <location filename="../src/fileops.cpp" line="527"/>
         <source>The folder “%1” can’t be created.</source>
         <translation>No se puede crear la carpeta «%1».</translation>
     </message>
     <message>
-        <location filename="../src/fileops.cpp" line="490"/>
+        <location filename="../src/fileops.cpp" line="530"/>
         <source>Expanding…</source>
         <translation>Expandiendo…</translation>
     </message>
@@ -599,47 +605,47 @@
         <translation>Gris</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="84"/>
+        <location filename="../qml/FolderLook.qml" line="91"/>
         <source>This folder’s look can’t be saved here.</source>
         <translation>El aspecto de esta carpeta no se puede guardar aquí.</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="102"/>
+        <location filename="../qml/FolderLook.qml" line="109"/>
         <source>Customize Folder</source>
         <translation>Personalizar carpeta</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="197"/>
+        <location filename="../qml/FolderLook.qml" line="204"/>
         <source>Symbol</source>
         <translation>Símbolo</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="202"/>
+        <location filename="../qml/FolderLook.qml" line="209"/>
         <source>Emoji</source>
         <translation>Emoji</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="235"/>
+        <location filename="../qml/FolderLook.qml" line="242"/>
         <source>Search symbols</source>
         <translation>Buscar símbolos</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="259"/>
+        <location filename="../qml/FolderLook.qml" line="266"/>
         <source>Type or paste an emoji, then Enter</source>
         <translation>Escribe o pega un emoji y pulsa Intro</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="319"/>
+        <location filename="../qml/FolderLook.qml" line="326"/>
         <source>No symbol matches</source>
         <translation>Ningún símbolo coincide</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="329"/>
+        <location filename="../qml/FolderLook.qml" line="336"/>
         <source>Reset</source>
         <translation>Restablecer</translation>
     </message>
     <message>
-        <location filename="../qml/FolderLook.qml" line="335"/>
+        <location filename="../qml/FolderLook.qml" line="342"/>
         <source>Done</source>
         <translation>Aceptar</translation>
     </message>
@@ -877,62 +883,62 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="45"/>
+        <location filename="../src/main.cpp" line="47"/>
         <source>The Wonderlands OS file manager.</source>
         <translation>El gestor de archivos de Wonderlands OS.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="48"/>
+        <location filename="../src/main.cpp" line="50"/>
         <source>Folders to open, or files to reveal.</source>
         <translation>Carpetas que abrir o archivos que mostrar.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="49"/>
+        <location filename="../src/main.cpp" line="51"/>
         <source>Start in this view: icons, list or gallery.</source>
         <translation>Empezar en esta vista: icons, list o gallery.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="50"/>
+        <location filename="../src/main.cpp" line="52"/>
         <source>auto (follow the desktop), light or dark.</source>
         <translation>auto (seguir al escritorio), light o dark.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="51"/>
+        <location filename="../src/main.cpp" line="53"/>
         <source>Save a picture of the window to this file and quit (for tests).</source>
         <translation>Guardar una imagen de la ventana en este archivo y salir (para pruebas).</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="52"/>
+        <location filename="../src/main.cpp" line="54"/>
         <source>With --shot: actions to perform first, separated by “;”.</source>
         <translation>Con --shot: acciones que realizar antes, separadas por «;».</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="53"/>
+        <location filename="../src/main.cpp" line="55"/>
         <source>With --shot: the window size, as WIDTHxHEIGHT.</source>
         <translation>Con --shot: el tamaño de la ventana, como ANCHOxALTO.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="54"/>
+        <location filename="../src/main.cpp" line="56"/>
         <source>Start without a window and wait to be asked for one (how the session starts it for “Show in folder”).</source>
         <translation>Arrancar sin ventana y esperar a que se pida una (así lo arranca la sesión para «Mostrar en la carpeta»).</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="55"/>
+        <location filename="../src/main.cpp" line="57"/>
         <source>Quick Look: preview the given files, or close the preview if it is showing them.</source>
         <translation>Vista rápida: previsualiza los archivos indicados, o cierra la vista si ya los muestra.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="56"/>
+        <location filename="../src/main.cpp" line="58"/>
         <source>Quick Look: if a preview is open, show the given files in it.</source>
         <translation>Vista rápida: si hay una vista abierta, muestra en ella los archivos indicados.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="57"/>
+        <location filename="../src/main.cpp" line="59"/>
         <source>Open “Customize Folder” on the folders instead of showing them.</source>
         <translation>Abrir «Personalizar carpeta» en las carpetas en lugar de mostrarlas.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="58"/>
+        <location filename="../src/main.cpp" line="60"/>
         <source>Print the picture of each customized folder, making it if needed, and quit.</source>
         <translation>Imprimir la imagen de cada carpeta personalizada, creándola si hace falta, y salir.</translation>
     </message>
