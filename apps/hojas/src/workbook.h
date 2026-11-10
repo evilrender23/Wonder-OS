@@ -128,6 +128,15 @@ struct ChartData {
     QList<double> xs;
 };
 
+/// A range turned into a table: a header row, banded rows, filters and,
+/// when asked, a row of totals as its last one.
+struct Table {
+    Area area;
+    bool totals = false;
+
+    bool operator==(const Table &o) const { return area == o.area && totals == o.totals; }
+};
+
 struct Sheet {
     QString name;
     QMap<int, QMap<int, Cell>> rows;
@@ -141,6 +150,7 @@ struct Sheet {
     int freezeCols = 0;
     QList<CondFormat> conditionals;
     QList<Validation> validations;
+    QList<Table> tables;
     QList<Chart> charts;
     /// The autofilter: its area (headers on the first row), what each column
     /// lets through (by offset in the area), and the rows it hides.
@@ -216,6 +226,8 @@ public:
     /// cached value, without history and without calculating.
     void loadCell(int sheet, int row, int col, const Value &value, const QString &formula, int style);
     void finishLoading();
+    /// For loaders too: a sheet to fill in directly (sizes, merges, rules), before finishLoading().
+    Sheet &loaderSheet(int index) { return m_sheets[index]; }
 
     // --- Styles
     const Style &style(int id) const { return m_styles.at(id); }
@@ -283,6 +295,16 @@ public:
     /// An area that takes whole rows or columns, cut down to what is in use.
     Area clipped(int sheet, const Area &area) const;
 
+    // --- Tables
+    /// Turns an area (its first row the headers) into a table; -1 when it
+    /// is a single row or runs into another table.
+    int addTable(int sheet, const Area &area);
+    /// Back to plain cells; the contents stay.
+    void removeTable(int sheet, int index);
+    /// Shows or drops the row of totals under the table.
+    void setTableTotals(int sheet, int index, bool on);
+    int tableAt(int sheet, int row, int col) const;
+
     // --- Charts
     int addChart(int sheet, const Chart &chart);
     void updateChart(int sheet, const Chart &chart);
@@ -299,6 +321,13 @@ public:
     void endGroup();
     bool modified() const { return m_modified; }
     void setModified(bool on) { m_modified = on; }
+    /// Nothing to undo from here on: what a new document starts with.
+    void forgetHistory()
+    {
+        m_undo.clear();
+        m_redo.clear();
+        m_modified = false;
+    }
     /// Counts up with every change, for views to know they are stale.
     int revision() const { return m_revision; }
 
@@ -315,6 +344,7 @@ public:
     int sheetId(const QString &name) const override { return sheetIndex(name); }
     Value cellValue(int sheet, int row, int col) override;
     void extent(int sheet, int *rows, int *cols) const override { used(sheet, rows, cols); }
+    bool rowOut(int sheet, int row, bool byHand) const override;
     void forEachCell(const RangeRef &range, const std::function<void(int, int, const Value &)> &visit) override;
     double now() const override;
 

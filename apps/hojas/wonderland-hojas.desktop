@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Hojas
+Name[en]=Sheets
+GenericName=Hoja de cálculo
+GenericName[en]=Spreadsheet
+Comment=Hojas de cálculo, tablas y gráficos
+Comment[en]=Spreadsheets, tables and charts
+Exec=wonderland-hojas %F
+Icon=wonderland-hojas
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-hojas
+MimeType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.oasis.opendocument.spreadsheet;text/csv;text/tab-separated-values;
+Categories=Office;Spreadsheet;Qt;
+Keywords=hojas;hoja de cálculo;tabla;fórmulas;gráficos;presupuesto;spreadsheet;excel;calc;xlsx;ods;csv;

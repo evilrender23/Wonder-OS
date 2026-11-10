@@ -304,9 +304,26 @@ void registerMath(QList<FuncDef> &t)
                   if (!def || !def->fn) {
                       return Arg(Err::Value);
                   }
-                  QList<Arg> rest = a.mid(1);
+                  // Rows a filter leaves out do not count; from 101 on, neither
+                  // do the ones hidden by hand.
+                  QList<Arg> rest;
+                  for (int i = 1; i < a.size(); ++i) {
+                      if (a[i].kind != Arg::Range || a[i].ref.sheet < 0) {
+                          rest.append(a[i]);
+                          continue;
+                      }
+                      auto seen = std::make_shared<Matrix>();
+                      E.ctx.host->forEachCell(a[i].ref, [&](int row, int, const Value &value) {
+                          if (!value.isEmpty() && !E.ctx.host->rowOut(a[i].ref.sheet, row, code > 100)) {
+                              seen->cells.append(value);
+                          }
+                      });
+                      seen->rows = int(seen->cells.size());
+                      seen->cols = 1;
+                      rest.append(Arg(seen));
+                  }
                   return def->fn(E, rest);
-              }, nullptr, false, "función; rango; …", "Un total del rango: 9 suma, 1 promedio, 2 cuenta, 4 máximo, 5 mínimo…"});
+              }, nullptr, true, "función; rango; …", "Un total de lo que se ve del rango: 9 suma, 1 promedio, 2 cuenta, 4 máximo, 5 mínimo…"});
     t.append({"PRODUCT", "PRODUCTO", 1, -1, FN {
                   QList<double> list;
                   Value error;

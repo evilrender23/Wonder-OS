@@ -1366,6 +1366,13 @@ void Workbook::structural(int sheetIndex, const SheetEdit &edit)
         }
     }
     sheet.validations = validations;
+    QList<Table> tables;
+    for (Table table : std::as_const(sheet.tables)) {
+        if (adjustArea(table.area, edit) && table.area.rows() > 1) {
+            tables.append(table);
+        }
+    }
+    sheet.tables = tables;
     for (Chart &chart : sheet.charts) {
         adjustArea(chart.area, edit);
         Area anchor{chart.row, chart.col, chart.row, chart.col};
@@ -1618,6 +1625,7 @@ void Workbook::setRowsHidden(int sheet, int r1, int r2, bool hidden)
             m_sheets[sheet].hiddenRows.remove(r);
         }
     }
+    recalc(true);
     changed();
 }
 
@@ -1630,6 +1638,15 @@ bool Workbook::rowHidden(int sheet, int row) const
 {
     const Sheet &s = m_sheets.at(sheet);
     return s.hiddenRows.contains(row) || s.filteredRows.contains(row);
+}
+
+bool Workbook::rowOut(int sheet, int row, bool byHand) const
+{
+    if (sheet < 0 || sheet >= m_sheets.size()) {
+        return false;
+    }
+    const Sheet &s = m_sheets.at(sheet);
+    return s.filteredRows.contains(row) || (byHand && s.hiddenRows.contains(row));
 }
 
 void Workbook::setFreeze(int sheet, int rows, int cols)
@@ -1722,6 +1739,8 @@ void Workbook::setFilterAllowed(int sheet, int column, const QStringList &allowe
         m_sheets[sheet].filterAllowed.insert(column, QSet<QString>(allowed.constBegin(), allowed.constEnd()));
     }
     applyFilter(sheet);
+    // The totals that pass over what a filter leaves out go again.
+    recalc(true);
     changed();
 }
 
@@ -2022,4 +2041,106 @@ ChartData Workbook::chartData(int sheet, const Chart &chart)
         data.series.append(values);
     }
     return data;
+}
+
+// --- Tables ---------------------------------------------------------------------
+
+int Workbook::tableAt(int sheet, int row, int col) const
+{
+    const QList<Table> &tables = m_sheets.at(sheet).tables;
+    for (int i = 0; i < tables.size(); ++i) {
+        if (tables.at(i).area.contains(row, col)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int Workbook::addTable(int sheet, const Area &wanted)
+{
+    Area area = wanted.rows() == 1 && wanted.cols() == 1 ? region(sheet, wanted.r1, wanted.c1) : clipped(sheet, wanted);
+    int usedRows = 0, usedCols = 0;
+    used(sheet, &usedRows, &usedCols);
+    area.r2 = qMin(area.r2, qMax(usedRows - 1, area.r1));
+    area.c2 = qMin(area.c2, qMax(usedCols - 1, area.c1));
+    if (area.rows() < 2) {
+        return -1;
+    }
+    for (const Table &other : std::as_const(m_sheets.at(sheet).tables)) {
+        if (other.area.intersects(area)) {
+            return -1;
+        }
+    }
+    beginGroup();
+    checkpoint();
+    Table table;
+    table.area = area;
+    m_sheets[sheet].tables.append(table);
+    changed();
+    setFilter(sheet, area);
+    endGroup();
+    return m_sheets.at(sheet).tables.size() - 1;
+}
+
+void Workbook::removeTable(int sheet, int index)
+{
+    if (index < 0 || index >= m_sheets.at(sheet).tables.size()) {
+        return;
+    }
+    beginGroup();
+    checkpoint();
+    const Table table = m_sheets.at(sheet).tables.at(index);
+    m_sheets[sheet].tables.removeAt(index);
+    changed();
+    if (m_sheets.at(sheet).hasFilter && m_sheets.at(sheet).filterArea.r1 == table.area.r1 && m_sheets.at(sheet).filterArea.c1 == table.area.c1) {
+        clearFilter(sheet);
+    }
+    endGroup();
+}
+
+void Workbook::setTableTotals(int sheet, int index, bool on)
+{
+    if (index < 0 || index >= m_sheets.at(sheet).tables.size() || m_sheets.at(sheet).tables.at(index).totals == on) {
+        return;
+    }
+    beginGroup();
+    checkpoint();
+    Table table = m_sheets.at(sheet).tables.at(index);
+    if (on) {
+        const int row = table.area.r2 + 1;
+        bool free = true;
+        for (int c = table.area.c1; c <= table.area.c2; ++c) {
+            const Cell *below = cell(sheet, row, c);
+            free = free && (!below || (below->value.isEmpty() && !below->formula));
+        }
+        if (!free) {
+            insertRows(sheet, row, 1);
+            table = m_sheets.at(sheet).tables.at(index);
+        }
+        const int first = table.area.r1 + 1;
+        const int last = table.area.r2;
+        for (int c = table.area.c1; c <= table.area.c2; ++c) {
+            bool numeric = false;
+            for (int r = first; r <= last && !numeric; ++r) {
+                numeric = value(sheet, r, c).isNumber();
+            }
+            if (c == table.area.c1 && !numeric) {
+                setInput(sheet, row, c, QStringLiteral("Total"));
+            } else if (numeric) {
+                setInput(sheet, row, c, QStringLiteral("=SUBTOTAL(109,%1)").arg(Formula::areaName(first, c, last, c)));
+                const Cell *above = cell(sheet, last, c);
+                const QString format = above ? m_styles.at(above->style).format : QString();
+                changeStyle(sheet, Area{row, c, row, c}, [&format](Style &style) { style.format = format; });
+            }
+        }
+        table.area.r2 = row;
+        table.totals = true;
+    } else {
+        clearArea(sheet, Area{table.area.r2, table.area.c1, table.area.r2, table.area.c2}, true, false);
+        table.area.r2 -= 1;
+        table.totals = false;
+    }
+    m_sheets[sheet].tables[index] = table;
+    changed();
+    endGroup();
 }

@@ -74,6 +74,15 @@ public:
     virtual void forEachCell(const RangeRef &range, const std::function<void(int row, int col, const Value &value)> &visit) = 0;
     /// Today and the time, as a serial number.
     virtual double now() const = 0;
+    /// Whether a row is out of sight: left out by a filter, or, when `byHand`
+    /// counts too, hidden by the user. SUBTOTAL passes over those.
+    virtual bool rowOut(int sheet, int row, bool byHand) const
+    {
+        Q_UNUSED(sheet)
+        Q_UNUSED(row)
+        Q_UNUSED(byHand)
+        return false;
+    }
 };
 
 struct EvalContext {
