@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Bases
+Name[en]=Bases
+GenericName=Bases de datos
+GenericName[en]=Databases
+Comment=Tablas, consultas, formularios e informes
+Comment[en]=Tables, queries, forms and reports
+Exec=wonderland-bases %f
+Icon=wonderland-bases
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-bases
+MimeType=application/vnd.sqlite3;application/x-sqlite3;
+Categories=Office;Database;Qt;
+Keywords=datos;base de datos;tablas;consultas;formularios;informes;sqlite;sql;access;database;
