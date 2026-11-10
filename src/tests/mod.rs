@@ -85,6 +85,7 @@ mod screenshot_write;
 mod send_to_output;
 mod session_lock;
 mod session_restore;
+mod shell_desktop;
 mod snap_actions;
 mod soak;
 mod spaces;

@@ -71,7 +71,6 @@ Scope {
     // Quick Look is showing an icon (it says so over IPC): the selection
     // outlives the focus it took, and the preview follows the selection.
     property bool looking: false
-    onLookingChanged: if (!looking) lookEnded.restart()
     onSelectedNamesChanged: if (looking && selectedNames.length) run(["look-update"].concat(selectedNames))
     property point dndGrab: Qt.point(0, 0)
     property string dir: ""
@@ -354,164 +353,175 @@ Scope {
         function looking(on: bool): void { root.looking = on }
     }
 
-    PanelWindow {
-        id: win
+    // One surface, on the primary screen. Built per screen like the bar and
+    // the dock: a monitor that drops out takes its surfaces with it, and only
+    // a window made for the screen that comes back shows up again.
+    Variants {
+        model: Settings.data.desktopIcons && root.primaryScreen ? [root.primaryScreen] : []
 
-        screen: root.primaryScreen
-        visible: Settings.data.desktopIcons
-        WlrLayershell.namespace: "wonderland-desktop"
-        WlrLayershell.layer: WlrLayer.Bottom
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
-        anchors { top: true; bottom: true; left: true; right: true }
-        color: "transparent"
-        mask: root.modal || root.dndActive || root.appDrag ? everything : iconsOnly
+        delegate: PanelWindow {
+            id: win
 
-        Region { id: everything; item: iconField }
-        Region { id: iconsOnly }
+            required property var modelData
+            screen: modelData
+            WlrLayershell.namespace: "wonderland-desktop"
+            WlrLayershell.layer: WlrLayer.Bottom
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+            anchors { top: true; bottom: true; left: true; right: true }
+            color: "transparent"
+            mask: root.modal || root.dndActive || root.appDrag ? everything : iconsOnly
 
-        function remask() {
-            const regions = []
-            for (let i = 0; i < icons.count; i++) {
-                const it = icons.itemAt(i)
-                if (it && it.placed) regions.push(it.region)
-            }
-            iconsOnly.regions = regions
-        }
+            Region { id: everything; item: iconField }
+            Region { id: iconsOnly }
 
-        Item {
-            id: iconField
-            anchors.fill: parent
-            focus: true
-            onWidthChanged: root.fieldWidth = width
-            onHeightChanged: root.fieldHeight = height
-            Component.onCompleted: { root.fieldWidth = width; root.fieldHeight = height }
-
-            // Focus moving to a window or to the canvas ends the selection.
-            readonly property bool active: Window.active
-            onActiveChanged: if (!active && !root.modal && !root.dragging && !root.dndActive && !root.looking) root.selected = ({})
-            // The preview closed: unless the focus came back here, the selection ends as it would have.
-            Timer {
-                id: lookEnded
-                interval: 400
-                onTriggered: if (!iconField.active && !root.looking && !root.modal && !root.dragging && !root.dndActive) root.selected = ({})
-            }
-
-            Keys.onPressed: event => {
-                if (root.renaming !== "") return
-                const names = root.selectedNames
-                if (event.key === Qt.Key_Escape) {
-                    root.menuOpen = false
-                    root.selected = ({})
-                } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                    root.open(names)
-                } else if (event.key === Qt.Key_Space) {
-                    root.look(names)
-                } else if (event.key === Qt.Key_Delete) {
-                    root.trash(names)
-                } else if (event.key === Qt.Key_F2 && names.length === 1) {
-                    root.renaming = names[0]
-                } else if (event.key === Qt.Key_A && (event.modifiers & Qt.ControlModifier)) {
-                    const all = {}
-                    for (const it of root.items) all[it.name] = true
-                    root.selected = all
-                } else {
-                    return
+            function remask() {
+                const regions = []
+                for (let i = 0; i < icons.count; i++) {
+                    const it = icons.itemAt(i)
+                    if (it && it.placed) regions.push(it.region)
                 }
-                event.accepted = true
+                iconsOnly.regions = regions
             }
 
-            // Only reachable while a menu, a rename or an app's drag has the
-            // whole surface. No button reaches us during a drag, so a press
-            // with `appDrag` still set means its end was never announced.
-            MouseArea {
+            Item {
+                id: iconField
                 anchors.fill: parent
-                enabled: root.modal || root.appDrag
-                acceptedButtons: Qt.AllButtons
-                onPressed: {
-                    root.appDrag = false
-                    root.menuOpen = false
-                    if (root.renaming !== "") { root.renaming = ""; root.renameError = "" }
-                }
-            }
+                focus: true
+                onWidthChanged: root.fieldWidth = width
+                onHeightChanged: root.fieldHeight = height
+                Component.onCompleted: { root.fieldWidth = width; root.fieldHeight = height }
 
-            // With the surface taking all input for the menu, the pointer
-            // leaving it means it went to a window or the bar: let go.
-            HoverHandler {
-                id: hover
-                onHoveredChanged: {
-                    if (!hovered && root.menuOpen) leftMenu.restart()
-                    else leftMenu.stop()
+                // Focus moving to a window or to the canvas ends the selection.
+                readonly property bool active: Window.active
+                onActiveChanged: if (!active && !root.modal && !root.dragging && !root.dndActive && !root.looking) root.selected = ({})
+                // The preview closed: unless the focus came back here, the selection ends as it would have.
+                Connections {
+                    target: root
+                    function onLookingChanged() { if (!root.looking) lookEnded.restart() }
                 }
-            }
-            Timer { id: leftMenu; interval: 700; onTriggered: root.menuOpen = false }
+                Timer {
+                    id: lookEnded
+                    interval: 400
+                    onTriggered: if (!iconField.active && !root.looking && !root.modal && !root.dragging && !root.dndActive) root.selected = ({})
+                }
 
-            // Our own drag coming back over the desktop: the icons follow it
-            // and land where it is dropped, magnet included. Files dragged
-            // from an app move to the Desktop folder (cut, not copy, as on a
-            // folder icon) and land where they are dropped.
-            DropArea {
-                anchors.fill: parent
-                enabled: root.dndActive || root.appDrag
-                function ours(drag) { return drag.source && drag.source.desktopDrag === true }
-                function files(drag) { return drag.hasUrls ? root.pathsOf(drag.urls) : [] }
-                onEntered: drag => {
-                    if (ours(drag)) return
-                    if (files(drag).length === 0) { drag.accepted = false; return }
-                    drag.accept(Qt.MoveAction)
-                }
-                onPositionChanged: drag => {
-                    if (!ours(drag)) return
-                    root.drag(root.dndName, drag.x - root.dndGrab.x, drag.y - root.dndGrab.y,
-                              root.magnetHeld)
-                }
-                onExited: root.cancelDrag()
-                onDropped: drop => {
-                    if (ours(drop)) {
-                        root.drop(root.dndName, drop.x - root.dndGrab.x, drop.y - root.dndGrab.y)
-                        drop.accept(Qt.IgnoreAction)
+                Keys.onPressed: event => {
+                    if (root.renaming !== "") return
+                    const names = root.selectedNames
+                    if (event.key === Qt.Key_Escape) {
+                        root.menuOpen = false
+                        root.selected = ({})
+                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                        root.open(names)
+                    } else if (event.key === Qt.Key_Space) {
+                        root.look(names)
+                    } else if (event.key === Qt.Key_Delete) {
+                        root.trash(names)
+                    } else if (event.key === Qt.Key_F2 && names.length === 1) {
+                        root.renaming = names[0]
+                    } else if (event.key === Qt.Key_A && (event.modifiers & Qt.ControlModifier)) {
+                        const all = {}
+                        for (const it of root.items) all[it.name] = true
+                        root.selected = all
+                    } else {
                         return
                     }
-                    const list = files(drop)
-                    if (list.length === 0) { drop.accepted = false; return }
-                    root.takeFiles(list, drop.x, drop.y)
-                    drop.accept(Qt.MoveAction)
+                    event.accepted = true
                 }
-            }
 
-            Repeater {
-                model: root.guides
-                delegate: Rectangle {
-                    required property var modelData
-                    x: modelData.vertical ? Math.round(modelData.pos) : modelData.from
-                    y: modelData.vertical ? modelData.from : Math.round(modelData.pos)
-                    width: modelData.vertical ? 1 : modelData.to - modelData.from
-                    height: modelData.vertical ? modelData.to - modelData.from : 1
-                    color: Theme.p.accent
-                    opacity: 0.2 + 0.8 * Math.max(0, Math.min(1, modelData.strength))
+                // Only reachable while a menu, a rename or an app's drag has the
+                // whole surface. No button reaches us during a drag, so a press
+                // with `appDrag` still set means its end was never announced.
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: root.modal || root.appDrag
+                    acceptedButtons: Qt.AllButtons
+                    onPressed: {
+                        root.appDrag = false
+                        root.menuOpen = false
+                        if (root.renaming !== "") { root.renaming = ""; root.renameError = "" }
+                    }
                 }
-            }
 
-            Repeater {
-                id: icons
-                model: ScriptModel {
-                    values: root.items
-                    objectProp: "name"
+                // With the surface taking all input for the menu, the pointer
+                // leaving it means it went to a window or the bar: let go.
+                HoverHandler {
+                    id: hover
+                    onHoveredChanged: {
+                        if (!hovered && root.menuOpen) leftMenu.restart()
+                        else leftMenu.stop()
+                    }
                 }
-                delegate: DesktopIcon {
+                Timer { id: leftMenu; interval: 700; onTriggered: root.menuOpen = false }
+
+                // Our own drag coming back over the desktop: the icons follow it
+                // and land where it is dropped, magnet included. Files dragged
+                // from an app move to the Desktop folder (cut, not copy, as on a
+                // folder icon) and land where they are dropped.
+                DropArea {
+                    anchors.fill: parent
+                    enabled: root.dndActive || root.appDrag
+                    function ours(drag) { return drag.source && drag.source.desktopDrag === true }
+                    function files(drag) { return drag.hasUrls ? root.pathsOf(drag.urls) : [] }
+                    onEntered: drag => {
+                        if (ours(drag)) return
+                        if (files(drag).length === 0) { drag.accepted = false; return }
+                        drag.accept(Qt.MoveAction)
+                    }
+                    onPositionChanged: drag => {
+                        if (!ours(drag)) return
+                        root.drag(root.dndName, drag.x - root.dndGrab.x, drag.y - root.dndGrab.y,
+                                  root.magnetHeld)
+                    }
+                    onExited: root.cancelDrag()
+                    onDropped: drop => {
+                        if (ours(drop)) {
+                            root.drop(root.dndName, drop.x - root.dndGrab.x, drop.y - root.dndGrab.y)
+                            drop.accept(Qt.IgnoreAction)
+                            return
+                        }
+                        const list = files(drop)
+                        if (list.length === 0) { drop.accepted = false; return }
+                        root.takeFiles(list, drop.x, drop.y)
+                        drop.accept(Qt.MoveAction)
+                    }
+                }
+
+                Repeater {
+                    model: root.guides
+                    delegate: Rectangle {
+                        required property var modelData
+                        x: modelData.vertical ? Math.round(modelData.pos) : modelData.from
+                        y: modelData.vertical ? modelData.from : Math.round(modelData.pos)
+                        width: modelData.vertical ? 1 : modelData.to - modelData.from
+                        height: modelData.vertical ? modelData.to - modelData.from : 1
+                        color: Theme.p.accent
+                        opacity: 0.2 + 0.8 * Math.max(0, Math.min(1, modelData.strength))
+                    }
+                }
+
+                Repeater {
+                    id: icons
+                    model: ScriptModel {
+                        values: root.items
+                        objectProp: "name"
+                    }
+                    delegate: DesktopIcon {
+                        desk: root
+                        field: iconField
+                        onPlacedChanged: Qt.callLater(win.remask)
+                    }
+                    onItemAdded: Qt.callLater(win.remask)
+                    onItemRemoved: Qt.callLater(win.remask)
+                }
+
+                DesktopMenu {
                     desk: root
-                    field: iconField
-                    onPlacedChanged: Qt.callLater(win.remask)
+                    visible: root.menuOpen
+                    x: Math.max(4, Math.min(iconField.width - width - 4, root.menuAt.x))
+                    y: Math.max(4, Math.min(iconField.height - height - 4, root.menuAt.y))
+                    z: 10
                 }
-                onItemAdded: Qt.callLater(win.remask)
-                onItemRemoved: Qt.callLater(win.remask)
-            }
-
-            DesktopMenu {
-                desk: root
-                visible: root.menuOpen
-                x: Math.max(4, Math.min(iconField.width - width - 4, root.menuAt.x))
-                y: Math.max(4, Math.min(iconField.height - height - 4, root.menuAt.y))
-                z: 10
             }
         }
     }
