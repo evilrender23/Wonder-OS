@@ -25,6 +25,7 @@ use driftwm::wobbly::{Offsets, patch_offset};
 
 const VERTEX_SRC: &str = include_str!("../shaders/warp.vert");
 const FRAGMENT_SRC: &str = include_str!("../shaders/warp.frag");
+const BURN_FRAGMENT_SRC: &str = include_str!("../shaders/burn.frag");
 
 /// Offscreen allocations are rounded up to this, so a window whose painted
 /// box jitters by a pixel under a fractional zoom keeps its texture.
@@ -50,6 +51,11 @@ struct ProgramInner {
     u_clip: ffi::types::GLint,
     u_used: ffi::types::GLint,
     u_alloc: ffi::types::GLint,
+    /// The close effects' own uniforms; absent (-1) from the plain warp.
+    u_effect: ffi::types::GLint,
+    u_progress: ffi::types::GLint,
+    u_seed: ffi::types::GLint,
+    u_pad: ffi::types::GLint,
 }
 
 /// The compiled mesh program. Lives as long as the renderer's GL context.
@@ -78,13 +84,30 @@ unsafe fn compile_stage(
 }
 
 pub fn compile_warp_program(renderer: &mut GlesRenderer) -> Option<WarpProgram> {
+    compile_program(renderer, FRAGMENT_SRC, true, "warp mesh")
+}
+
+/// The program of the close effects (`[effects.close_animation]`): the warp
+/// renderer's mesh stage under a fragment stage that burns, melts or beams
+/// the picture away.
+pub fn compile_burn_program(renderer: &mut GlesRenderer) -> Option<WarpProgram> {
+    compile_program(renderer, BURN_FRAGMENT_SRC, false, "close effect")
+}
+
+fn compile_program(
+    renderer: &mut GlesRenderer,
+    fragment_src: &str,
+    derivatives: bool,
+    what: &str,
+) -> Option<WarpProgram> {
     let compiled = renderer.with_context(|gl| unsafe {
         let vert = compile_stage(gl, ffi::VERTEX_SHADER, VERTEX_SRC)?;
         // Screen-space derivatives are an extension in GLES 2; nearly every
         // driver has it, and the plain variant covers the rest.
-        let with_derivatives = FRAGMENT_SRC.replacen('\n', "\n#define DERIVATIVES\n", 1);
-        let frag = compile_stage(gl, ffi::FRAGMENT_SHADER, &with_derivatives)
-            .or_else(|| compile_stage(gl, ffi::FRAGMENT_SHADER, FRAGMENT_SRC));
+        let frag = derivatives
+            .then(|| fragment_src.replacen('\n', "\n#define DERIVATIVES\n", 1))
+            .and_then(|src| compile_stage(gl, ffi::FRAGMENT_SHADER, &src))
+            .or_else(|| compile_stage(gl, ffi::FRAGMENT_SHADER, fragment_src));
         let Some(frag) = frag else {
             gl.DeleteShader(vert);
             return None;
@@ -121,12 +144,16 @@ pub fn compile_warp_program(renderer: &mut GlesRenderer) -> Option<WarpProgram> 
             u_clip: uniform(c"clip"),
             u_used: uniform(c"used"),
             u_alloc: uniform(c"alloc"),
+            u_effect: uniform(c"effect"),
+            u_progress: uniform(c"progress"),
+            u_seed: uniform(c"seed"),
+            u_pad: uniform(c"pad"),
         })
     });
     match compiled {
         Ok(Some(inner)) => Some(WarpProgram(Rc::new(inner))),
         _ => {
-            tracing::error!("Failed to compile the warp mesh program");
+            tracing::error!("Failed to compile the {what} program");
             None
         }
     }
@@ -327,6 +354,15 @@ impl WarpMesh {
         })
     }
 
+    /// The picture undeformed over `rect` (`x, y, w, h` in output physical
+    /// pixels), with `pad` texels of room around it for a close effect's
+    /// flames and streaks.
+    pub fn quad(rect: [f64; 4], texels: Size<i32, Physical>, pad: f64) -> Self {
+        Self::build(1, 1, texels, pad, |u, v| {
+            [rect[0] + u * rect[2], rect[1] + v * rect[3]]
+        })
+    }
+
     #[cfg(test)]
     pub fn bounds(&self) -> Rectangle<i32, Physical> {
         self.bounds
@@ -356,6 +392,18 @@ impl WarpStamp {
     }
 }
 
+/// What a close effect's fragment stage is told on top of the warp's own
+/// uniforms.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BurnUniforms {
+    /// `CloseEffect::shader_id`.
+    pub effect: f32,
+    pub progress: f32,
+    pub seed: [f32; 2],
+    /// The mesh's overhang, in texels.
+    pub pad: f32,
+}
+
 #[derive(Debug)]
 pub struct WarpElement {
     stamp: WarpStamp,
@@ -363,6 +411,7 @@ pub struct WarpElement {
     source: WarpSource,
     mesh: WarpMesh,
     alpha: f32,
+    burn: Option<BurnUniforms>,
 }
 
 impl WarpElement {
@@ -379,7 +428,15 @@ impl WarpElement {
             source,
             mesh,
             alpha,
+            burn: None,
         }
+    }
+
+    /// Draw with a close effect's uniforms; `program` must then be the one
+    /// from [`compile_burn_program`].
+    pub fn burning(mut self, burn: BurnUniforms) -> Self {
+        self.burn = Some(burn);
+        self
     }
 }
 
@@ -445,6 +502,7 @@ impl RenderElement<GlesRenderer> for WarpElement {
         let source = &self.source;
         let mesh = &self.mesh;
         let alpha = self.alpha;
+        let burn = self.burn;
         // Smithay re-establishes program, texture unit, attribute arrays and
         // divisors on each of its own draws, and never binds an element array
         // buffer or VAO, so nothing here needs restoring beyond what is
@@ -467,6 +525,12 @@ impl RenderElement<GlesRenderer> for WarpElement {
             gl.UniformMatrix3fv(program.u_matrix, 1, ffi::FALSE, projection.as_ptr());
             gl.UniformMatrix3fv(program.u_local, 1, ffi::FALSE, local.as_ptr());
             gl.Uniform1f(program.u_alpha, alpha);
+            if let Some(burn) = burn {
+                gl.Uniform1f(program.u_effect, burn.effect);
+                gl.Uniform1f(program.u_progress, burn.progress);
+                gl.Uniform2f(program.u_seed, burn.seed[0], burn.seed[1]);
+                gl.Uniform1f(program.u_pad, burn.pad);
+            }
             gl.Uniform2f(program.u_used, source.used.w as f32, source.used.h as f32);
             gl.Uniform2f(
                 program.u_alloc,
@@ -627,6 +691,16 @@ mod tests {
         let count = (mesh.vertices.len() / 4) as u16;
         assert!(mesh.indices.iter().all(|i| *i < count));
         assert_eq!(mesh.indices.len(), MAX_CELLS * 3 * 6);
+    }
+
+    #[test]
+    fn a_quad_overhangs_its_picture_by_the_pad() {
+        // A 100x50 texel picture drawn twice as large: 10 texels of pad are
+        // 20 pixels of room.
+        let mesh = WarpMesh::quad([40.0, 60.0, 200.0, 100.0], Size::from((100, 50)), 10.0);
+        assert_eq!(mesh.bounds().loc, Point::from((20, 40)));
+        assert_eq!(mesh.bounds().size, Size::from((240, 140)));
+        assert_eq!(mesh.indices.len(), 6);
     }
 
     #[test]

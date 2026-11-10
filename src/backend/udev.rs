@@ -700,6 +700,7 @@ pub fn init_udev(
         data.render.cursor_smear_shader =
             crate::render::cursor_smear::compile_cursor_smear_shader(backend.renderer());
         data.render.warp_program = crate::render::compile_warp_program(backend.renderer());
+        data.render.burn_program = crate::render::compile_burn_program(backend.renderer());
         data.render.corner_clip_shader =
             crate::render::compile_corner_clip_shader(backend.renderer());
         let (blur_down, blur_up, blur_mask) =

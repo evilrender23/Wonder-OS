@@ -10,15 +10,16 @@ use smithay::utils::Transform;
 
 use super::parse::{parse_key_combo, parse_mouse_binding};
 use super::toml::{
-    BackendFileConfig, CursorBlurFileConfig, DecorationFileConfig, EffectsFileConfig,
-    GlassFileConfig, HotCornersFile, MagicLampFileConfig, OutputOutlineConfig, OutputRuleFile,
-    PassListFile, TextCursorFileConfig, WindowRuleFile, WobblyFileConfig,
+    BackendFileConfig, CloseAnimationFileConfig, CursorBlurFileConfig, DecorationFileConfig,
+    EffectsFileConfig, GlassFileConfig, HotCornersFile, MagicLampFileConfig, OutputOutlineConfig,
+    OutputRuleFile, PassListFile, TextCursorFileConfig, WindowRuleFile, WobblyFileConfig,
 };
 use super::types::{
-    BackendConfig, CursorBlurConfig, DecorationConfig, DecorationMode, EffectsConfig,
-    FocusPlacement, FontWeight, GlassConfig, HotCorners, MagicLampConfig, ModKey, OutputConfig,
-    OutputMode, OutputOutlineSettings, OutputPosition, PassList, Pattern, TextCursorAnimation,
-    TextCursorConfig, TextCursorVfx, TitleAlign, WindowRule, WobblyConfig,
+    BackendConfig, CloseAnimationConfig, CloseStyle, CursorBlurConfig, DecorationConfig,
+    DecorationMode, EffectsConfig, FocusPlacement, FontWeight, GlassConfig, HotCorners,
+    MagicLampConfig, ModKey, OutputConfig, OutputMode, OutputOutlineSettings, OutputPosition,
+    PassList, Pattern, TextCursorAnimation, TextCursorConfig, TextCursorVfx, TitleAlign,
+    WindowRule, WobblyConfig,
 };
 
 /// How actionable a config warning is. The error bar has room for one message,
@@ -543,6 +544,7 @@ pub(super) fn parse_effects_config(raw: EffectsFileConfig, errors: &mut Warnings
         cursor_blur: parse_cursor_blur_config(raw.cursor_blur, errors),
         wobbly: parse_wobbly_config(raw.wobbly, errors),
         magic_lamp: parse_magic_lamp_config(raw.magic_lamp, errors),
+        close_animation: parse_close_animation_config(raw.close_animation, errors),
     }
 }
 
@@ -597,6 +599,36 @@ pub(super) fn parse_magic_lamp_config(
             50.0,
             2000.0,
             "effects.magic_lamp.duration_ms",
+            errors,
+        ),
+    }
+}
+
+pub(super) fn parse_close_animation_config(
+    raw: CloseAnimationFileConfig,
+    errors: &mut Warnings,
+) -> CloseAnimationConfig {
+    let d = CloseAnimationConfig::default();
+    let style = match raw.style.as_deref() {
+        None => d.style,
+        Some(name) => CloseStyle::from_name(name).unwrap_or_else(|| {
+            collect_warn(
+                errors,
+                format!(
+                    "config: invalid effects.close_animation.style '{name}' ({}), using default",
+                    CloseStyle::names().join(", ")
+                ),
+            );
+            d.style
+        }),
+    };
+    CloseAnimationConfig {
+        style,
+        duration_ms: clamp_warn(
+            raw.duration_ms.unwrap_or(d.duration_ms),
+            100.0,
+            3000.0,
+            "effects.close_animation.duration_ms",
             errors,
         ),
     }

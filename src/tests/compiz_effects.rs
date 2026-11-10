@@ -99,6 +99,14 @@ const WINDOW_AT: (u32, u32) = (340, 90);
 /// A fixture with a GL renderer, one output and one settled [`WINDOW`] at
 /// [`WINDOW_AT`].
 fn scene(test: &str, extra: &str) -> Option<(Fixture, Output)> {
+    scene_with_client(test, extra).map(|(f, output, _)| (f, output))
+}
+
+/// [`scene`], plus the window's client, for the scenarios that close it.
+fn scene_with_client(
+    test: &str,
+    extra: &str,
+) -> Option<(Fixture, Output, super::client::ClientId)> {
     let renderer = gl::surfaceless_renderer(test)?;
     let mut f = Fixture::with_config(super::config(&config_toml(extra)));
     let output = f.add_output(1, (OUTPUT.0 as u16, OUTPUT.1 as u16));
@@ -125,7 +133,7 @@ fn scene(test: &str, extra: &str) -> Option<(Fixture, Output)> {
     });
     settle(&mut f);
     tick_until_settled(&mut f);
-    Some((f, output))
+    Some((f, output, client))
 }
 
 fn teardown(f: &mut Fixture, output: &Output) {
@@ -1011,5 +1019,172 @@ fn the_smear_obeys_its_switch_and_the_cursor_hiding() {
     f.state().tick_cursor_blur();
     assert!(!f.state().has_active_animations());
 
+    teardown(&mut f, &output);
+}
+
+/// Close the scene's window the abrupt way and let the server notice.
+fn close(f: &mut Fixture, client: super::client::ClientId) {
+    f.kill_client(client);
+    f.pump(4);
+}
+
+fn close_style(style: &str) -> String {
+    format!("[effects.close_animation]\nstyle = \"{style}\"\nduration_ms = 400\n")
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn every_close_effect_starts_from_the_window_and_ends_on_nothing() {
+    use driftwm::close_effect::CloseEffect;
+    let _gl = gl::lock();
+    for effect in CloseEffect::ALL.into_iter().skip(1) {
+        let name = effect.name();
+        let Some((mut f, output, client)) = scene_with_client(name, &close_style(name)) else {
+            return;
+        };
+        let baseline = live_frame(&mut f, &output);
+        let rest = painted_bounds(&baseline).expect("the window is drawn");
+        close(&mut f, client);
+        assert_eq!(f.state().closing_snapshots.len(), 1, "{name}");
+        assert_eq!(f.state().closing_snapshots[0].burning(), Some(effect));
+        assert!(f.state().has_active_animations(), "{name}");
+
+        // The first frame is the window as it was.
+        let first = live_frame(&mut f, &output);
+        dump(&first, &format!("close_{name}_00"));
+        let differing = first
+            .pixels()
+            .zip(baseline.pixels())
+            .filter(|(a, b)| (0..4).any(|i| a[i].abs_diff(b[i]) > 3))
+            .count();
+        assert_eq!(differing, 0, "{name} starts from the window's own picture");
+
+        let frames = (0.4 * effect.duration_factor() / FRAME.as_secs_f64()).ceil() as usize;
+        let pad = effect.overhang().ceil() as u32 + 2;
+        let mut changed = false;
+        let mut last = first;
+        for step in 1..=8 {
+            tick(&mut f, frames / 10);
+            assert_eq!(f.state().closing_snapshots.len(), 1, "{name} step {step}");
+            let img = live_frame(&mut f, &output);
+            dump(&img, &format!("close_{name}_{step:02}"));
+            if let Some(b) = painted_bounds(&img) {
+                assert!(
+                    b.0 + pad >= rest.0
+                        && b.1 + pad >= rest.1
+                        && b.2 <= rest.2 + pad
+                        && b.3 <= rest.3 + pad,
+                    "{name} step {step} stays within its overhang: {b:?}"
+                );
+            }
+            changed |= img != last;
+            last = img;
+        }
+        assert!(changed, "{name} animates");
+        assert!(last != baseline, "{name} has left the window's picture");
+        tick(&mut f, frames - 8 * (frames / 10) + 2);
+        assert!(
+            f.state().closing_snapshots.is_empty(),
+            "{name} ends on time"
+        );
+        assert!(!f.state().has_active_animations(), "{name}");
+        assert!(painted_bounds(&live_frame(&mut f, &output)).is_none());
+        teardown(&mut f, &output);
+    }
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn the_last_frames_of_a_close_effect_are_nearly_gone() {
+    let _gl = gl::lock();
+    for name in driftwm::close_effect::CloseStyle::names() {
+        if name == "fade" || name == "random" {
+            continue;
+        }
+        let Some((mut f, output, client)) = scene_with_client(name, &close_style(name)) else {
+            return;
+        };
+        let effect = driftwm::close_effect::CloseEffect::from_name(name).expect("a real effect");
+        close(&mut f, client);
+        let frames = (0.4 * effect.duration_factor() / FRAME.as_secs_f64()).ceil() as usize;
+        tick(&mut f, frames - 2);
+        let img = live_frame(&mut f, &output);
+        let loudest = img.pixels().map(|p| p[3]).max().unwrap_or(0);
+        assert!(loudest < 40, "{name} would pop out at alpha {loudest}");
+        tick(&mut f, 4);
+        teardown(&mut f, &output);
+    }
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn the_default_close_is_still_the_fade() {
+    let _gl = gl::lock();
+    let Some((mut f, output, client)) = scene_with_client("default close", "") else {
+        return;
+    };
+    close(&mut f, client);
+    assert_eq!(f.state().closing_snapshots.len(), 1);
+    assert_eq!(f.state().closing_snapshots[0].burning(), None);
+    for _ in 0..2000 {
+        f.state().tick_window_animations(FRAME);
+    }
+    assert!(f.state().closing_snapshots.is_empty());
+    teardown(&mut f, &output);
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn a_random_close_picks_a_shader_effect() {
+    let _gl = gl::lock();
+    let Some((mut f, output, client)) = scene_with_client("random close", &close_style("random"))
+    else {
+        return;
+    };
+    close(&mut f, client);
+    let effect = f.state().closing_snapshots[0].burning();
+    assert!(effect.is_some_and(|e| e != driftwm::close_effect::CloseEffect::Fade));
+    tick(&mut f, 400);
+    assert!(f.state().closing_snapshots.is_empty());
+    teardown(&mut f, &output);
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn minimizing_keeps_the_lamp_whatever_the_close_effect() {
+    let _gl = gl::lock();
+    let Some((mut f, output)) = scene("minimize vs close", &close_style("fire")) else {
+        return;
+    };
+    let id = window_id(&mut f);
+    set_minimized(&mut f, id, true);
+    assert_eq!(f.state().closing_snapshots.len(), 1);
+    assert!(f.state().closing_snapshots[0].is_lamp());
+    assert_eq!(f.state().closing_snapshots[0].burning(), None);
+    tick(&mut f, 100);
+    assert!(f.state().closing_snapshots.is_empty());
+    teardown(&mut f, &output);
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn instant_animations_skip_the_close_effect() {
+    let _gl = gl::lock();
+    let extra = format!(
+        "[effects]\nanimation_speed = 1.0\n\n{}",
+        close_style("fire")
+    );
+    let Some((mut f, output, client)) = scene_with_client("instant close", &extra) else {
+        return;
+    };
+    close(&mut f, client);
+    assert!(
+        f.state()
+            .closing_snapshots
+            .iter()
+            .all(|s| s.burning().is_none())
+    );
+    tick(&mut f, 2);
+    assert!(f.state().closing_snapshots.is_empty());
     teardown(&mut f, &output);
 }

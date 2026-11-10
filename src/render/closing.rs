@@ -19,13 +19,14 @@ use smithay::utils::user_data::UserDataMap;
 use smithay::utils::{Logical, Physical, Point, Rectangle, Scale, Size, Transform};
 use smithay::wayland::compositor::{TraversalAction, with_surface_tree_downward};
 
+use driftwm::close_effect::CloseEffect;
 use driftwm::magic_lamp::Lamp;
 use driftwm::stage::ElementId;
 use smithay::reexports::wayland_server::backend::ObjectId;
 
 use crate::state::SuspendedWindow;
 
-use super::warp::{WarpElement, WarpMesh, WarpProgram, WarpSource, WarpStamp};
+use super::warp::{BurnUniforms, WarpElement, WarpMesh, WarpProgram, WarpSource, WarpStamp};
 use super::{
     OutputRenderElements, TrimmedElement, WindowRenderAnimation, WindowTransformElement,
     painted_rect, shaders,
@@ -444,7 +445,20 @@ pub(crate) struct ClosingSnapshot {
     /// A magic-lamp minimize or restore: `fly` still names the target, the
     /// picture is poured there through a funnel instead of flown.
     lamp: Option<LampFlight>,
+    /// A close effect (`[effects.close_animation]`): the picture burns,
+    /// melts or beams away in place instead of fading.
+    burn: Option<BurnFlight>,
     progress: f64,
+}
+
+/// A close effect's clock: linear in time like the lamp's, since the shader
+/// paces itself.
+struct BurnFlight {
+    effect: CloseEffect,
+    /// Seconds for the whole effect.
+    duration: f64,
+    seed: [f32; 2],
+    stamp: WarpStamp,
 }
 
 /// The genie's clock. Unlike the eased chase the other snapshots run on, it
@@ -464,8 +478,56 @@ struct LampFlight {
 
 impl ClosingSnapshot {
     pub fn tick(&mut self, frame_factor: f64) {
-        if self.lamp.is_none() {
+        if self.lamp.is_none() && self.burn.is_none() {
             self.progress += (1.0 - self.progress) * frame_factor;
+        }
+    }
+
+    /// Advance a close effect by `dt` seconds; other snapshots ignore it.
+    pub fn tick_burn(&mut self, dt: f64) {
+        let Some(burn) = &mut self.burn else {
+            return;
+        };
+        self.progress = (self.progress + dt.max(0.0) / burn.duration).clamp(0.0, 1.0);
+        burn.stamp.bump();
+    }
+
+    /// Leave with `effect` over `duration` seconds instead of fading.
+    /// `roll` is any number that differs between closes. The fade itself,
+    /// a minimize and the stand-in crossfade keep their own animation.
+    pub fn burn_with(&mut self, effect: CloseEffect, duration: f64, roll: u32) {
+        if effect == CloseEffect::Fade || self.alpha_only || self.fly.is_some() {
+            return;
+        }
+        if self.pinned.is_none() {
+            // Room for the flames, so per-output scoping still finds them.
+            let pad = effect.overhang();
+            let r = self.fly_origin.unwrap_or(self.canvas_rect);
+            self.canvas_rect = Rectangle::new(
+                Point::from((r.loc.x - pad, r.loc.y - pad)),
+                Size::from((r.size.w + 2.0 * pad, r.size.h + 2.0 * pad)),
+            );
+            self.fly_origin = Some(r);
+        }
+        self.progress = 0.0;
+        self.burn = Some(BurnFlight {
+            effect,
+            duration: duration.max(0.001),
+            seed: driftwm::close_effect::seed(roll),
+            stamp: WarpStamp::default(),
+        });
+    }
+
+    /// The close effect this snapshot is leaving with, if any.
+    #[cfg(test)]
+    pub fn burning(&self) -> Option<CloseEffect> {
+        self.burn.as_ref().map(|b| b.effect)
+    }
+
+    /// Finish a close effect on the next tick, wherever it is.
+    pub fn finish_burn(&mut self) {
+        if self.burn.is_some() {
+            self.progress = 1.0;
         }
     }
 
@@ -488,6 +550,7 @@ impl ClosingSnapshot {
         match &self.lamp {
             Some(lamp) if lamp.restoring => self.progress <= 0.0,
             Some(_) => self.progress >= 1.0,
+            None if self.burn.is_some() => self.progress >= 1.0,
             None => 1.0 - self.progress <= DONE_EPSILON,
         }
     }
@@ -502,6 +565,7 @@ impl ClosingSnapshot {
         duration: f64,
         restoring: bool,
     ) {
+        self.burn = None;
         self.fly_to(target, 0.0);
         self.progress = if restoring { 1.0 } else { 0.0 };
         self.lamp = Some(LampFlight {
@@ -566,6 +630,7 @@ impl ClosingSnapshot {
     /// shrinking to `scale`, instead of shrinking in place. The canvas rect
     /// grows to cover the whole path so per-output scoping still finds it.
     pub fn fly_to(&mut self, target: Point<f64, Logical>, scale: f64) {
+        self.burn = None;
         self.fly = Some((target, scale));
         if self.pinned.is_none() {
             // Room for the lamp's neck around the target.
@@ -882,6 +947,7 @@ pub(crate) fn snapshot_canvas(
         fly_origin: None,
         texture,
         lamp: None,
+        burn: None,
         progress: 0.0,
     })
 }
@@ -917,6 +983,7 @@ pub(crate) fn snapshot_screen(
         fly_origin: None,
         texture,
         lamp: None,
+        burn: None,
         progress: 0.0,
     })
 }
@@ -931,6 +998,7 @@ impl ClosingSnapshot {
         zoom: f64,
         output_scale: f64,
         warp: Option<&WarpProgram>,
+        burn: Option<&WarpProgram>,
     ) -> Option<OutputRenderElements> {
         let alpha = fade_out_alpha(self.progress);
         let close_scale = match self.fly {
@@ -998,6 +1066,32 @@ impl ClosingSnapshot {
                 Lamp::alpha(self.progress),
             )));
         }
+        if let (Some(flight), Some(program)) = (&self.burn, burn) {
+            // The overhang is given in logical pixels; the mesh wants texels.
+            let texels_per_logical = self.texels.w as f64 / screen_size.w.max(1.0);
+            let view_zoom = if self.pinned.is_some() { 1.0 } else { zoom };
+            let pad = flight.effect.overhang() * view_zoom * texels_per_logical;
+            let mesh = WarpMesh::quad(
+                [loc_phys.x, loc_phys.y, size_phys.w, size_phys.h],
+                self.texels,
+                pad,
+            );
+            return Some(OutputRenderElements::Warp(
+                WarpElement::new(
+                    &flight.stamp,
+                    program,
+                    WarpSource::whole(self.texture.clone(), self.texels),
+                    mesh,
+                    1.0,
+                )
+                .burning(BurnUniforms {
+                    effect: flight.effect.shader_id(),
+                    progress: self.progress as f32,
+                    seed: flight.seed,
+                    pad: pad.max(1.0) as f32,
+                }),
+            ));
+        }
         let center = Point::from((
             loc_phys.x + size_phys.w / 2.0,
             loc_phys.y + size_phys.h / 2.0,
@@ -1022,6 +1116,7 @@ impl ClosingSnapshot {
 }
 
 /// Elements for every closing snapshot visible on `output`, top-most first.
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn render_snapshots_for_output(
     snapshots: &[ClosingSnapshot],
     output_name: &str,
@@ -1030,6 +1125,7 @@ pub(crate) fn render_snapshots_for_output(
     zoom: f64,
     output_scale: f64,
     warp: Option<&WarpProgram>,
+    burn: Option<&WarpProgram>,
 ) -> Vec<OutputRenderElements> {
     snapshots
         .iter()
@@ -1039,7 +1135,7 @@ pub(crate) fn render_snapshots_for_output(
                 |(o, _)| o == output_name,
             )
         })
-        .filter_map(|s| s.render_element(output_name, camera, zoom, output_scale, warp))
+        .filter_map(|s| s.render_element(output_name, camera, zoom, output_scale, warp, burn))
         .collect()
 }
 

@@ -104,6 +104,11 @@ pub fn install(f: &mut Fixture, mut renderer: GlesRenderer) {
         "the cursor smear shader compiled"
     );
     state.render.warp_program = warp;
+    state.render.burn_program = crate::render::compile_burn_program(&mut renderer);
+    assert!(
+        state.render.burn_program.is_some(),
+        "the close effect program compiled"
+    );
     state.render.corner_clip_shader = corner_clip;
     state.backend = Some(Backend::Udev(Box::new(renderer)));
 }

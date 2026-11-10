@@ -14,6 +14,7 @@
 )]
 pub mod app_icon;
 pub mod canvas;
+pub mod close_effect;
 pub mod config;
 pub mod cursor_blur;
 pub mod desktop_entry;

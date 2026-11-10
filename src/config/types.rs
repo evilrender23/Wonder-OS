@@ -6,6 +6,8 @@ use smithay::backend::input::AxisSource;
 use smithay::input::keyboard::{Keysym, ModifiersState};
 use smithay::utils::Transform;
 
+pub use crate::close_effect::{CloseEffect, CloseStyle};
+
 pub const BTN_LEFT: u32 = 0x110;
 pub const BTN_RIGHT: u32 = 0x111;
 pub const BTN_MIDDLE: u32 = 0x112;
@@ -1116,6 +1118,8 @@ pub struct EffectsConfig {
     pub wobbly: WobblyConfig,
     /// Genie animation into and out of the dock: `[effects.magic_lamp]`.
     pub magic_lamp: MagicLampConfig,
+    /// How a closed window leaves the screen: `[effects.close_animation]`.
+    pub close_animation: CloseAnimationConfig,
 }
 
 impl Default for EffectsConfig {
@@ -1131,6 +1135,7 @@ impl Default for EffectsConfig {
             cursor_blur: CursorBlurConfig::default(),
             wobbly: WobblyConfig::default(),
             magic_lamp: MagicLampConfig::default(),
+            close_animation: CloseAnimationConfig::default(),
         }
     }
 }
@@ -1204,6 +1209,27 @@ impl Default for MagicLampConfig {
         Self {
             enabled: true,
             duration_ms: 380.0,
+        }
+    }
+}
+
+/// The animation a closed window leaves with, after the Burn My Windows
+/// extension: the plain fade, one of the shader effects, or a different one
+/// each time.
+#[derive(Clone, Debug, PartialEq)]
+pub struct CloseAnimationConfig {
+    pub style: CloseStyle,
+    /// Base length of a shader effect, in milliseconds; each effect scales
+    /// it to its own pace. The fade ignores it and follows
+    /// `animation_speed` like every other window animation.
+    pub duration_ms: f64,
+}
+
+impl Default for CloseAnimationConfig {
+    fn default() -> Self {
+        Self {
+            style: CloseStyle::Effect(CloseEffect::Fade),
+            duration_ms: 500.0,
         }
     }
 }

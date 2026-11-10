@@ -20,6 +20,8 @@ pub struct RenderCache {
     pub cursor_smear_shader: Option<GlesTexProgram>,
     /// Mesh program of the warp renderer (wobbly windows, magic lamp).
     pub warp_program: Option<crate::render::warp::WarpProgram>,
+    /// Mesh program of the close effects (`[effects.close_animation]`).
+    pub burn_program: Option<crate::render::warp::WarpProgram>,
     pub corner_clip_shader: Option<GlesTexProgram>,
     pub background_shader: Option<GlesPixelProgram>,
     /// `u_time` is referenced — drives per-frame redraws.
@@ -100,6 +102,7 @@ impl RenderCache {
             text_caret_shader: None,
             cursor_smear_shader: None,
             warp_program: None,
+            burn_program: None,
             corner_clip_shader: None,
             background_shader: None,
             background_is_animated: false,

@@ -66,6 +66,14 @@ pub(super) struct EffectsFileConfig {
     pub cursor_blur: CursorBlurFileConfig,
     pub wobbly: WobblyFileConfig,
     pub magic_lamp: MagicLampFileConfig,
+    pub close_animation: CloseAnimationFileConfig,
+}
+
+#[derive(Serialize, Deserialize, Default)]
+#[serde(default, deny_unknown_fields)]
+pub(super) struct CloseAnimationFileConfig {
+    pub style: Option<String>,
+    pub duration_ms: Option<f64>,
 }
 
 #[derive(Serialize, Deserialize, Default)]

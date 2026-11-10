@@ -288,6 +288,17 @@ const pages = [
                     s("effects.magic_lamp.enabled", "bool", "Lámpara mágica al minimizar"),
                     s("effects.magic_lamp.duration_ms", "int", "Duración", "", { min: 50, max: 2000, step: 10, unit: "ms" })
                 ]
+            },
+            {
+                title: "Animación al cerrar",
+                note: "Cómo desaparece una ventana al cerrarla, al estilo de Burn My Windows. Minimizar conserva su propia animación.",
+                items: [
+                    s("effects.close_animation.style", "choice", "Efecto", "«Aleatorio» elige uno distinto para cada ventana.",
+                      { options: [["fade", "Desvanecer"], ["fire", "Fuego"], ["incinerate", "Incinerar"], ["tv", "Televisor antiguo"],
+                                  ["glide", "Deslizar"], ["pixelate", "Pixelar"], ["hexagon", "Hexágonos"], ["energize", "Teletransporte"],
+                                  ["matrix", "Matrix"], ["doom", "Derretir (Doom)"], ["apparition", "Aparición"], ["random", "Aleatorio"]] }),
+                    s("effects.close_animation.duration_ms", "int", "Duración", "Duración base; el fuego dura algo más y el televisor algo menos. No afecta a «Desvanecer».", { min: 100, max: 3000, step: 10, unit: "ms" })
+                ]
             }
         ]
     },

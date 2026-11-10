@@ -834,6 +834,36 @@ Default: `380`
 
 50–2000: length of the animation
 
+## `[effects.close_animation]`
+
+### `style`
+
+Default: `"fade"`
+
+How a closed window leaves the screen, after the Burn My Windows extension. "fade" is the plain shrink-and-fade; the others are:
+
+```text
+"fire"        burns away from the bottom up
+"incinerate"  a scorch spreads from a point on the border
+"tv"          an old television switching off
+"glide"       tilts back and slides away
+"pixelate"    breaks into blocks that drop out
+"hexagon"     splits into glowing hexagonal tiles
+"energize"    beamed up in streaks of light
+"matrix"      rained away by columns of green glyphs
+"doom"        the Doom screen melt
+"apparition"  twisted into a vortex
+"random"      a different one of those for every window
+```
+
+Minimizing keeps its own animation ([effects.magic_lamp]), and [effects] animation_speed = 1 makes closing instant whatever is set here.
+
+### `duration_ms`
+
+Default: `500`
+
+100–3000: base length; fire runs a little longer than this, the television shorter
+
 ## `[background]`
 
 ### `type`

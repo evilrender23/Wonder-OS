@@ -51,7 +51,7 @@ pub use shaders::{
 };
 pub use text_caret::compile_text_caret_shader;
 pub use tile_chunks::BgChunkCache;
-pub use warp::compile_warp_program;
+pub use warp::{compile_burn_program, compile_warp_program};
 
 #[cfg(test)]
 pub(crate) use capture::render_elements_to_rgba;
@@ -1780,6 +1780,7 @@ pub fn compose_frame(
             zoom,
             output_scale,
             state.render.warp_program.as_ref(),
+            state.render.burn_program.as_ref(),
         );
         // Collected before the per-fade mutable borrows of `state` below.
         // `focused`/`launching` are the values frozen at fade creation, never a

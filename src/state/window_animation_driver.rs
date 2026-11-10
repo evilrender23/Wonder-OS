@@ -810,6 +810,10 @@ impl DriftWm {
                 snapshot.finish_lamp();
             }
             snapshot.tick_lamp(dt.as_secs_f64());
+            if speed >= 1.0 {
+                snapshot.finish_burn();
+            }
+            snapshot.tick_burn(dt.as_secs_f64());
         }
         // A window handed back by the lamp starts being drawn live: whatever
         // is cached about what sits behind frosted windows there is stale.
@@ -1378,7 +1382,18 @@ impl DriftWm {
             )
         };
         self.backend = Some(backend);
-        if let Some(snapshot) = snapshot {
+        if let Some(mut snapshot) = snapshot {
+            // A minimize calls `fly_to`/`pour_to` right after this, which
+            // takes the effect back off: it is for windows that are closing.
+            let effects = &self.config.effects;
+            if !alpha_only && effects.animation_speed < 1.0 {
+                let roll = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map_or(0, |d| d.subsec_nanos());
+                let effect = effects.close_animation.style.resolve(roll);
+                let duration = effects.close_animation.duration_ms / 1000.0;
+                snapshot.burn_with(effect, duration * effect.duration_factor(), roll);
+            }
             self.closing_snapshots.push(snapshot);
         }
     }

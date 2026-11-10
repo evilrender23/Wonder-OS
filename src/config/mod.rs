@@ -1701,7 +1701,48 @@ mod tests {
         assert!(fx.wobbly.exclude.is_empty());
         assert!(fx.magic_lamp.enabled);
         assert_eq!(fx.magic_lamp.duration_ms, 380.0);
+        assert_eq!(
+            fx.close_animation.style,
+            CloseStyle::Effect(CloseEffect::Fade)
+        );
+        assert_eq!(fx.close_animation.duration_ms, 500.0);
         assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn the_close_animation_reads_every_style() {
+        for name in CloseStyle::names() {
+            let (config, warnings) = Config::from_toml_collect(&format!(
+                "[effects.close_animation]\nstyle = \"{name}\"\nduration_ms = 800\n"
+            ))
+            .unwrap();
+            let close = &config.effects.close_animation;
+            assert_eq!(close.style.name(), name);
+            assert_eq!(close.duration_ms, 800.0);
+            assert!(warnings.is_empty(), "{warnings:?}");
+        }
+    }
+
+    #[test]
+    fn an_unknown_close_style_falls_back_and_says_so() {
+        let (config, warnings) = Config::from_toml_collect(
+            "[effects.close_animation]\nstyle = \"explode\"\nduration_ms = 9\n",
+        )
+        .unwrap();
+        let close = &config.effects.close_animation;
+        assert_eq!(close.style, CloseStyle::Effect(CloseEffect::Fade));
+        assert_eq!(close.duration_ms, 100.0);
+        assert!(
+            warnings
+                .iter()
+                .any(|w| w.contains("close_animation.style") && w.contains("incinerate")),
+            "{warnings:?}"
+        );
+        assert!(
+            warnings
+                .iter()
+                .any(|w| w.contains("close_animation.duration_ms"))
+        );
     }
 
     #[test]
