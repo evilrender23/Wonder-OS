@@ -42,7 +42,9 @@ Use `RUST_LOG=debug cargo run` for smithay/libinput event traces.
 
 ### Matching CI before you push
 
-`.github/workflows/ci.yml` is the source of truth. It runs, in order:
+`.github/workflows/ci.yml` runs only `cargo fmt --check` and clippy (plus the
+wonderterm checks). The tests no longer run in CI, so run the whole list
+yourself before pushing, in order:
 
 ```bash
 cargo fmt --check
