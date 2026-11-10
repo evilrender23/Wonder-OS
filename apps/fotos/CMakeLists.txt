@@ -8,13 +8,14 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Multimedia Svg DBus Concurrent)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Multimedia Svg DBus Concurrent LinguistTools)
 find_package(PkgConfig REQUIRED)
 # Reads the date, the camera and the orientation of a picture, and writes the
 # orientation back without touching its pixels.
 pkg_check_modules(EXIV2 REQUIRED IMPORTED_TARGET exiv2>=0.28)
 
-qt_standard_project_setup(REQUIRES 6.8)
+# The texts are written in Spanish; English is the one translation.
+qt_standard_project_setup(REQUIRES 6.8 I18N_SOURCE_LANGUAGE es I18N_TRANSLATED_LANGUAGES en)
 include(GNUInstallDirs)
 
 # What the tests build too: everything but the window.
@@ -59,6 +60,12 @@ target_include_directories(wonderland-fotos PRIVATE src)
 target_compile_definitions(wonderland-fotos PRIVATE FOTOS_VERSION="${PROJECT_VERSION}")
 target_link_libraries(wonderland-fotos PRIVATE ${core_libs}
     Qt6::Quick Qt6::QuickControls2 Qt6::QuickDialogs2 Qt6::Multimedia Qt6::Svg Qt6::DBus)
+
+qt_add_translations(wonderland-fotos
+    TS_FILES i18n/wonderland-fotos_en.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -locations none -no-obsolete
+)
 
 install(TARGETS wonderland-fotos RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES wonderland-fotos.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)

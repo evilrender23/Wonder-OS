@@ -76,7 +76,7 @@ GridView {
             width: parent.width - 20
             anchors.top: cover.bottom
             anchors.topMargin: 23
-            text: card.modelData.count === 1 ? "1 elemento" : card.modelData.count + " elementos"
+            text: card.modelData.count === 1 ? qsTr("1 elemento") : qsTr("%1 elementos").arg(card.modelData.count)
             color: Theme.dim
             font.pixelSize: 12
         }

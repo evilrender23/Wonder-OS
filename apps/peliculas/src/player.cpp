@@ -5,6 +5,7 @@
 #include "store.h"
 
 #include <QAudioOutput>
+#include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
@@ -21,7 +22,7 @@ static QString trackLabel(const QMediaMetaData &meta, int number)
     QString label = Media::languageName(meta.value(QMediaMetaData::Language).value<QLocale::Language>());
     const QString title = meta.stringValue(QMediaMetaData::Title);
     if (label.isEmpty()) {
-        label = title.isEmpty() ? QStringLiteral("Pista %1").arg(number) : title;
+        label = title.isEmpty() ? QCoreApplication::translate("Player", "Pista %1").arg(number) : title;
     } else if (!title.isEmpty() && title.compare(label, Qt::CaseInsensitive) != 0) {
         label += QStringLiteral(" — ") + title;
     }
@@ -79,12 +80,12 @@ Player::Player(Store *store, History *history, bool silent, QObject *parent)
                 load(m_playlist->currentPath());
             }
         } else if (status == QMediaPlayer::InvalidMedia) {
-            Q_EMIT failed(QStringLiteral("No se puede reproducir «%1».").arg(title()));
+            Q_EMIT failed(tr("No se puede reproducir «%1».").arg(title()));
         }
     });
     connect(m_media, &QMediaPlayer::errorOccurred, this, [this](QMediaPlayer::Error error, const QString &) {
         if (error != QMediaPlayer::NoError && hasMedia()) {
-            Q_EMIT failed(QStringLiteral("No se puede reproducir «%1».").arg(title()));
+            Q_EMIT failed(tr("No se puede reproducir «%1».").arg(title()));
         }
     });
 
@@ -237,7 +238,7 @@ void Player::load(const QString &path)
         m_media->setSource(QUrl());
         refreshTracks();
         Q_EMIT currentChanged();
-        Q_EMIT failed(QStringLiteral("No se encuentra «%1».").arg(title()));
+        Q_EMIT failed(tr("No se encuentra «%1».").arg(title()));
         return;
     }
     m_resumeAt = m_history->resume(path);
@@ -364,7 +365,7 @@ void Player::refreshTracks()
         for (int i = 0; i < audio.size(); ++i) {
             m_audioTracks << QVariantMap{{QStringLiteral("index"), i}, {QStringLiteral("label"), trackLabel(audio.at(i), i + 1)}};
         }
-        m_subtitleChoices << QVariantMap{{QStringLiteral("key"), QString()}, {QStringLiteral("label"), QStringLiteral("Desactivados")}};
+        m_subtitleChoices << QVariantMap{{QStringLiteral("key"), QString()}, {QStringLiteral("label"), tr("Desactivados")}};
         const QList<QMediaMetaData> inside = m_media->subtitleTracks();
         for (int i = 0; i < inside.size(); ++i) {
             m_subtitleChoices << QVariantMap{{QStringLiteral("key"), QStringLiteral("t:%1").arg(i)}, {QStringLiteral("label"), trackLabel(inside.at(i), i + 1)}};
@@ -395,7 +396,7 @@ void Player::setSubtitle(const QString &key)
         if (m_subtitles.load(key.mid(2))) {
             m_subtitle = key;
         } else {
-            Q_EMIT failed(QStringLiteral("No se pueden leer esos subtítulos."));
+            Q_EMIT failed(tr("No se pueden leer esos subtítulos."));
         }
     }
     m_media->setActiveSubtitleTrack(inside);

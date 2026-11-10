@@ -8,9 +8,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Svg DBus)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Svg DBus LinguistTools)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.8 I18N_SOURCE_LANGUAGE es I18N_TRANSLATED_LANGUAGES en)
 include(GNUInstallDirs)
 
 # What the tests build too: everything but the window.
@@ -53,6 +53,13 @@ target_include_directories(wonderland-calendario PRIVATE src)
 target_compile_definitions(wonderland-calendario PRIVATE CALENDARIO_VERSION="${PROJECT_VERSION}")
 target_link_libraries(wonderland-calendario PRIVATE ${core_libs}
     Qt6::Quick Qt6::QuickControls2 Qt6::QuickDialogs2 Qt6::Svg Qt6::DBus)
+
+# The texts are written in Spanish; English is the translation.
+qt_add_translations(wonderland-calendario
+    TS_FILES i18n/wonderland-calendario_en.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -locations none -no-obsolete
+)
 
 install(TARGETS wonderland-calendario RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES wonderland-calendario.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)

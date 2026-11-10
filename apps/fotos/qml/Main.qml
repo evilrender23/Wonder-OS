@@ -26,7 +26,7 @@ ApplicationWindow {
     minimumWidth: 720
     minimumHeight: 440
     visible: true
-    title: viewer.visible && viewer.item.name ? viewer.item.name + " — Fotos" : "Fotos"
+    title: viewer.visible && viewer.item.name ? qsTr("%1 — Fotos").arg(viewer.item.name) : qsTr("Fotos")
     color: App.glass ? "transparent" : Theme.window
 
     onClosing: {
@@ -72,15 +72,15 @@ ApplicationWindow {
     }
     readonly property string heading: {
         switch (route.page) {
-        case "favorites": return "Favoritos"
-        case "videos": return "Vídeos"
-        case "screenshots": return "Capturas de pantalla"
-        case "folders": return "Carpetas"
-        case "albums": return "Álbumes"
+        case "favorites": return qsTr("Favoritos")
+        case "videos": return qsTr("Vídeos")
+        case "screenshots": return qsTr("Capturas de pantalla")
+        case "folders": return qsTr("Carpetas")
+        case "albums": return qsTr("Álbumes")
         case "folder": return App.library.revision >= 0 ? App.library.placeName(route.key) : ""
         case "album": return App.albums.revision >= 0 ? App.albums.name(route.key) : ""
         }
-        return "Fototeca"
+        return qsTr("Fototeca")
     }
     readonly property var folderCards: App.library.places.map(place => ({ key: place.path, name: place.name, count: place.count, cover: place.cover, stamp: place.coverStamp }))
     readonly property var albumCards: App.albums.list.map(album => ({ key: album.id, name: album.name, count: album.count, cover: album.cover, stamp: "a" + epoch }))
@@ -124,38 +124,38 @@ ApplicationWindow {
         if (paths.length === 0)
             return
         const one = paths.length === 1
-        confirm.ask(one ? "¿Mover «" + paths[0].split("/").pop() + "» a la papelera?" : "¿Mover " + paths.length + " elementos a la papelera?",
-                    one ? "Se quitará de la biblioteca y de tus álbumes. Podrás recuperarlo desde la papelera." : "Se quitarán de la biblioteca y de tus álbumes. Podrás recuperarlos desde la papelera.", "Mover a la papelera", () => {
+        confirm.ask(one ? qsTr("¿Mover «%1» a la papelera?").arg(paths[0].split("/").pop()) : qsTr("¿Mover %1 elementos a la papelera?").arg(paths.length),
+                    one ? qsTr("Se quitará de la biblioteca y de tus álbumes. Podrás recuperarlo desde la papelera.") : qsTr("Se quitarán de la biblioteca y de tus álbumes. Podrás recuperarlos desde la papelera."), qsTr("Mover a la papelera"), () => {
             const gone = App.trash(paths)
             if (gone > 0) {
                 viewer.dropped(paths)
                 choose(paths, false)
-                toast.say(gone === 1 ? "Movido a la papelera." : gone + " elementos movidos a la papelera.")
+                toast.say(gone === 1 ? qsTr("Movido a la papelera.") : qsTr("%1 elementos movidos a la papelera.").arg(gone))
             }
         })
     }
     function copy(paths) {
         App.copy(paths)
-        toast.say(paths.length === 1 ? "Copiado." : paths.length + " elementos copiados.")
+        toast.say(paths.length === 1 ? qsTr("Copiado.") : qsTr("%1 elementos copiados.").arg(paths.length))
     }
     function addTo(id, paths) {
         const added = App.albums.add(id, paths)
         const name = App.albums.name(id)
-        toast.say(added === 0 ? "Ya estaba en «" + name + "»." : (added === 1 ? "Añadido a «" + name + "»." : added + " elementos añadidos a «" + name + "»."))
+        toast.say(added === 0 ? qsTr("Ya estaba en «%1».").arg(name) : (added === 1 ? qsTr("Añadido a «%1».").arg(name) : qsTr("%1 elementos añadidos a «%2».").arg(added).arg(name)))
     }
     property var pendingPaths: []
     property string renaming
     function newAlbum(paths) {
         pendingPaths = paths
         renaming = ""
-        nameDialog.ask("Nuevo álbum", "", "Crear")
+        nameDialog.ask(qsTr("Nuevo álbum"), "", qsTr("Crear"))
     }
     function renameAlbum(id) {
         renaming = id
-        nameDialog.ask("Renombrar álbum", App.albums.name(id), "Renombrar")
+        nameDialog.ask(qsTr("Renombrar álbum"), App.albums.name(id), qsTr("Renombrar"))
     }
     function deleteAlbum(id) {
-        confirm.ask("¿Eliminar el álbum «" + App.albums.name(id) + "»?", "Sus fotos y vídeos siguen en la biblioteca.", "Eliminar", () => App.albums.remove(id))
+        confirm.ask(qsTr("¿Eliminar el álbum «%1»?").arg(App.albums.name(id)), qsTr("Sus fotos y vídeos siguen en la biblioteca."), qsTr("Eliminar"), () => App.albums.remove(id))
     }
     function openAt(index) {
         viewer.show(grid.photos.paths, index)
@@ -268,7 +268,7 @@ ApplicationWindow {
 
     FolderDialog {
         id: folderDialog
-        title: "Añadir carpeta a la biblioteca"
+        title: qsTr("Añadir carpeta a la biblioteca")
         onAccepted: App.library.addFolder(selectedFolder)
     }
     NameDialog {
@@ -280,7 +280,7 @@ ApplicationWindow {
                 const paths = win.pendingPaths
                 const id = App.albums.create(name, paths)
                 if (paths.length > 0)
-                    toast.say(paths.length === 1 ? "Añadido a «" + name + "»." : paths.length + " elementos añadidos a «" + name + "».")
+                    toast.say(paths.length === 1 ? qsTr("Añadido a «%1».").arg(name) : qsTr("%1 elementos añadidos a «%2».").arg(paths.length).arg(name))
                 else
                     win.visit("album", id)
             }
@@ -301,19 +301,19 @@ ApplicationWindow {
             popup()
         }
         FMenuItem {
-            text: "Abrir"
+            text: qsTr("Abrir")
             visible: photoMenu.single && !viewer.visible
             onTriggered: win.openAt(grid.photos.indexOf(photoMenu.paths[0]))
         }
         FMenuItem {
-            text: photoMenu.loved ? "Quitar de favoritos" : "Añadir a favoritos"
+            text: photoMenu.loved ? qsTr("Quitar de favoritos") : qsTr("Añadir a favoritos")
             onTriggered: App.albums.setFavorite(photoMenu.paths, !photoMenu.loved)
         }
         FMenu {
             id: addMenu
-            title: "Añadir al álbum"
+            title: qsTr("Añadir al álbum")
             FMenuItem {
-                text: "Nuevo álbum…"
+                text: qsTr("Nuevo álbum…")
                 onTriggered: win.newAlbum(photoMenu.paths)
             }
             FSeparator {
@@ -331,7 +331,7 @@ ApplicationWindow {
             }
         }
         FMenuItem {
-            text: "Quitar de este álbum"
+            text: qsTr("Quitar de este álbum")
             visible: win.route.page === "album" && !viewer.visible
             onTriggered: {
                 App.albums.take(win.route.key, photoMenu.paths)
@@ -340,27 +340,27 @@ ApplicationWindow {
         }
         FSeparator {}
         FMenuItem {
-            text: "Girar a la derecha"
+            text: qsTr("Girar a la derecha")
             visible: photoMenu.single && win.epoch >= 0 && App.canRotate(photoMenu.paths[0] ?? "")
             onTriggered: App.rotate(photoMenu.paths[0], true)
         }
         FMenuItem {
-            text: "Girar a la izquierda"
+            text: qsTr("Girar a la izquierda")
             visible: photoMenu.single && win.epoch >= 0 && App.canRotate(photoMenu.paths[0] ?? "")
             onTriggered: App.rotate(photoMenu.paths[0], false)
         }
         FMenuItem {
-            text: "Copiar"
+            text: qsTr("Copiar")
             onTriggered: win.copy(photoMenu.paths)
         }
         FMenuItem {
-            text: "Mostrar en Archivos"
+            text: qsTr("Mostrar en Archivos")
             visible: photoMenu.single
             onTriggered: App.reveal(photoMenu.paths[0])
         }
         FSeparator {}
         FMenuItem {
-            text: "Mover a la papelera"
+            text: qsTr("Mover a la papelera")
             onTriggered: win.trash(photoMenu.paths)
         }
     }
@@ -372,11 +372,11 @@ ApplicationWindow {
             popup()
         }
         FMenuItem {
-            text: "Renombrar…"
+            text: qsTr("Renombrar…")
             onTriggered: win.renameAlbum(albumMenu.albumId)
         }
         FMenuItem {
-            text: "Eliminar álbum"
+            text: qsTr("Eliminar álbum")
             onTriggered: win.deleteAlbum(albumMenu.albumId)
         }
     }
@@ -388,18 +388,18 @@ ApplicationWindow {
             popup()
         }
         FMenuItem {
-            text: "Mostrar en Archivos"
+            text: qsTr("Mostrar en Archivos")
             onTriggered: App.reveal(folderMenu.folder)
         }
     }
     FMenu {
         id: libraryMenu
         FMenuItem {
-            text: "Añadir carpeta…"
+            text: qsTr("Añadir carpeta…")
             onTriggered: folderDialog.open()
         }
         FMenuItem {
-            text: "Volver a leer la biblioteca"
+            text: qsTr("Volver a leer la biblioteca")
             onTriggered: App.library.rescan()
         }
         FSeparator {
@@ -409,7 +409,7 @@ ApplicationWindow {
             model: App.library.folders
             delegate: FMenuItem {
                 required property string modelData
-                text: "Quitar «" + modelData.split("/").pop() + "»"
+                text: qsTr("Quitar «%1»").arg(modelData.split("/").pop())
                 onTriggered: App.library.removeFolder(modelData)
             }
             onObjectAdded: (index, object) => libraryMenu.insertItem(index + 3, object)
@@ -449,7 +449,7 @@ ApplicationWindow {
                 x: 12
                 y: 12
                 width: parent.width - 24
-                placeholderText: "Buscar"
+                placeholderText: qsTr("Buscar")
                 placeholderTextColor: Theme.faint
                 color: Theme.text
                 font.pixelSize: 13
@@ -512,37 +512,37 @@ ApplicationWindow {
                     }
 
                     Label {
-                        text: "Biblioteca"
+                        text: qsTr("Biblioteca")
                         topPadding: 2
                     }
                     SideItem {
                         symbol: "images"
-                        text: "Fototeca"
+                        text: qsTr("Fototeca")
                         selected: win.route.page === "library"
                         onClicked: win.visit("library")
                         onMenuRequested: libraryMenu.popup()
                     }
                     SideItem {
                         symbol: "heart"
-                        text: "Favoritos"
+                        text: qsTr("Favoritos")
                         selected: win.route.page === "favorites"
                         onClicked: win.visit("favorites")
                     }
                     SideItem {
                         symbol: "film"
-                        text: "Vídeos"
+                        text: qsTr("Vídeos")
                         selected: win.route.page === "videos"
                         onClicked: win.visit("videos")
                     }
                     SideItem {
                         symbol: "monitor"
-                        text: "Capturas de pantalla"
+                        text: qsTr("Capturas de pantalla")
                         selected: win.route.page === "screenshots"
                         onClicked: win.visit("screenshots")
                     }
                     SideItem {
                         symbol: "folder"
-                        text: "Carpetas"
+                        text: qsTr("Carpetas")
                         selected: win.route.page === "folders" || win.route.page === "folder"
                         onClicked: win.visit("folders")
                         onMenuRequested: libraryMenu.popup()
@@ -553,7 +553,7 @@ ApplicationWindow {
                         height: albumsLabel.height
                         Label {
                             id: albumsLabel
-                            text: "Álbumes"
+                            text: qsTr("Álbumes")
                         }
                         TButton {
                             anchors.right: parent.right
@@ -569,7 +569,7 @@ ApplicationWindow {
                     }
                     SideItem {
                         symbol: "images"
-                        text: "Todos los álbumes"
+                        text: qsTr("Todos los álbumes")
                         selected: win.route.page === "albums"
                         onClicked: win.visit("albums")
                     }
@@ -596,7 +596,7 @@ ApplicationWindow {
                     x: 17
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - 60
-                    text: App.library.scanning ? "Leyendo la biblioteca…" : App.counted(App.library.photoCount, App.library.videoCount)
+                    text: App.library.scanning ? qsTr("Leyendo la biblioteca…") : App.counted(App.library.photoCount, App.library.videoCount)
                     visible: App.library.scanning || !win.empty
                     color: Theme.dim
                     font.pixelSize: 11
@@ -652,11 +652,11 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             text: {
                                 if (win.selectedPaths.length > 0)
-                                    return win.selectedPaths.length === 1 ? "1 seleccionado" : win.selectedPaths.length + " seleccionados"
+                                    return win.selectedPaths.length === 1 ? qsTr("1 seleccionado") : qsTr("%1 seleccionados").arg(win.selectedPaths.length)
                                 if (win.route.page === "folders")
-                                    return win.folderCards.length === 1 ? "1 carpeta" : win.folderCards.length + " carpetas"
+                                    return win.folderCards.length === 1 ? qsTr("1 carpeta") : qsTr("%1 carpetas").arg(win.folderCards.length)
                                 if (win.route.page === "albums")
-                                    return win.albumCards.length === 1 ? "1 álbum" : win.albumCards.length + " álbumes"
+                                    return win.albumCards.length === 1 ? qsTr("1 álbum") : qsTr("%1 álbumes").arg(win.albumCards.length)
                                 return grid.photos.count > 0 ? App.counted(grid.photos.photoCount, grid.photos.videoCount) : ""
                             }
                             color: win.selectedPaths.length > 0 ? Theme.tint : Theme.dim
@@ -708,7 +708,7 @@ ApplicationWindow {
                                 x: 2
                                 y: 2
                                 Repeater {
-                                    model: [{ key: "year", text: "Años" }, { key: "month", text: "Meses" }, { key: "day", text: "Días" }, { key: "none", text: "Todo" }]
+                                    model: [{ key: "year", text: qsTr("Años") }, { key: "month", text: qsTr("Meses") }, { key: "day", text: qsTr("Días") }, { key: "none", text: qsTr("Todo") }]
                                     delegate: Rectangle {
                                         required property var modelData
                                         readonly property bool on: win.grouping === modelData.key
@@ -816,19 +816,19 @@ ApplicationWindow {
                             font.weight: Font.DemiBold
                             text: {
                                 if (parent.reading)
-                                    return "Leyendo la biblioteca…"
+                                    return qsTr("Leyendo la biblioteca…")
                                 if (search.text !== "")
-                                    return "Sin resultados para «" + search.text + "»"
+                                    return qsTr("Sin resultados para «%1»").arg(search.text)
                                 if (parent.wantsFolder)
-                                    return "Tu biblioteca está vacía"
+                                    return qsTr("Tu biblioteca está vacía")
                                 switch (win.route.page) {
-                                case "favorites": return "Aún no hay favoritos"
-                                case "videos": return "No hay vídeos"
-                                case "screenshots": return "No hay capturas de pantalla"
-                                case "albums": return "Aún no hay álbumes"
-                                case "album": return "Este álbum está vacío"
+                                case "favorites": return qsTr("Aún no hay favoritos")
+                                case "videos": return qsTr("No hay vídeos")
+                                case "screenshots": return qsTr("No hay capturas de pantalla")
+                                case "albums": return qsTr("Aún no hay álbumes")
+                                case "album": return qsTr("Este álbum está vacío")
                                 }
-                                return "No hay nada aquí"
+                                return qsTr("No hay nada aquí")
                             }
                         }
                         Text {
@@ -842,11 +842,11 @@ ApplicationWindow {
                                 if (parent.reading || search.text !== "")
                                     return ""
                                 if (parent.wantsFolder)
-                                    return App.library.folders.length === 0 ? "Añade una carpeta con tus fotos y vídeos." : "No hay fotos ni vídeos en " + App.library.folders.map(folder => "«" + folder.split("/").pop() + "»").join(", ") + "."
+                                    return App.library.folders.length === 0 ? qsTr("Añade una carpeta con tus fotos y vídeos.") : qsTr("No hay fotos ni vídeos en %1.").arg(App.library.folders.map(folder => qsTr("«%1»").arg(folder.split("/").pop())).join(", "))
                                 switch (win.route.page) {
-                                case "favorites": return "Marca una foto con el corazón y aparecerá aquí."
-                                case "albums": return "Reúne fotos y vídeos sin moverlos de su carpeta."
-                                case "album": return "Elige fotos en la fototeca y añádelas desde su menú."
+                                case "favorites": return qsTr("Marca una foto con el corazón y aparecerá aquí.")
+                                case "albums": return qsTr("Reúne fotos y vídeos sin moverlos de su carpeta.")
+                                case "album": return qsTr("Elige fotos en la fototeca y añádelas desde su menú.")
                                 }
                                 return ""
                             }
@@ -855,7 +855,7 @@ ApplicationWindow {
                             anchors.horizontalCenter: parent.horizontalCenter
                             visible: !parent.reading && search.text === "" && (parent.wantsFolder || win.route.page === "albums")
                             symbol: win.route.page === "albums" ? "plus" : "folder-plus"
-                            text: win.route.page === "albums" ? "Nuevo álbum" : "Añadir carpeta…"
+                            text: win.route.page === "albums" ? qsTr("Nuevo álbum") : qsTr("Añadir carpeta…")
                             onClicked: {
                                 if (win.route.page === "albums")
                                     win.newAlbum([])

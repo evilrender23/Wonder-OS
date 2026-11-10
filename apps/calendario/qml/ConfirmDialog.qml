@@ -52,7 +52,7 @@ Popup {
             anchors.right: parent.right
             spacing: 8
             DialogButton {
-                text: "Cancelar"
+                text: qsTr("Cancelar")
                 onClicked: dialog.close()
             }
             DialogButton {

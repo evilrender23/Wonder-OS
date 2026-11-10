@@ -107,13 +107,13 @@ void App::open(const QList<QUrl> &urls)
         const int read = info.isFile() ? m_agenda->importFile(info.absoluteFilePath()) : -1;
         const QString into = m_agenda->calendar(m_agenda->defaultCalendar()).value(QStringLiteral("name")).toString();
         if (read < 0) {
-            Q_EMIT said(QStringLiteral("«%1» no es un calendario que se pueda leer.").arg(info.fileName()));
+            Q_EMIT said(tr("«%1» no es un calendario que se pueda leer.").arg(info.fileName()));
         } else if (read == 0) {
-            Q_EMIT said(QStringLiteral("«%1» no tiene eventos.").arg(info.fileName()));
+            Q_EMIT said(tr("«%1» no tiene eventos.").arg(info.fileName()));
         } else if (read == 1) {
-            Q_EMIT said(QStringLiteral("1 evento añadido a «%1».").arg(into));
+            Q_EMIT said(tr("1 evento añadido a «%1».").arg(into));
         } else {
-            Q_EMIT said(QStringLiteral("%L1 eventos añadidos a «%2».").arg(read).arg(into));
+            Q_EMIT said(tr("%L1 eventos añadidos a «%2».").arg(read).arg(into));
         }
     }
 }
@@ -157,19 +157,21 @@ void App::remind()
     const QDate today = now.date();
     for (const Notice &notice : notices) {
         const QDate day = notice.start.date();
-        QString when = day == today ? QStringLiteral("Hoy")
-            : day == today.addDays(1) ? QStringLiteral("Mañana")
-            : QStringLiteral("El ") + Dates::medium(day, today);
+        QString when = day == today ? tr("Hoy")
+            : day == today.addDays(1) ? tr("Mañana")
+            //: A day, as in «El 12 de noviembre».
+            : tr("El %1").arg(Dates::medium(day, today));
         if (!notice.allDay) {
             const int minute = notice.start.time().hour() * 60 + notice.start.time().minute();
-            when += (minute / 60 == 1 ? QStringLiteral(" a la ") : QStringLiteral(" a las ")) + Agenda::clock(minute);
+            //: A day and a time, as in «Hoy a la 1:30» and «Hoy a las 9:30».
+            when = (minute / 60 == 1 ? tr("%1 a la %2") : tr("%1 a las %2")).arg(when, Agenda::clock(minute));
         }
         if (!notice.location.isEmpty()) {
             when += QStringLiteral(" · ") + notice.location;
         }
         QDBusMessage call = QDBusMessage::createMethodCall(QStringLiteral("org.freedesktop.Notifications"), QStringLiteral("/org/freedesktop/Notifications"),
                                                            QStringLiteral("org.freedesktop.Notifications"), QStringLiteral("Notify"));
-        call << QStringLiteral("Calendario") << uint(0) << QStringLiteral("wonderland-calendario") << notice.title << when << QStringList()
+        call << tr("Calendario") << uint(0) << QStringLiteral("wonderland-calendario") << notice.title << when << QStringList()
              << QVariantMap{{QStringLiteral("desktop-entry"), QStringLiteral("wonderland-calendario")}} << int(-1);
         QDBusConnection::sessionBus().asyncCall(call);
     }

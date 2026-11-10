@@ -13,12 +13,12 @@ static QString capitalized(QString text)
 static QString counted(int photos, int videos)
 {
     if (videos == 0) {
-        return photos == 1 ? QStringLiteral("1 foto") : QStringLiteral("%L1 fotos").arg(photos);
+        return photos == 1 ? PhotoModel::tr("1 foto") : PhotoModel::tr("%L1 fotos").arg(photos);
     }
     if (photos == 0) {
-        return videos == 1 ? QStringLiteral("1 vídeo") : QStringLiteral("%L1 vídeos").arg(videos);
+        return videos == 1 ? PhotoModel::tr("1 vídeo") : PhotoModel::tr("%L1 vídeos").arg(videos);
     }
-    return QStringLiteral("%L1 elementos").arg(photos + videos);
+    return PhotoModel::tr("%L1 elementos").arg(photos + videos);
 }
 
 PhotoModel::PhotoModel(QObject *parent)
@@ -115,14 +115,14 @@ void PhotoModel::setColumns(int columns)
 
 QString PhotoModel::title(const QDateTime &when, const QString &grouping)
 {
-    const QLocale locale(QLocale::Spanish, QLocale::Spain);
+    const QLocale locale = Media::locale();
     if (grouping == QLatin1String("year")) {
         return QString::number(when.date().year());
     }
     if (grouping == QLatin1String("day")) {
-        return locale.toString(when.date(), QStringLiteral("d 'de' MMMM 'de' yyyy"));
+        return locale.toString(when.date(), tr("d 'de' MMMM 'de' yyyy"));
     }
-    return capitalized(locale.toString(when.date(), QStringLiteral("MMMM 'de' yyyy")));
+    return capitalized(locale.toString(when.date(), tr("MMMM 'de' yyyy")));
 }
 
 bool PhotoModel::matches(const MediaItem &item, const QStringList &words, const QString &place)
@@ -131,8 +131,10 @@ bool PhotoModel::matches(const MediaItem &item, const QStringList &words, const 
         return true;
     }
     const QDateTime when = QDateTime::fromMSecsSinceEpoch(item.taken);
+    // What it is, in the words of the texts and, translated, in those on screen too.
     const QString hay = Media::fold(item.name() + QLatin1Char(' ') + place + QLatin1Char(' ') + item.camera + QLatin1Char(' ') + title(when, QStringLiteral("day"))
-                                    + (item.video ? QStringLiteral(" vídeo") : QStringLiteral(" foto")) + (item.screenshot ? QStringLiteral(" captura") : QString()));
+                                    + (item.video ? QStringLiteral(" vídeo") : QStringLiteral(" foto")) + (item.screenshot ? QStringLiteral(" captura") : QString())
+                                    + QLatin1Char(' ') + (item.video ? tr("vídeo") : tr("foto")) + (item.screenshot ? QLatin1Char(' ') + tr("captura") : QString()));
     for (const QString &word : words) {
         if (!hay.contains(word)) {
             return false;

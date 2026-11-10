@@ -8,9 +8,11 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QIcon>
+#include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <QTranslator>
 
 int main(int argc, char *argv[])
 {
@@ -22,15 +24,22 @@ int main(int argc, char *argv[])
     QGuiApplication::setDesktopFileName(QStringLiteral("wonderland-bluetooth"));
     QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/WonderlandBluetooth/wonderland-bluetooth.svg")));
 
+    // The texts are written in Spanish; any other language gets the English ones.
+    QTranslator translator;
+    if (QLocale().language() != QLocale::Spanish
+        && translator.load(QStringLiteral(":/i18n/wonderland-bluetooth_en.qm"))) {
+        QCoreApplication::installTranslator(&translator);
+    }
+
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("El gestor de Bluetooth de Wonder OS."));
+    parser.setApplicationDescription(QCoreApplication::translate("main", "El gestor de Bluetooth de Wonder OS."));
     parser.addHelpOption();
     parser.addVersionOption();
-    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QStringLiteral("auto (como el escritorio), light o dark."), QStringLiteral("modo"), QStringLiteral("auto"));
-    const QCommandLineOption demoOption(QStringLiteral("demo"), QStringLiteral("Un Bluetooth de mentira con dispositivos de ejemplo: no toca el del equipo."));
-    const QCommandLineOption shotOption(QStringLiteral("shot"), QStringLiteral("Guarda una imagen de la ventana en este archivo y sale (para pruebas)."), QStringLiteral("png"));
-    const QCommandLineOption doOption(QStringLiteral("do"), QStringLiteral("Con --shot: acciones previas, separadas por «;»."), QStringLiteral("acciones"));
-    const QCommandLineOption sizeOption(QStringLiteral("size"), QStringLiteral("Con --shot: el tamaño de la ventana, como ANCHOxALTO."), QStringLiteral("tamaño"));
+    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QCoreApplication::translate("main", "auto (como el escritorio), light o dark."), QCoreApplication::translate("main", "modo"), QStringLiteral("auto"));
+    const QCommandLineOption demoOption(QStringLiteral("demo"), QCoreApplication::translate("main", "Un Bluetooth de mentira con dispositivos de ejemplo: no toca el del equipo."));
+    const QCommandLineOption shotOption(QStringLiteral("shot"), QCoreApplication::translate("main", "Guarda una imagen de la ventana en este archivo y sale (para pruebas)."), QStringLiteral("png"));
+    const QCommandLineOption doOption(QStringLiteral("do"), QCoreApplication::translate("main", "Con --shot: acciones previas, separadas por «;»."), QCoreApplication::translate("main", "acciones"));
+    const QCommandLineOption sizeOption(QStringLiteral("size"), QCoreApplication::translate("main", "Con --shot: el tamaño de la ventana, como ANCHOxALTO."), QCoreApplication::translate("main", "tamaño"));
     parser.addOptions({appearanceOption, demoOption, shotOption, doOption, sizeOption});
     parser.process(app);
 

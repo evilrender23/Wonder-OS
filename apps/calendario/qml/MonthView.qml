@@ -100,7 +100,8 @@ Item {
                 Text {
                     id: number
                     anchors.centerIn: parent
-                    text: box.info.day === 1 ? "1 " + App.monthName(box.info.month).slice(0, 3) : box.info.day
+                    //: The first day of a month, with the month cut short: «1 nov».
+                    text: box.info.day === 1 ? qsTr("1 %1").arg(App.monthName(box.info.month).slice(0, 3)) : box.info.day
                     color: box.today ? "#ffffff" : (box.inside ? Theme.text : Theme.faint)
                     font.pixelSize: 13
                     font.weight: box.today ? Font.DemiBold : Font.Normal
@@ -128,7 +129,7 @@ Item {
                     x: 5
                     height: 18
                     verticalAlignment: Text.AlignVCenter
-                    text: "+" + (box.events.length - box.shown) + " más"
+                    text: qsTr("+%1 más").arg(box.events.length - box.shown)
                     color: more.containsMouse ? Theme.text : Theme.dim
                     font.pixelSize: 11
                     font.weight: Font.DemiBold

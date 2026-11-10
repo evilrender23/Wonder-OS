@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Bluetooth
+Name[en]=Bluetooth
 GenericName=Gestor de Bluetooth
 GenericName[en]=Bluetooth Manager
 Comment=Enlaza, conecta y gestiona tus dispositivos Bluetooth
@@ -12,3 +13,4 @@ StartupNotify=true
 StartupWMClass=wonderland-bluetooth
 Categories=Settings;HardwareSettings;Qt;
 Keywords=bluetooth;inalámbrico;auriculares;ratón;teclado;mando;enlazar;emparejar;dispositivos;wireless;pair;
+Keywords[en]=bluetooth;wireless;headphones;mouse;keyboard;controller;gamepad;pair;devices;

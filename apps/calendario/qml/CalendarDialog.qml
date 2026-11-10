@@ -54,7 +54,7 @@ Popup {
     contentItem: Column {
         spacing: 14
         Text {
-            text: dialog.calendarId === "" ? "Calendario nuevo" : "Editar calendario"
+            text: dialog.calendarId === "" ? qsTr("Calendario nuevo") : qsTr("Editar calendario")
             color: Theme.text
             font.pixelSize: 15
             font.weight: Font.DemiBold
@@ -63,7 +63,7 @@ Popup {
             id: field
             width: parent.width
             implicitHeight: 30
-            placeholderText: "Nombre del calendario"
+            placeholderText: qsTr("Nombre del calendario")
             onAccepted: dialog.accept()
         }
         Row {
@@ -97,11 +97,11 @@ Popup {
             anchors.right: parent.right
             spacing: 8
             DialogButton {
-                text: "Cancelar"
+                text: qsTr("Cancelar")
                 onClicked: dialog.close()
             }
             DialogButton {
-                text: dialog.calendarId === "" ? "Crear" : "Guardar"
+                text: dialog.calendarId === "" ? qsTr("Crear") : qsTr("Guardar")
                 primary: true
                 active: field.text.trim() !== ""
                 onClicked: dialog.accept()

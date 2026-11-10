@@ -55,8 +55,8 @@ void Agenda::load()
         }
     }
     if (m_calendars.isEmpty()) {
-        m_calendars << Calendar{QStringLiteral("personal"), QStringLiteral("Personal"), palette().at(4), true}
-                    << Calendar{QStringLiteral("trabajo"), QStringLiteral("Trabajo"), palette().at(5), true};
+        m_calendars << Calendar{QStringLiteral("personal"), tr("Personal"), palette().at(4), true}
+                    << Calendar{QStringLiteral("trabajo"), tr("Trabajo"), palette().at(5), true};
     }
     for (const QJsonValue &value : root.value(QLatin1String("events")).toArray()) {
         Event event = Event::fromJson(value.toObject());
@@ -185,7 +185,7 @@ QString Agenda::addCalendar(const QString &name, const QString &color)
 {
     Calendar calendar;
     calendar.id = newId();
-    calendar.name = name.trimmed().isEmpty() ? QStringLiteral("Calendario") : name.trimmed();
+    calendar.name = name.trimmed().isEmpty() ? tr("Calendario") : name.trimmed();
     calendar.color = QColor::isValidColorName(color) ? color : palette().at(m_calendars.size() % palette().size());
     m_calendars << calendar;
     commit();
@@ -403,7 +403,7 @@ QVariantMap Agenda::describe(const Occurrence &occurrence, const QDate &day) con
     const QDate firstDay = occurrence.start.date();
     return {
         {QStringLiteral("id"), event.id},
-        {QStringLiteral("title"), event.title.isEmpty() ? QStringLiteral("Evento nuevo") : event.title},
+        {QStringLiteral("title"), event.title.isEmpty() ? tr("Evento nuevo") : event.title},
         {QStringLiteral("color"), calendar ? calendar->color : palette().at(4)},
         {QStringLiteral("calendar"), event.calendar},
         {QStringLiteral("allDay"), event.allDay},
@@ -622,7 +622,7 @@ bool Agenda::exportFile(const QString &path, const QString &calendarId) const
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
     }
-    file.write(Ics::write(events, calendar ? calendar->name : QStringLiteral("Calendario")));
+    file.write(Ics::write(events, calendar ? calendar->name : tr("Calendario")));
     return file.commit();
 }
 
@@ -649,7 +649,7 @@ QList<Notice> Agenda::due(const QDateTime &after, const QDateTime &until) const
         for (const QDateTime &start : event.starts(from, to)) {
             const QDateTime alert = Event::real(start).addSecs(-lead);
             if (alert > after && alert <= until) {
-                notices << Notice{event.title.isEmpty() ? QStringLiteral("Evento nuevo") : event.title, event.location, start, event.allDay};
+                notices << Notice{event.title.isEmpty() ? tr("Evento nuevo") : event.title, event.location, start, event.allDay};
             }
         }
     }

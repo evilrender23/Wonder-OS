@@ -253,23 +253,23 @@ QString App::time(qint64 ms) const
 
 QString App::day(qint64 ms) const
 {
-    return QLocale(QLocale::Spanish, QLocale::Spain).toString(QDateTime::fromMSecsSinceEpoch(ms).date(), QStringLiteral("d 'de' MMMM 'de' yyyy"));
+    return Media::locale().toString(QDateTime::fromMSecsSinceEpoch(ms).date(), tr("d 'de' MMMM 'de' yyyy"));
 }
 
 QString App::moment(qint64 ms) const
 {
-    return QLocale(QLocale::Spanish, QLocale::Spain).toString(QDateTime::fromMSecsSinceEpoch(ms), QStringLiteral("d 'de' MMMM 'de' yyyy, H:mm"));
+    return Media::locale().toString(QDateTime::fromMSecsSinceEpoch(ms), tr("d 'de' MMMM 'de' yyyy, H:mm"));
 }
 
 QString App::counted(int photos, int videos) const
 {
     if (videos == 0) {
-        return photos == 1 ? QStringLiteral("1 foto") : QStringLiteral("%L1 fotos").arg(photos);
+        return photos == 1 ? tr("1 foto") : tr("%L1 fotos").arg(photos);
     }
     if (photos == 0) {
-        return videos == 1 ? QStringLiteral("1 vídeo") : QStringLiteral("%L1 vídeos").arg(videos);
+        return videos == 1 ? tr("1 vídeo") : tr("%L1 vídeos").arg(videos);
     }
-    return QStringLiteral("%L1 elementos").arg(photos + videos);
+    return tr("%L1 elementos").arg(photos + videos);
 }
 
 int App::trash(const QStringList &paths)
@@ -286,7 +286,7 @@ int App::trash(const QStringList &paths)
     }
     if (gone.size() < paths.size()) {
         const int left = int(paths.size() - gone.size());
-        Q_EMIT failed(left == 1 ? QStringLiteral("Un elemento no se pudo mover a la papelera.") : QStringLiteral("%1 elementos no se pudieron mover a la papelera.").arg(left));
+        Q_EMIT failed(left == 1 ? tr("Un elemento no se pudo mover a la papelera.") : tr("%1 elementos no se pudieron mover a la papelera.").arg(left));
     }
     return int(gone.size());
 }

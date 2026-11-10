@@ -25,7 +25,7 @@ ApplicationWindow {
     minimumWidth: 560
     minimumHeight: 360
     visible: true
-    title: watching ? player.title + " — Películas" : "Películas"
+    title: watching ? qsTr("%1 — Películas").arg(player.title) : qsTr("Películas")
     color: watching ? Theme.stage : (App.glass ? "transparent" : Theme.window)
 
     onClosing: {
@@ -65,7 +65,7 @@ ApplicationWindow {
     Connections {
         target: win.player
         function onResumed(position) {
-            win.say("Sigue desde " + App.time(position))
+            win.say(qsTr("Sigue desde %1").arg(App.time(position)))
         }
         function onPlayingChanged() {
             win.wake()
@@ -91,18 +91,18 @@ ApplicationWindow {
     }
     function changeVolume(delta) {
         player.volume = Math.round((player.volume + delta) * 20) / 20
-        say(player.muted ? "Silencio" : "Volumen " + Math.round(player.volume * 100) + " %")
+        say(player.muted ? qsTr("Silencio") : qsTr("Volumen %1 %").arg(Math.round(player.volume * 100)))
     }
     function toggleMute() {
         player.muted = !player.muted
-        say(player.muted ? "Silencio" : "Volumen " + Math.round(player.volume * 100) + " %")
+        say(player.muted ? qsTr("Silencio") : qsTr("Volumen %1 %").arg(Math.round(player.volume * 100)))
     }
     function rateName(rate) {
-        return rate === 1 ? "Normal" : String(rate).replace(".", ",") + "×"
+        return rate === 1 ? qsTr("Normal") : String(rate).replace(".", qsTr(",", "separador decimal")) + "×"
     }
     function setRate(rate) {
         player.rate = rate
-        say("Velocidad " + (rate === 1 ? "normal" : rateName(rate)))
+        say(rate === 1 ? qsTr("Velocidad normal") : qsTr("Velocidad %1").arg(rateName(rate)))
     }
     function stepRate(direction) {
         let at = 0
@@ -118,16 +118,16 @@ ApplicationWindow {
     }
     function snapshot() {
         const path = player.snapshot()
-        say(path !== "" ? "Captura guardada en Imágenes" : "No se pudo guardar la captura")
+        say(path !== "" ? qsTr("Captura guardada en Imágenes") : qsTr("No se pudo guardar la captura"))
     }
     function cycleSubtitles() {
         if (player.subtitleChoices.length < 2) {
-            say("Sin subtítulos")
+            say(qsTr("Sin subtítulos"))
             return
         }
         player.cycleSubtitles()
         const chosen = player.subtitleChoices.find(choice => choice.key === player.subtitle)
-        say("Subtítulos: " + (chosen ? chosen.label : "Desactivados"))
+        say(qsTr("Subtítulos: %1").arg(chosen ? chosen.label : qsTr("Desactivados")))
     }
     readonly property string volumeSymbol: player.muted || player.volume === 0 ? "volume-x" : (player.volume < 0.34 ? "volume" : (player.volume < 0.67 ? "volume-1" : "volume-2"))
 
@@ -177,30 +177,30 @@ ApplicationWindow {
 
     // --- Dialogs -----------------------------------------------------------
 
-    readonly property var mediaFilters: ["Vídeo y sonido (*.mp4 *.m4v *.mkv *.webm *.mov *.avi *.wmv *.flv *.mpg *.mpeg *.ts *.m2ts *.ogv *.3gp *.vob *.mp3 *.flac *.ogg *.opus *.m4a *.aac *.wav *.wma)", "Todos los archivos (*)"]
+    readonly property var mediaFilters: [qsTr("Vídeo y sonido") + " (*.mp4 *.m4v *.mkv *.webm *.mov *.avi *.wmv *.flv *.mpg *.mpeg *.ts *.m2ts *.ogv *.3gp *.vob *.mp3 *.flac *.ogg *.opus *.m4a *.aac *.wav *.wma)", qsTr("Todos los archivos") + " (*)"]
     FileDialog {
         id: fileDialog
-        title: "Abrir"
+        title: qsTr("Abrir")
         fileMode: FileDialog.OpenFiles
         nameFilters: win.mediaFilters
         onAccepted: App.open(selectedFiles)
     }
     FolderDialog {
         id: folderDialog
-        title: "Abrir carpeta"
+        title: qsTr("Abrir carpeta")
         onAccepted: App.open([selectedFolder])
     }
     FileDialog {
         id: addDialog
-        title: "Añadir a la lista"
+        title: qsTr("Añadir a la lista")
         fileMode: FileDialog.OpenFiles
         nameFilters: win.mediaFilters
         onAccepted: App.enqueue(selectedFiles)
     }
     FileDialog {
         id: subtitleDialog
-        title: "Subtítulos"
-        nameFilters: ["Subtítulos (*.srt *.vtt *.ass *.ssa)", "Todos los archivos (*)"]
+        title: qsTr("Subtítulos")
+        nameFilters: [qsTr("Subtítulos") + " (*.srt *.vtt *.ass *.ssa)", qsTr("Todos los archivos") + " (*)"]
         onAccepted: win.player.useSubtitleFile(selectedFile)
     }
 
@@ -222,7 +222,7 @@ ApplicationWindow {
         }
         FSeparator {}
         FMenuItem {
-            text: "Añadir archivo de subtítulos…"
+            text: qsTr("Añadir archivo de subtítulos…")
             onTriggered: subtitleDialog.open()
         }
     }
@@ -258,25 +258,25 @@ ApplicationWindow {
     }
     FMenu {
         id: fillMenu
-        FMenuItem { text: "Ajustar a la ventana"; checkable: true; checked: win.fill === "fit"; onTriggered: win.fill = "fit" }
-        FMenuItem { text: "Llenar la ventana"; checkable: true; checked: win.fill === "fill"; onTriggered: win.fill = "fill" }
-        FMenuItem { text: "Estirar"; checkable: true; checked: win.fill === "stretch"; onTriggered: win.fill = "stretch" }
+        FMenuItem { text: qsTr("Ajustar a la ventana"); checkable: true; checked: win.fill === "fit"; onTriggered: win.fill = "fit" }
+        FMenuItem { text: qsTr("Llenar la ventana"); checkable: true; checked: win.fill === "fill"; onTriggered: win.fill = "fill" }
+        FMenuItem { text: qsTr("Estirar"); checkable: true; checked: win.fill === "stretch"; onTriggered: win.fill = "stretch" }
     }
     FMenu {
         id: contextMenu
-        FMenuItem { text: win.player.playing ? "Pausa" : "Reproducir"; onTriggered: win.player.toggle() }
-        FMenuItem { text: win.full ? "Salir de pantalla completa" : "Pantalla completa"; onTriggered: win.toggleFull() }
+        FMenuItem { text: win.player.playing ? qsTr("Pausa") : qsTr("Reproducir"); onTriggered: win.player.toggle() }
+        FMenuItem { text: win.full ? qsTr("Salir de pantalla completa") : qsTr("Pantalla completa"); onTriggered: win.toggleFull() }
         FSeparator {}
-        FMenuItem { text: "Subtítulos…"; onTriggered: subtitleMenu.popup() }
-        FMenuItem { text: "Pista de sonido…"; enabled: win.player.audioTracks.length > 1; onTriggered: audioMenu.popup() }
-        FMenuItem { text: "Velocidad…"; onTriggered: rateMenu.popup() }
-        FMenuItem { text: "Tamaño de la imagen…"; enabled: win.player.hasVideo; onTriggered: fillMenu.popup() }
+        FMenuItem { text: qsTr("Subtítulos…"); onTriggered: subtitleMenu.popup() }
+        FMenuItem { text: qsTr("Pista de sonido…"); enabled: win.player.audioTracks.length > 1; onTriggered: audioMenu.popup() }
+        FMenuItem { text: qsTr("Velocidad…"); onTriggered: rateMenu.popup() }
+        FMenuItem { text: qsTr("Tamaño de la imagen…"); enabled: win.player.hasVideo; onTriggered: fillMenu.popup() }
         FSeparator {}
-        FMenuItem { text: "Guardar captura"; enabled: win.player.hasVideo; onTriggered: win.snapshot() }
-        FMenuItem { text: "Mostrar en Rabbit"; onTriggered: App.reveal(win.player.path) }
+        FMenuItem { text: qsTr("Guardar captura"); enabled: win.player.hasVideo; onTriggered: win.snapshot() }
+        FMenuItem { text: qsTr("Mostrar en Rabbit"); onTriggered: App.reveal(win.player.path) }
         FSeparator {}
-        FMenuItem { text: "Abrir…"; onTriggered: fileDialog.open() }
-        FMenuItem { text: "Cerrar la película"; onTriggered: win.player.close() }
+        FMenuItem { text: qsTr("Abrir…"); onTriggered: fileDialog.open() }
+        FMenuItem { text: qsTr("Cerrar la película"); onTriggered: win.player.close() }
     }
 
     // --- The first page ----------------------------------------------------
@@ -414,7 +414,7 @@ ApplicationWindow {
                 onStage: true
                 symbol: "chevron-left"
                 size: 18
-                tip: "Cerrar la película"
+                tip: qsTr("Cerrar la película")
                 onClicked: win.player.close()
             }
             Text {
@@ -519,14 +519,14 @@ ApplicationWindow {
                 TButton {
                     onStage: true
                     symbol: "prev-fill"
-                    tip: "Anterior (P)"
+                    tip: qsTr("Anterior (P)")
                     onClicked: win.player.previous()
                 }
                 TButton {
                     onStage: true
                     symbol: "rewind"
                     visible: bottomBar.width >= 640
-                    tip: "Atrás 10 s (←)"
+                    tip: qsTr("Atrás 10 s (←)")
                     onClicked: win.step(-10000)
                 }
                 TButton {
@@ -536,28 +536,28 @@ ApplicationWindow {
                     y: -2
                     size: 20
                     symbol: win.player.playing ? "pause-fill" : "play-fill"
-                    tip: win.player.playing ? "Pausa (Espacio)" : "Reproducir (Espacio)"
+                    tip: win.player.playing ? qsTr("Pausa (Espacio)") : qsTr("Reproducir (Espacio)")
                     onClicked: win.player.toggle()
                 }
                 TButton {
                     onStage: true
                     symbol: "fast-forward"
                     visible: bottomBar.width >= 640
-                    tip: "Adelante 10 s (→)"
+                    tip: qsTr("Adelante 10 s (→)")
                     onClicked: win.step(10000)
                 }
                 TButton {
                     onStage: true
                     symbol: "next-fill"
                     active: win.player.canNext
-                    tip: "Siguiente (N)"
+                    tip: qsTr("Siguiente (N)")
                     onClicked: win.player.next()
                 }
                 Item { width: 8; height: 1 }
                 TButton {
                     onStage: true
                     symbol: win.volumeSymbol
-                    tip: win.player.muted ? "Activar el sonido (M)" : "Silenciar (M)"
+                    tip: win.player.muted ? qsTr("Activar el sonido (M)") : qsTr("Silenciar (M)")
                     onClicked: win.toggleMute()
                 }
                 Seek {
@@ -578,14 +578,14 @@ ApplicationWindow {
                     onStage: true
                     symbol: "captions"
                     checked: win.player.subtitle !== ""
-                    tip: "Subtítulos (V)"
+                    tip: qsTr("Subtítulos (V)")
                     onClicked: subtitleMenu.popup()
                 }
                 TButton {
                     onStage: true
                     symbol: "audio-lines"
                     visible: win.player.audioTracks.length > 1 && bottomBar.width >= 420
-                    tip: "Pista de sonido"
+                    tip: qsTr("Pista de sonido")
                     onClicked: audioMenu.popup()
                 }
                 TButton {
@@ -593,7 +593,7 @@ ApplicationWindow {
                     symbol: "gauge"
                     visible: bottomBar.width >= 420
                     checked: Math.abs(win.player.rate - 1) > 0.01
-                    tip: "Velocidad ([ y ])"
+                    tip: qsTr("Velocidad ([ y ])")
                     onClicked: rateMenu.popup()
                 }
                 TButton {
@@ -601,27 +601,27 @@ ApplicationWindow {
                     symbol: "proportions"
                     visible: win.player.hasVideo && bottomBar.width >= 640
                     checked: win.fill !== "fit"
-                    tip: "Tamaño de la imagen"
+                    tip: qsTr("Tamaño de la imagen")
                     onClicked: fillMenu.popup()
                 }
                 TButton {
                     onStage: true
                     symbol: "camera"
                     visible: win.player.hasVideo && bottomBar.width >= 640
-                    tip: "Guardar captura (S)"
+                    tip: qsTr("Guardar captura (S)")
                     onClicked: win.snapshot()
                 }
                 TButton {
                     onStage: true
                     symbol: "list-video"
                     checked: win.queueOpen
-                    tip: "Lista (L)"
+                    tip: qsTr("Lista (L)")
                     onClicked: win.queueOpen = !win.queueOpen
                 }
                 TButton {
                     onStage: true
                     symbol: win.full ? "minimize" : "maximize"
-                    tip: win.full ? "Salir de pantalla completa (F)" : "Pantalla completa (F)"
+                    tip: win.full ? qsTr("Salir de pantalla completa (F)") : qsTr("Pantalla completa (F)")
                     onClicked: win.toggleFull()
                 }
             }

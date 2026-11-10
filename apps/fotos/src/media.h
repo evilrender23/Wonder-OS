@@ -2,6 +2,7 @@
 
 #include <QDateTime>
 #include <QJsonObject>
+#include <QLocale>
 #include <QString>
 #include <QStringList>
 #include <QVariantMap>
@@ -54,4 +55,9 @@ int turned(int orientation, bool clockwise);
 
 /// Lower case and without accents: «Cumpleaños» matches «cumpleanos».
 QString fold(const QString &text);
+
+/// The locale dates and numbers are written in: Spain's, like the texts,
+/// until the translation is loaded and sets the one that goes with it.
+QLocale locale();
+void setLocale(const QLocale &locale);
 }

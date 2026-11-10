@@ -94,7 +94,7 @@ Item {
             width: view.gutter - 8
             y: 5
             horizontalAlignment: Text.AlignRight
-            text: "todo el día"
+            text: qsTr("todo el día")
             color: Theme.faint
             font.pixelSize: 10
         }
@@ -125,7 +125,7 @@ Item {
                     x: 5
                     height: 18
                     verticalAlignment: Text.AlignVCenter
-                    text: "+" + (stack.events.length - stack.shown) + " más"
+                    text: qsTr("+%1 más").arg(stack.events.length - stack.shown)
                     color: Theme.dim
                     font.pixelSize: 11
                     font.weight: Font.DemiBold

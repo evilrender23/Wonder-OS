@@ -166,7 +166,7 @@ Rectangle {
         case Qt.Key_C:
             if (ctrl) {
                 App.copy([path])
-                said("Copiado.")
+                said(qsTr("Copiado."))
             }
             break
         case Qt.Key_Delete:
@@ -225,7 +225,7 @@ Rectangle {
                     }
                 }
                 Text {
-                    text: viewer.paths.length > 1 ? (viewer.index + 1) + " de " + viewer.paths.length : ""
+                    text: viewer.paths.length > 1 ? qsTr("%1 de %2").arg(viewer.index + 1).arg(viewer.paths.length) : ""
                     color: Theme.dim
                     font.pixelSize: 12
                     rightPadding: 8
@@ -353,7 +353,7 @@ Rectangle {
                         color: Theme.faint
                     }
                     Text {
-                        text: "No se puede mostrar esta imagen."
+                        text: qsTr("No se puede mostrar esta imagen.")
                         color: Theme.dim
                         font.pixelSize: 13
                     }
@@ -398,7 +398,7 @@ Rectangle {
                             id: sound
                             muted: App.setting("muted", false)
                         }
-                        onErrorOccurred: (error, text) => viewer.said("No se puede reproducir este vídeo.")
+                        onErrorOccurred: (error, text) => viewer.said(qsTr("No se puede reproducir este vídeo."))
                     }
                     VideoOutput {
                         id: screen
@@ -534,7 +534,7 @@ Rectangle {
                         width: parent.width
                         spacing: 12
                         Text {
-                            text: "Información"
+                            text: qsTr("Información")
                             color: Theme.text
                             font.pixelSize: 15
                             font.weight: Font.DemiBold

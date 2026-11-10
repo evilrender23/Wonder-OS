@@ -14,3 +14,4 @@ StartupWMClass=wonderland-peliculas
 MimeType=video/mp4;video/x-matroska;video/webm;video/quicktime;video/x-msvideo;video/mpeg;video/x-m4v;video/3gpp;video/mp2t;video/ogg;video/x-flv;video/x-ms-wmv;video/vnd.avi;
 Categories=AudioVideo;Video;Player;Qt;
 Keywords=vídeo;video;película;peliculas;películas;cine;reproductor;subtítulos;movies;films;player;
+Keywords[en]=video;movie;film;films;cinema;player;subtitles;

@@ -6,8 +6,10 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QIcon>
+#include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
+#include <QTranslator>
 
 int main(int argc, char *argv[])
 {
@@ -15,19 +17,30 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("wonderland"));
     QCoreApplication::setApplicationName(QStringLiteral("wonderland-calendario"));
     QCoreApplication::setApplicationVersion(QStringLiteral(CALENDARIO_VERSION));
-    QGuiApplication::setApplicationDisplayName(QStringLiteral("Calendario"));
     QGuiApplication::setDesktopFileName(QStringLiteral("wonderland-calendario"));
     QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/WonderlandCalendario/wonderland-calendario.svg")));
 
+    // Los textos están escritos en español; cualquier otro idioma recibe el inglés.
+    QTranslator translator;
+    if (QLocale().language() != QLocale::Spanish
+        && translator.load(QStringLiteral(":/i18n/wonderland-calendario_en.qm"))) {
+        QCoreApplication::installTranslator(&translator);
+    }
+    QGuiApplication::setApplicationDisplayName(QCoreApplication::translate("main", "Calendario"));
+
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("El calendario de Wonderland: eventos y citas."));
+    parser.setApplicationDescription(QCoreApplication::translate("main", "El calendario de Wonderland: eventos y citas."));
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument(QStringLiteral("archivos"), QStringLiteral("Calendarios .ics que añadir."), QStringLiteral("[archivos…]"));
-    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QStringLiteral("auto (como el escritorio), light o dark."), QStringLiteral("modo"), QStringLiteral("auto"));
-    const QCommandLineOption shotOption(QStringLiteral("shot"), QStringLiteral("Guarda una imagen de la ventana en este archivo y sale (para pruebas)."), QStringLiteral("png"));
-    const QCommandLineOption doOption(QStringLiteral("do"), QStringLiteral("Con --shot: acciones previas, separadas por «;»."), QStringLiteral("acciones"));
-    const QCommandLineOption sizeOption(QStringLiteral("size"), QStringLiteral("Con --shot: el tamaño de la ventana, como ANCHOxALTO."), QStringLiteral("tamaño"));
+    parser.addPositionalArgument(QCoreApplication::translate("main", "archivos"), QCoreApplication::translate("main", "Calendarios .ics que añadir."),
+                                 QCoreApplication::translate("main", "[archivos…]"));
+    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QCoreApplication::translate("main", "auto (como el escritorio), light o dark."),
+                                              QCoreApplication::translate("main", "modo"), QStringLiteral("auto"));
+    const QCommandLineOption shotOption(QStringLiteral("shot"), QCoreApplication::translate("main", "Guarda una imagen de la ventana en este archivo y sale (para pruebas)."), QStringLiteral("png"));
+    const QCommandLineOption doOption(QStringLiteral("do"), QCoreApplication::translate("main", "Con --shot: acciones previas, separadas por «;»."),
+                                      QCoreApplication::translate("main", "acciones"));
+    const QCommandLineOption sizeOption(QStringLiteral("size"), QCoreApplication::translate("main", "Con --shot: el tamaño de la ventana, como ANCHOxALTO."),
+                                        QCoreApplication::translate("main", "tamaño"));
     parser.addOptions({appearanceOption, shotOption, doOption, sizeOption});
     parser.process(app);
 

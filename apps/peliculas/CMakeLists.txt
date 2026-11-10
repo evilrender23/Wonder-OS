@@ -8,9 +8,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Multimedia Svg DBus)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Multimedia Svg DBus LinguistTools)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.8 I18N_SOURCE_LANGUAGE es I18N_TRANSLATED_LANGUAGES en)
 include(GNUInstallDirs)
 
 # What the tests build too: everything that needs neither a window nor a film.
@@ -55,6 +55,13 @@ target_include_directories(wonderland-peliculas PRIVATE src)
 target_compile_definitions(wonderland-peliculas PRIVATE PELICULAS_VERSION="${PROJECT_VERSION}")
 target_link_libraries(wonderland-peliculas PRIVATE ${core_libs}
     Qt6::Quick Qt6::QuickControls2 Qt6::QuickDialogs2 Qt6::Multimedia Qt6::Svg Qt6::DBus)
+
+# The texts are written in Spanish; English is the one translation.
+qt_add_translations(wonderland-peliculas
+    TS_FILES i18n/wonderland-peliculas_en.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -locations none -no-obsolete
+)
 
 install(TARGETS wonderland-peliculas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES wonderland-peliculas.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)

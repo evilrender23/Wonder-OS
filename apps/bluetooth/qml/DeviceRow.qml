@@ -71,7 +71,7 @@ Item {
         }
         TButton {
             visible: !root.device.busy && !root.device.blocked
-            text: root.device.connected ? "Desconectar" : "Conectar"
+            text: root.device.connected ? qsTr("Desconectar") : qsTr("Conectar")
             onClicked: root.device.connected ? Bt.disconnectFrom(root.device.address) : Bt.connectTo(root.device.address)
         }
         TButton {
@@ -79,8 +79,8 @@ Item {
             implicitWidth: 30
             leftPadding: 0
             rightPadding: 0
-            tip: "Detalles"
-            Accessible.name: "Detalles de " + root.device.name
+            tip: qsTr("Detalles")
+            Accessible.name: qsTr("Detalles de %1").arg(root.device.name)
             onClicked: root.details()
             Sym {
                 anchors.centerIn: parent

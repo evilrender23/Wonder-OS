@@ -93,7 +93,7 @@ ListView {
             Text {
                 anchors.right: parent.right
                 anchors.baseline: titleText.baseline
-                text: "Seleccionar"
+                text: qsTr("Seleccionar")
                 color: Theme.tint
                 font.pixelSize: 12
                 opacity: headArea.containsMouse ? 1 : 0

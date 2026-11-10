@@ -21,15 +21,16 @@ Rectangle {
         width: parent.width
         height: 44
         Text {
+            id: heading
             x: 14
             anchors.verticalCenter: parent.verticalCenter
-            text: "Lista"
+            text: qsTr("Lista")
             color: Theme.ink
             font.pixelSize: 14
             font.weight: Font.DemiBold
         }
         Text {
-            x: 56
+            x: Math.max(56, heading.x + heading.implicitWidth + 8)
             anchors.verticalCenter: parent.verticalCenter
             text: panel.playlist.count
             color: Theme.inkFaint
@@ -46,7 +47,7 @@ Rectangle {
                 size: 15
                 checked: panel.playlist.shuffle
                 tone: Theme.inkDim
-                tip: "Orden aleatorio"
+                tip: qsTr("Orden aleatorio")
                 onClicked: panel.playlist.shuffle = !panel.playlist.shuffle
             }
             TButton {
@@ -55,7 +56,7 @@ Rectangle {
                 size: 15
                 checked: panel.playlist.repeat !== 0
                 tone: Theme.inkDim
-                tip: panel.playlist.repeat === 0 ? "Repetir la lista" : (panel.playlist.repeat === 1 ? "Repetir este" : "No repetir")
+                tip: panel.playlist.repeat === 0 ? qsTr("Repetir la lista") : (panel.playlist.repeat === 1 ? qsTr("Repetir este") : qsTr("No repetir"))
                 onClicked: panel.playlist.repeat = (panel.playlist.repeat + 1) % 3
             }
             TButton {
@@ -63,7 +64,7 @@ Rectangle {
                 symbol: "plus"
                 size: 15
                 tone: Theme.inkDim
-                tip: "Añadir a la lista…"
+                tip: qsTr("Añadir a la lista…")
                 onClicked: panel.addRequested()
             }
         }

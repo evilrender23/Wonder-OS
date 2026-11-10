@@ -1,5 +1,6 @@
 #include "metadata.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -211,7 +212,7 @@ void fill(MediaItem &item)
 
 QString sizeText(qint64 bytes)
 {
-    const QLocale locale(QLocale::Spanish, QLocale::Spain);
+    const QLocale locale = Media::locale();
     if (bytes >= 1000LL * 1000 * 1000) {
         return locale.toString(bytes / 1e9, 'f', 2) + QStringLiteral(" GB");
     }
@@ -234,7 +235,7 @@ static QString coordinate(const Exiv2::ExifData &exif, const char *key, const ch
         const double value = double(it->toFloat(0)) + double(it->toFloat(1)) / 60.0 + double(it->toFloat(2)) / 3600.0;
         const QString ref = text(exif, refKey).toUpper();
         const bool minus = ref.startsWith(QLatin1Char('S')) || ref.startsWith(QLatin1Char('W'));
-        return QLocale(QLocale::Spanish, QLocale::Spain).toString(value, 'f', 5) + QStringLiteral("° ") + (minus ? negative : positive);
+        return Media::locale().toString(value, 'f', 5) + QStringLiteral("° ") + (minus ? negative : positive);
     } catch (const std::exception &) {
         return {};
     }
@@ -242,7 +243,7 @@ static QString coordinate(const Exiv2::ExifData &exif, const char *key, const ch
 
 QVariantList details(const MediaItem &item)
 {
-    const QLocale locale(QLocale::Spanish, QLocale::Spain);
+    const QLocale locale = Media::locale();
     QVariantList rows;
     const auto add = [&rows](const QString &label, const QString &value) {
         if (!value.isEmpty()) {
@@ -250,61 +251,61 @@ QVariantList details(const MediaItem &item)
         }
     };
     const QFileInfo info(item.path);
-    add(QStringLiteral("Fecha"), locale.toString(QDateTime::fromMSecsSinceEpoch(item.taken), QStringLiteral("d 'de' MMMM 'de' yyyy, H:mm")));
+    add(QCoreApplication::translate("Metadata", "Fecha"), locale.toString(QDateTime::fromMSecsSinceEpoch(item.taken), QCoreApplication::translate("Metadata", "d 'de' MMMM 'de' yyyy, H:mm")));
     if (item.width > 0 && item.height > 0) {
         QString pixels = QStringLiteral("%1 × %2").arg(item.width).arg(item.height);
         const double mega = double(item.width) * item.height / 1e6;
         if (!item.video && mega >= 0.95) {
             pixels += QStringLiteral(" (%1 MP)").arg(locale.toString(mega, 'f', mega < 10 ? 1 : 0));
         }
-        add(QStringLiteral("Dimensiones"), pixels);
+        add(QCoreApplication::translate("Metadata", "Dimensiones"), pixels);
     }
-    add(QStringLiteral("Tamaño"), sizeText(item.size));
-    add(QStringLiteral("Tipo"), info.suffix().toUpper());
+    add(QCoreApplication::translate("Metadata", "Tamaño"), sizeText(item.size));
+    add(QCoreApplication::translate("Metadata", "Tipo"), info.suffix().toUpper());
 
     if (item.video) {
         const Probe video = probe(item.path);
         if (video.duration > 0) {
             const qint64 seconds = video.duration / 1000;
-            add(QStringLiteral("Duración"), seconds >= 3600 ? QStringLiteral("%1:%2:%3").arg(seconds / 3600).arg((seconds / 60) % 60, 2, 10, QLatin1Char('0')).arg(seconds % 60, 2, 10, QLatin1Char('0'))
+            add(QCoreApplication::translate("Metadata", "Duración"), seconds >= 3600 ? QStringLiteral("%1:%2:%3").arg(seconds / 3600).arg((seconds / 60) % 60, 2, 10, QLatin1Char('0')).arg(seconds % 60, 2, 10, QLatin1Char('0'))
                                                             : QStringLiteral("%1:%2").arg(seconds / 60).arg(seconds % 60, 2, 10, QLatin1Char('0')));
         }
-        add(QStringLiteral("Códec"), video.codec.toUpper());
+        add(QCoreApplication::translate("Metadata", "Códec"), video.codec.toUpper());
         if (video.fps > 0) {
-            add(QStringLiteral("Fotogramas"), locale.toString(video.fps, 'f', qAbs(video.fps - qRound(video.fps)) < 0.01 ? 0 : 2) + QStringLiteral(" fps"));
+            add(QCoreApplication::translate("Metadata", "Fotogramas"), locale.toString(video.fps, 'f', qAbs(video.fps - qRound(video.fps)) < 0.01 ? 0 : 2) + QStringLiteral(" fps"));
         }
     } else if (const auto image = openImage(item.path)) {
         const Exiv2::ExifData &exif = image->exifData();
-        add(QStringLiteral("Cámara"), cameraName(exif));
-        add(QStringLiteral("Objetivo"), text(exif, "Exif.Photo.LensModel"));
+        add(QCoreApplication::translate("Metadata", "Cámara"), cameraName(exif));
+        add(QCoreApplication::translate("Metadata", "Objetivo"), text(exif, "Exif.Photo.LensModel"));
         const double focal = number(exif, "Exif.Photo.FocalLength");
         if (focal > 0) {
-            add(QStringLiteral("Focal"), locale.toString(focal, 'f', focal < 10 ? 1 : 0) + QStringLiteral(" mm"));
+            add(QCoreApplication::translate("Metadata", "Focal"), locale.toString(focal, 'f', focal < 10 ? 1 : 0) + QStringLiteral(" mm"));
         }
         const double aperture = number(exif, "Exif.Photo.FNumber");
         if (aperture > 0) {
-            add(QStringLiteral("Apertura"), QStringLiteral("ƒ/") + locale.toString(aperture, 'f', aperture == qRound(aperture) ? 0 : 1));
+            add(QCoreApplication::translate("Metadata", "Apertura"), QStringLiteral("ƒ/") + locale.toString(aperture, 'f', aperture == qRound(aperture) ? 0 : 1));
         }
         const double exposure = number(exif, "Exif.Photo.ExposureTime");
         if (exposure > 0) {
-            add(QStringLiteral("Exposición"), exposure >= 1 ? locale.toString(exposure, 'f', exposure == qRound(exposure) ? 0 : 1) + QStringLiteral(" s")
+            add(QCoreApplication::translate("Metadata", "Exposición"), exposure >= 1 ? locale.toString(exposure, 'f', exposure == qRound(exposure) ? 0 : 1) + QStringLiteral(" s")
                                                              : QStringLiteral("1/%1 s").arg(qRound(1.0 / exposure)));
         }
         const int iso = int(number(exif, "Exif.Photo.ISOSpeedRatings"));
         if (iso > 0) {
             add(QStringLiteral("ISO"), QString::number(iso));
         }
-        const QString latitude = coordinate(exif, "Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef", QStringLiteral("N"), QStringLiteral("S"));
-        const QString longitude = coordinate(exif, "Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef", QStringLiteral("E"), QStringLiteral("O"));
+        const QString latitude = coordinate(exif, "Exif.GPSInfo.GPSLatitude", "Exif.GPSInfo.GPSLatitudeRef", QCoreApplication::translate("Metadata", "N", "punto cardinal"), QCoreApplication::translate("Metadata", "S", "punto cardinal"));
+        const QString longitude = coordinate(exif, "Exif.GPSInfo.GPSLongitude", "Exif.GPSInfo.GPSLongitudeRef", QCoreApplication::translate("Metadata", "E", "punto cardinal"), QCoreApplication::translate("Metadata", "O", "punto cardinal"));
         if (!latitude.isEmpty() && !longitude.isEmpty()) {
-            add(QStringLiteral("Lugar"), latitude + QStringLiteral(", ") + longitude);
+            add(QCoreApplication::translate("Metadata", "Lugar"), latitude + QStringLiteral(", ") + longitude);
         }
     }
     QString folder = info.absolutePath();
     if (folder.startsWith(QDir::homePath())) {
         folder.replace(0, QDir::homePath().size(), QStringLiteral("~"));
     }
-    add(QStringLiteral("Carpeta"), folder);
+    add(QCoreApplication::translate("Metadata", "Carpeta"), folder);
     return rows;
 }
 
@@ -340,7 +341,7 @@ bool rotate(const QString &path, bool clockwise, QString *error)
     };
     const QFileInfo info(path);
     if (!info.isFile() || !info.isWritable()) {
-        return fail(QStringLiteral("No se puede escribir en «%1».").arg(info.fileName()));
+        return fail(QCoreApplication::translate("Metadata", "No se puede escribir en «%1».").arg(info.fileName()));
     }
     const QDateTime before = info.lastModified();
     if (byTag(path)) {
@@ -357,14 +358,14 @@ bool rotate(const QString &path, bool clockwise, QString *error)
             exif["Exif.Image.Orientation"] = uint16_t(Media::turned(now, clockwise));
             image->writeMetadata();
         } catch (const std::exception &) {
-            return fail(QStringLiteral("No se pudo girar «%1».").arg(info.fileName()));
+            return fail(QCoreApplication::translate("Metadata", "No se pudo girar «%1».").arg(info.fileName()));
         }
     } else if (byPixels(path)) {
         QImageReader reader(path);
         reader.setAutoTransform(true);
         const QImage image = reader.read();
         if (image.isNull()) {
-            return fail(QStringLiteral("No se pudo leer «%1».").arg(info.fileName()));
+            return fail(QCoreApplication::translate("Metadata", "No se pudo leer «%1».").arg(info.fileName()));
         }
         QImage out = image.transformed(QTransform().rotate(clockwise ? 90 : -90));
         out.setDotsPerMeterX(image.dotsPerMeterY());
@@ -374,15 +375,15 @@ bool rotate(const QString &path, bool clockwise, QString *error)
         QImageWriter writer(part, suffix(path).toLatin1());
         if (!writer.write(out)) {
             QFile::remove(part);
-            return fail(QStringLiteral("No se pudo girar «%1».").arg(info.fileName()));
+            return fail(QCoreApplication::translate("Metadata", "No se pudo girar «%1».").arg(info.fileName()));
         }
         QFile::setPermissions(part, info.permissions());
         if (::rename(QFile::encodeName(part).constData(), QFile::encodeName(path).constData()) != 0) {
             QFile::remove(part);
-            return fail(QStringLiteral("No se pudo girar «%1».").arg(info.fileName()));
+            return fail(QCoreApplication::translate("Metadata", "No se pudo girar «%1».").arg(info.fileName()));
         }
     } else {
-        return fail(QStringLiteral("Las imágenes %1 no se pueden girar sin perder calidad.").arg(info.suffix().toUpper()));
+        return fail(QCoreApplication::translate("Metadata", "Las imágenes %1 no se pueden girar sin perder calidad.").arg(info.suffix().toUpper()));
     }
     QFile file(path);
     if (file.open(QIODevice::ReadWrite)) {

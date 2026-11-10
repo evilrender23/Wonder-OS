@@ -15,11 +15,11 @@ Rectangle {
 
     function remaining(item) {
         if (item.finished)
-            return "Visto"
+            return qsTr("Visto")
         if (item.duration <= 0 || item.position <= 0)
             return item.duration > 0 ? App.time(item.duration) : ""
         const minutes = Math.round((item.duration - item.position) / 60000)
-        return minutes < 1 ? "Queda menos de 1 min" : (minutes === 1 ? "Queda 1 min" : "Quedan " + minutes + " min")
+        return minutes < 1 ? qsTr("Queda menos de 1 min") : (minutes === 1 ? qsTr("Queda 1 min") : qsTr("Quedan %1 min").arg(minutes))
     }
 
     Column {
@@ -37,14 +37,14 @@ Rectangle {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "Películas"
+            text: qsTr("Películas")
             color: Theme.text
             font.pixelSize: 22
             font.weight: Font.DemiBold
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "Arrastra aquí un vídeo o una carpeta, o ábrelo."
+            text: qsTr("Arrastra aquí un vídeo o una carpeta, o ábrelo.")
             color: Theme.dim
             font.pixelSize: 13
         }
@@ -54,12 +54,12 @@ Rectangle {
             spacing: 10
             PillButton {
                 symbol: "film"
-                text: "Abrir archivo…"
+                text: qsTr("Abrir archivo…")
                 onClicked: page.openFiles()
             }
             PillButton {
                 symbol: "folder-open"
-                text: "Abrir carpeta…"
+                text: qsTr("Abrir carpeta…")
                 onClicked: page.openFolder()
             }
         }
@@ -76,7 +76,7 @@ Rectangle {
 
         Text {
             id: heading
-            text: "Continuar viendo"
+            text: qsTr("Continuar viendo")
             color: Theme.dim
             font.pixelSize: 12
             font.weight: Font.DemiBold
@@ -84,7 +84,7 @@ Rectangle {
         Text {
             anchors.right: parent.right
             anchors.baseline: heading.baseline
-            text: "Borrar historial"
+            text: qsTr("Borrar historial")
             color: clearArea.containsMouse ? Theme.tint : Theme.dim
             font.pixelSize: 12
             MouseArea {
@@ -184,7 +184,7 @@ Rectangle {
                     symbol: "x"
                     size: 13
                     tone: Theme.dim
-                    tip: "Quitar del historial"
+                    tip: qsTr("Quitar del historial")
                     opacity: rowArea.containsMouse || hovered ? 1 : 0
                     onClicked: page.forgotten(row.modelData.path)
                 }

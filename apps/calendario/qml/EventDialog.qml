@@ -12,25 +12,25 @@ Popup {
     readonly property bool repeating: existing && wasRepeating
     property bool wasRepeating: false
 
-    readonly property var repeats: ["Nunca", "Cada día", "Cada semana", "Cada mes", "Cada año"]
+    readonly property var repeats: [qsTr("Nunca"), qsTr("Cada día"), qsTr("Cada semana"), qsTr("Cada mes"), qsTr("Cada año")]
     readonly property var reminders: [
-        { minutes: -1, label: "Ninguno" },
-        { minutes: 0, label: "A la hora del evento" },
-        { minutes: 5, label: "5 minutos antes" },
-        { minutes: 15, label: "15 minutos antes" },
-        { minutes: 30, label: "30 minutos antes" },
-        { minutes: 60, label: "1 hora antes" },
-        { minutes: 120, label: "2 horas antes" },
-        { minutes: 1440, label: "1 día antes" },
-        { minutes: 2880, label: "2 días antes" },
-        { minutes: 10080, label: "1 semana antes" }
+        { minutes: -1, label: qsTr("Ninguno") },
+        { minutes: 0, label: qsTr("A la hora del evento") },
+        { minutes: 5, label: qsTr("5 minutos antes") },
+        { minutes: 15, label: qsTr("15 minutos antes") },
+        { minutes: 30, label: qsTr("30 minutos antes") },
+        { minutes: 60, label: qsTr("1 hora antes") },
+        { minutes: 120, label: qsTr("2 horas antes") },
+        { minutes: 1440, label: qsTr("1 día antes") },
+        { minutes: 2880, label: qsTr("2 días antes") },
+        { minutes: 10080, label: qsTr("1 semana antes") }
     ]
     /// The list, plus the event's own when it came from elsewhere with another.
     readonly property var reminderOptions: {
         const own = fields.reminder ?? -1
         if (reminders.some(option => option.minutes === own))
             return reminders
-        return reminders.concat([{ minutes: own, label: own + " minutos antes" }]).sort((a, b) => a.minutes - b.minutes)
+        return reminders.concat([{ minutes: own, label: qsTr("%1 minutos antes").arg(own) }]).sort((a, b) => a.minutes - b.minutes)
     }
 
     function set(key, value) {
@@ -115,14 +115,14 @@ Popup {
             implicitHeight: 34
             font.pixelSize: 17
             font.weight: Font.DemiBold
-            placeholderText: "Evento nuevo"
+            placeholderText: qsTr("Evento nuevo")
             text: dialog.fields.title ?? ""
             onTextEdited: dialog.set("title", text)
             onAccepted: dialog.accept()
         }
         Row {
             spacing: 10
-            Label { text: "Calendario" }
+            Label { text: qsTr("Calendario") }
             FCombo {
                 width: 220
                 model: App.agenda.calendars.map(calendar => calendar.name)
@@ -133,10 +133,10 @@ Popup {
         }
         Row {
             spacing: 10
-            Label { text: "Lugar" }
+            Label { text: qsTr("Lugar") }
             Field {
                 width: dialog.availableWidth - 102
-                placeholderText: "Añadir lugar"
+                placeholderText: qsTr("Añadir lugar")
                 text: dialog.fields.location ?? ""
                 onTextEdited: dialog.set("location", text)
                 onAccepted: dialog.accept()
@@ -149,7 +149,7 @@ Popup {
         }
         Row {
             spacing: 10
-            Label { text: "Todo el día" }
+            Label { text: qsTr("Todo el día") }
             Rectangle {
                 id: toggle
                 readonly property bool on: dialog.fields.allDay ?? false
@@ -175,7 +175,7 @@ Popup {
         }
         Row {
             spacing: 10
-            Label { text: "Empieza" }
+            Label { text: qsTr("Empieza") }
             DateField {
                 day: dialog.fields.startDay ?? 0
                 onEdited: day => dialog.setStart(day, dialog.fields.startMin)
@@ -188,7 +188,7 @@ Popup {
         }
         Row {
             spacing: 10
-            Label { text: "Termina" }
+            Label { text: qsTr("Termina") }
             DateField {
                 day: dialog.fields.endDay ?? 0
                 onEdited: day => dialog.setEnd(day, dialog.fields.endMin)
@@ -201,7 +201,7 @@ Popup {
         }
         Row {
             spacing: 10
-            Label { text: "Se repite" }
+            Label { text: qsTr("Se repite") }
             FCombo {
                 width: 132
                 model: dialog.repeats
@@ -212,7 +212,7 @@ Popup {
                 visible: (dialog.fields.repeat ?? 0) !== 0
                 height: 28
                 verticalAlignment: Text.AlignVCenter
-                text: "hasta"
+                text: qsTr("hasta")
                 color: Theme.dim
                 font.pixelSize: 13
             }
@@ -220,14 +220,14 @@ Popup {
                 visible: (dialog.fields.repeat ?? 0) !== 0
                 optional: true
                 width: 126
-                placeholder: "siempre"
+                placeholder: qsTr("siempre")
                 day: dialog.fields.untilDay ?? 0
                 onEdited: day => dialog.set("untilDay", day)
             }
         }
         Row {
             spacing: 10
-            Label { text: "Aviso" }
+            Label { text: qsTr("Aviso") }
             FCombo {
                 width: 220
                 model: dialog.reminderOptions.map(option => option.label)
@@ -245,7 +245,7 @@ Popup {
             height: 84
             TextArea {
                 id: notes
-                placeholderText: "Notas"
+                placeholderText: qsTr("Notas")
                 placeholderTextColor: Theme.faint
                 color: Theme.text
                 font.pixelSize: 13
@@ -270,7 +270,7 @@ Popup {
             DialogButton {
                 id: removeButton
                 visible: dialog.existing
-                text: "Eliminar"
+                text: qsTr("Eliminar")
                 danger: true
                 onClicked: {
                     if (dialog.repeating) {
@@ -283,14 +283,14 @@ Popup {
                 FMenu {
                     id: removeMenu
                     FMenuItem {
-                        text: "Solo este evento"
+                        text: qsTr("Solo este evento")
                         onTriggered: {
                             App.agenda.skip(dialog.fields.id, dialog.occurrence)
                             dialog.close()
                         }
                     }
                     FMenuItem {
-                        text: "Todos los eventos de la serie"
+                        text: qsTr("Todos los eventos de la serie")
                         onTriggered: {
                             App.agenda.remove(dialog.fields.id)
                             dialog.close()
@@ -302,11 +302,11 @@ Popup {
                 anchors.right: parent.right
                 spacing: 8
                 DialogButton {
-                    text: "Cancelar"
+                    text: qsTr("Cancelar")
                     onClicked: dialog.close()
                 }
                 DialogButton {
-                    text: dialog.existing ? "Guardar" : "Añadir"
+                    text: dialog.existing ? qsTr("Guardar") : qsTr("Añadir")
                     primary: true
                     onClicked: dialog.accept()
                 }

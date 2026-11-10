@@ -1,6 +1,7 @@
 #include "devices.h"
 
 #include <QCollator>
+#include <QCoreApplication>
 #include <QLocale>
 
 namespace Devices {
@@ -36,21 +37,22 @@ QString kindOf(const QString &icon)
 
 QString kindLabel(const QString &kind)
 {
-    static const QHash<QString, QString> labels = {
-        {QStringLiteral("headphones"), QStringLiteral("Auriculares")},
-        {QStringLiteral("speaker"), QStringLiteral("Altavoz")},
-        {QStringLiteral("keyboard"), QStringLiteral("Teclado")},
-        {QStringLiteral("mouse"), QStringLiteral("Ratón")},
-        {QStringLiteral("gamepad"), QStringLiteral("Mando")},
-        {QStringLiteral("phone"), QStringLiteral("Teléfono")},
-        {QStringLiteral("computer"), QStringLiteral("Ordenador")},
-        {QStringLiteral("tv"), QStringLiteral("Pantalla")},
-        {QStringLiteral("printer"), QStringLiteral("Impresora")},
-        {QStringLiteral("camera"), QStringLiteral("Cámara")},
-        {QStringLiteral("watch"), QStringLiteral("Reloj")},
-        {QStringLiteral("pen"), QStringLiteral("Tableta gráfica")},
+    // Translated when asked for: this table is built before the translator is installed.
+    static const QHash<QString, const char *> labels = {
+        {QStringLiteral("headphones"), QT_TRANSLATE_NOOP("Devices", "Auriculares")},
+        {QStringLiteral("speaker"), QT_TRANSLATE_NOOP("Devices", "Altavoz")},
+        {QStringLiteral("keyboard"), QT_TRANSLATE_NOOP("Devices", "Teclado")},
+        {QStringLiteral("mouse"), QT_TRANSLATE_NOOP("Devices", "Ratón")},
+        {QStringLiteral("gamepad"), QT_TRANSLATE_NOOP("Devices", "Mando")},
+        {QStringLiteral("phone"), QT_TRANSLATE_NOOP("Devices", "Teléfono")},
+        {QStringLiteral("computer"), QT_TRANSLATE_NOOP("Devices", "Ordenador")},
+        {QStringLiteral("tv"), QT_TRANSLATE_NOOP("Devices", "Pantalla")},
+        {QStringLiteral("printer"), QT_TRANSLATE_NOOP("Devices", "Impresora")},
+        {QStringLiteral("camera"), QT_TRANSLATE_NOOP("Devices", "Cámara")},
+        {QStringLiteral("watch"), QT_TRANSLATE_NOOP("Devices", "Reloj")},
+        {QStringLiteral("pen"), QT_TRANSLATE_NOOP("Devices", "Tableta gráfica")},
     };
-    return labels.value(kind, QStringLiteral("Dispositivo"));
+    return QCoreApplication::translate("Devices", labels.value(kind, QT_TRANSLATE_NOOP("Devices", "Dispositivo")));
 }
 
 QString symbol(const QString &kind)
@@ -81,21 +83,21 @@ bool isUnnamed(const QString &name, const QString &address)
 QString status(const DeviceInfo &device)
 {
     if (device.activity == QLatin1String("connecting")) {
-        return QStringLiteral("Conectando…");
+        return QCoreApplication::translate("Devices", "Conectando…");
     }
     if (device.activity == QLatin1String("disconnecting")) {
-        return QStringLiteral("Desconectando…");
+        return QCoreApplication::translate("Devices", "Desconectando…");
     }
     if (device.activity == QLatin1String("pairing")) {
-        return QStringLiteral("Enlazando…");
+        return QCoreApplication::translate("Devices", "Enlazando…");
     }
     if (device.blocked) {
-        return QStringLiteral("Bloqueado");
+        return QCoreApplication::translate("Devices", "Bloqueado");
     }
     if (device.connected) {
-        return device.battery >= 0 ? QStringLiteral("Conectado · %1 %").arg(device.battery) : QStringLiteral("Conectado");
+        return device.battery >= 0 ? QCoreApplication::translate("Devices", "Conectado · %1 %").arg(device.battery) : QCoreApplication::translate("Devices", "Conectado");
     }
-    return device.paired ? QStringLiteral("No conectado") : kindLabel(device.kind);
+    return device.paired ? QCoreApplication::translate("Devices", "No conectado") : kindLabel(device.kind);
 }
 
 bool before(const DeviceInfo &a, const DeviceInfo &b)
@@ -128,23 +130,23 @@ QString failure(const QString &operation, const QString &name, const QString &de
     }
     QString what;
     if (operation == QLatin1String("connect")) {
-        what = QStringLiteral("No se ha podido conectar con «%1».").arg(name);
+        what = QCoreApplication::translate("Devices", "No se ha podido conectar con «%1».").arg(name);
     } else if (operation == QLatin1String("disconnect")) {
-        what = QStringLiteral("No se ha podido desconectar «%1».").arg(name);
+        what = QCoreApplication::translate("Devices", "No se ha podido desconectar «%1».").arg(name);
     } else if (operation == QLatin1String("pair")) {
-        what = QStringLiteral("No se ha podido enlazar con «%1».").arg(name);
+        what = QCoreApplication::translate("Devices", "No se ha podido enlazar con «%1».").arg(name);
     } else if (operation == QLatin1String("forget")) {
-        what = QStringLiteral("No se ha podido olvidar «%1».").arg(name);
+        what = QCoreApplication::translate("Devices", "No se ha podido olvidar «%1».").arg(name);
     } else if (operation == QLatin1String("power")) {
-        return QStringLiteral("No se ha podido cambiar el estado del Bluetooth.");
+        return QCoreApplication::translate("Devices", "No se ha podido cambiar el estado del Bluetooth.");
     } else {
-        return QStringLiteral("No se ha podido aplicar el cambio.");
+        return QCoreApplication::translate("Devices", "No se ha podido aplicar el cambio.");
     }
     if (lower.contains(QLatin1String("rejected")) || lower.contains(QLatin1String("authentication"))) {
-        return what + QStringLiteral(" El dispositivo no ha aceptado el código.");
+        return what + QCoreApplication::translate("Devices", " El dispositivo no ha aceptado el código.");
     }
     if (operation == QLatin1String("connect") || operation == QLatin1String("pair")) {
-        return what + QStringLiteral(" Comprueba que está encendido, cerca y en modo de enlace.");
+        return what + QCoreApplication::translate("Devices", " Comprueba que está encendido, cerca y en modo de enlace.");
     }
     return what;
 }

@@ -15,7 +15,7 @@ Item {
     Text {
         visible: view.found.length === 0
         anchors.centerIn: parent
-        text: "Ningún evento con «" + view.text.trim() + "»"
+        text: qsTr("Ningún evento con «%1»").arg(view.text.trim())
         color: Theme.dim
         font.pixelSize: 15
     }
@@ -64,7 +64,7 @@ Item {
                         else if (row.modelData.endDay > row.modelData.startDay)
                             when += " – " + App.mediumDate(row.modelData.endDay)
                         if (row.modelData.repeats)
-                            when += " · se repite"
+                            when += " · " + qsTr("se repite")
                         if (row.modelData.location !== "")
                             when += " · " + row.modelData.location
                         return when

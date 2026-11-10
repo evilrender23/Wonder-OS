@@ -234,10 +234,10 @@ ApplicationWindow {
                             }
                             Text {
                                 Layout.fillWidth: true
-                                text: !Bt.present ? "No hay adaptador"
-                                    : !Bt.powered ? "Desactivado"
-                                    : Bt.discoverable ? "Visible como «" + Bt.name + "»"
-                                    : "Activado"
+                                text: !Bt.present ? qsTr("No hay adaptador")
+                                    : !Bt.powered ? qsTr("Desactivado")
+                                    : Bt.discoverable ? qsTr("Visible como «%1»").arg(Bt.name)
+                                    : qsTr("Activado")
                                 color: Theme.dim
                                 font.pixelSize: Theme.small
                                 elide: Text.ElideRight
@@ -256,24 +256,24 @@ ApplicationWindow {
             Placeholder {
                 visible: !Bt.present
                 symbol: "bluetooth-off"
-                title: "No hay adaptador Bluetooth"
-                body: "Este equipo no tiene Bluetooth, o el servicio no está en marcha. Si usas un adaptador USB, conéctalo y aparecerá aquí."
+                title: qsTr("No hay adaptador Bluetooth")
+                body: qsTr("Este equipo no tiene Bluetooth, o el servicio no está en marcha. Si usas un adaptador USB, conéctalo y aparecerá aquí.")
             }
             Placeholder {
                 visible: Bt.present && !Bt.powered
                 symbol: "bluetooth-off"
-                title: "Bluetooth está desactivado"
-                body: "Actívalo para conectar auriculares, ratones, teclados, mandos y otros dispositivos."
+                title: qsTr("Bluetooth está desactivado")
+                body: qsTr("Actívalo para conectar auriculares, ratones, teclados, mandos y otros dispositivos.")
                 TButton {
                     primary: true
-                    text: "Activar Bluetooth"
+                    text: qsTr("Activar Bluetooth")
                     onClicked: Bt.setPowered(true)
                 }
             }
 
             SectionTitle {
                 visible: mineCard.visible
-                text: "Mis dispositivos"
+                text: qsTr("Mis dispositivos")
             }
             Card {
                 id: mineCard
@@ -291,7 +291,7 @@ ApplicationWindow {
                 visible: Bt.powered
                 spacing: 8
                 SectionTitle {
-                    text: "Dispositivos cercanos"
+                    text: qsTr("Dispositivos cercanos")
                 }
                 Spinner {
                     visible: Bt.scanning
@@ -314,26 +314,26 @@ ApplicationWindow {
                     wrapMode: Text.WordWrap
                     color: Theme.dim
                     font.pixelSize: Theme.body
-                    text: Bt.scanning ? "Buscando dispositivos… Pon el tuyo en modo de enlace para que aparezca."
-                                      : "No se ha encontrado ningún dispositivo."
+                    text: Bt.scanning ? qsTr("Buscando dispositivos… Pon el tuyo en modo de enlace para que aparezca.")
+                                      : qsTr("No se ha encontrado ningún dispositivo.")
                 }
             }
 
             SectionTitle {
                 visible: Bt.powered
-                text: "Este equipo"
+                text: qsTr("Este equipo")
             }
             Card {
                 visible: Bt.powered
                 SettingRow {
-                    label: "Nombre"
-                    note: "Así ven los demás dispositivos a este equipo."
+                    label: qsTr("Nombre")
+                    note: qsTr("Así ven los demás dispositivos a este equipo.")
                     TField {
                         id: nameField
                         implicitWidth: 210
                         text: Bt.name
                         maximumLength: 64
-                        Accessible.name: "Nombre de este equipo"
+                        Accessible.name: qsTr("Nombre de este equipo")
                         onEditingFinished: {
                             Bt.rename(text)
                             text = Qt.binding(() => Bt.name)
@@ -346,19 +346,19 @@ ApplicationWindow {
                 }
                 Line {}
                 SettingRow {
-                    label: "Visible para otros dispositivos"
+                    label: qsTr("Visible para otros dispositivos")
                     note: Bt.discoverable && Bt.discoverableMinutes > 0
-                        ? "Deja de estarlo sola a los " + Bt.discoverableMinutes + " min."
-                        : "Solo hace falta para enlazar desde el otro dispositivo."
+                        ? qsTr("Deja de estarlo sola a los %1 min.").arg(Bt.discoverableMinutes)
+                        : qsTr("Solo hace falta para enlazar desde el otro dispositivo.")
                     TSwitch {
                         on: Bt.discoverable
-                        Accessible.name: "Visible para otros dispositivos"
+                        Accessible.name: qsTr("Visible para otros dispositivos")
                         onAsked: value => Bt.setDiscoverable(value)
                     }
                 }
                 Line {}
                 SettingRow {
-                    label: "Dirección"
+                    label: qsTr("Dirección")
                     Text {
                         text: Bt.address
                         color: Theme.dim
@@ -470,8 +470,8 @@ ApplicationWindow {
                     implicitWidth: 30
                     leftPadding: 0
                     rightPadding: 0
-                    tip: "Cerrar"
-                    Accessible.name: "Cerrar"
+                    tip: qsTr("Cerrar")
+                    Accessible.name: qsTr("Cerrar")
                     onClicked: details.close()
                     Sym {
                         anchors.centerIn: parent
@@ -491,13 +491,13 @@ ApplicationWindow {
                     id: detailRows
                     width: parent.width
                     SettingRow {
-                        label: "Nombre"
+                        label: qsTr("Nombre")
                         TField {
                             id: deviceName
                             implicitWidth: 200
                             text: win.shownDevice.name ?? ""
                             maximumLength: 64
-                            Accessible.name: "Nombre del dispositivo"
+                            Accessible.name: qsTr("Nombre del dispositivo")
                             onEditingFinished: {
                                 Bt.renameDevice(win.shown, text)
                                 text = Qt.binding(() => win.shownDevice.name ?? "")
@@ -506,22 +506,22 @@ ApplicationWindow {
                     }
                     Line {}
                     SettingRow {
-                        label: "Conectar automáticamente"
-                        note: "Puede conectarse a este equipo sin preguntar."
+                        label: qsTr("Conectar automáticamente")
+                        note: qsTr("Puede conectarse a este equipo sin preguntar.")
                         TSwitch {
                             enabled: !win.shownDevice.blocked
                             on: win.shownDevice.trusted ?? false
-                            Accessible.name: "Conectar automáticamente"
+                            Accessible.name: qsTr("Conectar automáticamente")
                             onAsked: value => Bt.setTrusted(win.shown, value)
                         }
                     }
                     Line {}
                     SettingRow {
-                        label: "Bloquear"
-                        note: "Rechaza cualquier conexión de este dispositivo."
+                        label: qsTr("Bloquear")
+                        note: qsTr("Rechaza cualquier conexión de este dispositivo.")
                         TSwitch {
                             on: win.shownDevice.blocked ?? false
-                            Accessible.name: "Bloquear"
+                            Accessible.name: qsTr("Bloquear")
                             onAsked: value => Bt.setBlocked(win.shown, value)
                         }
                     }
@@ -531,16 +531,16 @@ ApplicationWindow {
                     SettingRow {
                         id: batteryRow
                         visible: (win.shownDevice.battery ?? -1) >= 0
-                        label: "Batería"
+                        label: qsTr("Batería")
                         Text {
-                            text: (win.shownDevice.battery ?? 0) + " %"
+                            text: qsTr("%1 %").arg(win.shownDevice.battery ?? 0)
                             color: Theme.dim
                             font.pixelSize: Theme.body
                         }
                     }
                     Line {}
                     SettingRow {
-                        label: "Dirección"
+                        label: qsTr("Dirección")
                         Text {
                             text: win.shown
                             color: Theme.dim
@@ -559,7 +559,7 @@ ApplicationWindow {
                     /// The first press asks, the second one forgets.
                     property bool armed: false
                     destructive: true
-                    text: armed ? "Sí, olvidarlo" : "Olvidar este dispositivo"
+                    text: armed ? qsTr("Sí, olvidarlo") : qsTr("Olvidar este dispositivo")
                     onClicked: {
                         if (!armed) {
                             armed = true
@@ -574,7 +574,7 @@ ApplicationWindow {
                     visible: !win.shownDevice.blocked
                     enabled: !win.shownDevice.busy
                     primary: !win.shownDevice.connected
-                    text: win.shownDevice.connected ? "Desconectar" : "Conectar"
+                    text: win.shownDevice.connected ? qsTr("Desconectar") : qsTr("Conectar")
                     onClicked: win.shownDevice.connected ? Bt.disconnectFrom(win.shown) : Bt.connectTo(win.shown)
                 }
             }
@@ -584,7 +584,7 @@ ApplicationWindow {
                 wrapMode: Text.WordWrap
                 color: Theme.dim
                 font.pixelSize: Theme.small
-                text: "Para volver a usarlo habrá que enlazarlo de nuevo."
+                text: qsTr("Para volver a usarlo habrá que enlazarlo de nuevo.")
             }
         }
     }
@@ -625,8 +625,8 @@ ApplicationWindow {
                 color: Theme.text
                 font.pixelSize: 16
                 font.weight: Font.DemiBold
-                text: pairing.kind === "authorize" ? "¿Permitir la conexión de «" + (win.request.name ?? "") + "»?"
-                                                   : "Enlazar con «" + (win.request.name ?? "") + "»"
+                text: pairing.kind === "authorize" ? qsTr("¿Permitir la conexión de «%1»?").arg(win.request.name ?? "")
+                                                   : qsTr("Enlazar con «%1»").arg(win.request.name ?? "")
             }
             Text {
                 width: parent.width
@@ -634,11 +634,11 @@ ApplicationWindow {
                 wrapMode: Text.WordWrap
                 color: Theme.dim
                 font.pixelSize: Theme.body
-                text: pairing.kind === "confirm" ? "Comprueba que el dispositivo muestra este mismo código."
-                    : pairing.kind === "show" ? "Escribe este código en el dispositivo y pulsa Intro."
-                    : pairing.kind === "pin" ? "Escribe el PIN del dispositivo. Suele venir en su manual; a menudo es 0000 o 1234."
-                    : pairing.kind === "passkey" ? "Escribe el código de 6 cifras que muestra el dispositivo."
-                    : "Quiere conectarse a este equipo."
+                text: pairing.kind === "confirm" ? qsTr("Comprueba que el dispositivo muestra este mismo código.")
+                    : pairing.kind === "show" ? qsTr("Escribe este código en el dispositivo y pulsa Intro.")
+                    : pairing.kind === "pin" ? qsTr("Escribe el PIN del dispositivo. Suele venir en su manual; a menudo es 0000 o 1234.")
+                    : pairing.kind === "passkey" ? qsTr("Escribe el código de 6 cifras que muestra el dispositivo.")
+                    : qsTr("Quiere conectarse a este equipo.")
             }
             Text {
                 visible: pairing.kind === "confirm" || pairing.kind === "show"
@@ -650,7 +650,7 @@ ApplicationWindow {
                 font.family: "monospace"
                 font.letterSpacing: 2
                 text: win.request.code ?? ""
-                Accessible.name: "Código " + text
+                Accessible.name: qsTr("Código %1").arg(text)
             }
             TField {
                 id: answerField
@@ -665,7 +665,7 @@ ApplicationWindow {
                 validator: RegularExpressionValidator {
                     regularExpression: pairing.kind === "passkey" ? /[0-9]{0,6}/ : /.{0,16}/
                 }
-                Accessible.name: "Código"
+                Accessible.name: qsTr("Código")
                 onAccepted: pairing.accept()
                 onVisibleChanged: if (visible) forceActiveFocus()
             }
@@ -676,7 +676,7 @@ ApplicationWindow {
                 TButton {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
-                    text: pairing.kind === "authorize" ? "Rechazar" : "Cancelar"
+                    text: pairing.kind === "authorize" ? qsTr("Rechazar") : qsTr("Cancelar")
                     onClicked: Bt.answer(false)
                 }
                 TButton {
@@ -685,7 +685,7 @@ ApplicationWindow {
                     visible: pairing.kind !== "show"
                     enabled: !pairing.typed || answerField.text.trim() !== ""
                     primary: true
-                    text: pairing.kind === "authorize" ? "Permitir" : "Enlazar"
+                    text: pairing.kind === "authorize" ? qsTr("Permitir") : qsTr("Enlazar")
                     onClicked: pairing.accept()
                 }
             }

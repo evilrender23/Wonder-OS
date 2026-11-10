@@ -68,7 +68,9 @@ Item {
     Row {
         y: 30
         Repeater {
-            model: ["L", "M", "X", "J", "V", "S", "D"]
+            // The first letter of each day, from Monday (X is «miércoles», not to repeat the M).
+            model: [qsTr("L", "lunes"), qsTr("M", "martes"), qsTr("X", "miércoles"), qsTr("J", "jueves"),
+                    qsTr("V", "viernes"), qsTr("S", "sábado"), qsTr("D", "domingo")]
             Text {
                 required property string modelData
                 width: mini.cell

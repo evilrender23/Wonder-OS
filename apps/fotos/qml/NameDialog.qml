@@ -5,7 +5,7 @@ import QtQuick.Controls.Basic
 Popup {
     id: dialog
     property string heading
-    property string confirm: "Crear"
+    property string confirm: qsTr("Crear")
     signal accepted(string name)
 
     function ask(title, name, action) {
@@ -48,7 +48,7 @@ Popup {
         TextField {
             id: field
             width: parent.width
-            placeholderText: "Nombre del álbum"
+            placeholderText: qsTr("Nombre del álbum")
             placeholderTextColor: Theme.faint
             color: Theme.text
             font.pixelSize: 13
@@ -74,7 +74,7 @@ Popup {
                 color: cancelArea.containsMouse ? Theme.sideSelection : Theme.field
                 Text {
                     anchors.centerIn: parent
-                    text: "Cancelar"
+                    text: qsTr("Cancelar")
                     color: Theme.text
                     font.pixelSize: 13
                 }

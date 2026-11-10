@@ -14,3 +14,4 @@ StartupWMClass=wonderland-calendario
 MimeType=text/calendar;
 Categories=Office;Calendar;Qt;
 Keywords=calendario;agenda;eventos;citas;recordatorios;calendar;events;appointments;ics;
+Keywords[en]=agenda;events;appointments;reminders;schedule;ics;

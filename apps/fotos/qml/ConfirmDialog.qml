@@ -6,7 +6,7 @@ Popup {
     id: dialog
     property string heading
     property string message
-    property string confirm: "Aceptar"
+    property string confirm: qsTr("Aceptar")
     property var action: null
 
     function ask(title, text, label, then) {
@@ -71,7 +71,7 @@ Popup {
                 color: cancelArea.containsMouse ? Theme.sideSelection : Theme.field
                 Text {
                     anchors.centerIn: parent
-                    text: "Cancelar"
+                    text: qsTr("Cancelar")
                     color: Theme.text
                     font.pixelSize: 13
                 }

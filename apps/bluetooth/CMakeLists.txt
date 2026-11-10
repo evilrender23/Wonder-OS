@@ -8,10 +8,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 Svg DBus)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 Svg DBus LinguistTools)
 find_package(KF6BluezQt REQUIRED)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.8 I18N_SOURCE_LANGUAGE es I18N_TRANSLATED_LANGUAGES en)
 include(GNUInstallDirs)
 
 # What the tests build too: everything but BlueZ and the window.
@@ -54,6 +54,13 @@ qt_add_qml_module(wonderland-bluetooth
 target_include_directories(wonderland-bluetooth PRIVATE src)
 target_compile_definitions(wonderland-bluetooth PRIVATE BLUETOOTH_VERSION="${PROJECT_VERSION}")
 target_link_libraries(wonderland-bluetooth PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::Svg Qt6::DBus KF6::BluezQt)
+
+# The texts are written in Spanish; English is the one translation.
+qt_add_translations(wonderland-bluetooth
+    TS_FILES i18n/wonderland-bluetooth_en.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -locations none -no-obsolete
+)
 
 install(TARGETS wonderland-bluetooth RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES wonderland-bluetooth.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)

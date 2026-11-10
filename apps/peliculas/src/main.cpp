@@ -7,8 +7,10 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QIcon>
+#include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
+#include <QTranslator>
 
 int main(int argc, char *argv[])
 {
@@ -16,19 +18,27 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("wonderland"));
     QCoreApplication::setApplicationName(QStringLiteral("wonderland-peliculas"));
     QCoreApplication::setApplicationVersion(QStringLiteral(PELICULAS_VERSION));
-    QGuiApplication::setApplicationDisplayName(QStringLiteral("Películas"));
+
+    // Los textos están escritos en español; cualquier otro idioma recibe el inglés.
+    QTranslator translator;
+    if (QLocale().language() != QLocale::Spanish
+        && translator.load(QStringLiteral(":/i18n/wonderland-peliculas_en.qm"))) {
+        QCoreApplication::installTranslator(&translator);
+    }
+
+    QGuiApplication::setApplicationDisplayName(QCoreApplication::translate("main", "Películas"));
     QGuiApplication::setDesktopFileName(QStringLiteral("wonderland-peliculas"));
     QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/WonderlandPeliculas/wonderland-peliculas.svg")));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("El reproductor de vídeo de Wonderland."));
+    parser.setApplicationDescription(QCoreApplication::translate("main", "El reproductor de vídeo de Wonderland."));
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument(QStringLiteral("archivos"), QStringLiteral("Vídeos, carpetas o un archivo de subtítulos que abrir."), QStringLiteral("[archivos…]"));
-    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QStringLiteral("auto (como el escritorio), light o dark."), QStringLiteral("modo"), QStringLiteral("auto"));
-    const QCommandLineOption shotOption(QStringLiteral("shot"), QStringLiteral("Guarda una imagen de la ventana en este archivo y sale (para pruebas)."), QStringLiteral("png"));
-    const QCommandLineOption doOption(QStringLiteral("do"), QStringLiteral("Con --shot: acciones previas, separadas por «;»."), QStringLiteral("acciones"));
-    const QCommandLineOption sizeOption(QStringLiteral("size"), QStringLiteral("Con --shot: el tamaño de la ventana, como ANCHOxALTO."), QStringLiteral("tamaño"));
+    parser.addPositionalArgument(QCoreApplication::translate("main", "archivos"), QCoreApplication::translate("main", "Vídeos, carpetas o un archivo de subtítulos que abrir."), QCoreApplication::translate("main", "[archivos…]"));
+    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QCoreApplication::translate("main", "auto (como el escritorio), light o dark."), QCoreApplication::translate("main", "modo"), QStringLiteral("auto"));
+    const QCommandLineOption shotOption(QStringLiteral("shot"), QCoreApplication::translate("main", "Guarda una imagen de la ventana en este archivo y sale (para pruebas)."), QStringLiteral("png"));
+    const QCommandLineOption doOption(QStringLiteral("do"), QCoreApplication::translate("main", "Con --shot: acciones previas, separadas por «;»."), QCoreApplication::translate("main", "acciones"));
+    const QCommandLineOption sizeOption(QStringLiteral("size"), QCoreApplication::translate("main", "Con --shot: el tamaño de la ventana, como ANCHOxALTO."), QCoreApplication::translate("main", "tamaño"));
     parser.addOptions({appearanceOption, shotOption, doOption, sizeOption});
     parser.process(app);
 

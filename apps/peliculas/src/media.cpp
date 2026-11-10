@@ -1,6 +1,7 @@
 #include "media.h"
 
 #include <QCollator>
+#include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QHash>
@@ -169,25 +170,26 @@ QStringList Media::siblings(const QString &path)
 
 QString Media::languageName(QLocale::Language language)
 {
-    static const QHash<QLocale::Language, QString> names = {
-        {QLocale::Spanish, QStringLiteral("Español")},     {QLocale::English, QStringLiteral("Inglés")},      {QLocale::French, QStringLiteral("Francés")},
-        {QLocale::German, QStringLiteral("Alemán")},       {QLocale::Italian, QStringLiteral("Italiano")},    {QLocale::Portuguese, QStringLiteral("Portugués")},
-        {QLocale::Catalan, QStringLiteral("Catalán")},     {QLocale::Galician, QStringLiteral("Gallego")},    {QLocale::Basque, QStringLiteral("Euskera")},
-        {QLocale::Japanese, QStringLiteral("Japonés")},    {QLocale::Chinese, QStringLiteral("Chino")},       {QLocale::Korean, QStringLiteral("Coreano")},
-        {QLocale::Russian, QStringLiteral("Ruso")},        {QLocale::Arabic, QStringLiteral("Árabe")},        {QLocale::Dutch, QStringLiteral("Neerlandés")},
-        {QLocale::Polish, QStringLiteral("Polaco")},       {QLocale::Swedish, QStringLiteral("Sueco")},       {QLocale::NorwegianBokmal, QStringLiteral("Noruego")},
-        {QLocale::Danish, QStringLiteral("Danés")},        {QLocale::Finnish, QStringLiteral("Finés")},       {QLocale::Turkish, QStringLiteral("Turco")},
-        {QLocale::Greek, QStringLiteral("Griego")},        {QLocale::Hebrew, QStringLiteral("Hebreo")},       {QLocale::Hindi, QStringLiteral("Hindi")},
-        {QLocale::Czech, QStringLiteral("Checo")},         {QLocale::Hungarian, QStringLiteral("Húngaro")},   {QLocale::Romanian, QStringLiteral("Rumano")},
-        {QLocale::Ukrainian, QStringLiteral("Ucraniano")}, {QLocale::Thai, QStringLiteral("Tailandés")},      {QLocale::Vietnamese, QStringLiteral("Vietnamita")},
-        {QLocale::Indonesian, QStringLiteral("Indonesio")}, {QLocale::Latin, QStringLiteral("Latín")},
+    // Names only: the translator is asked each time one is shown.
+    static const QHash<QLocale::Language, const char *> names = {
+        {QLocale::Spanish, QT_TRANSLATE_NOOP("Media", "Español")},     {QLocale::English, QT_TRANSLATE_NOOP("Media", "Inglés")},      {QLocale::French, QT_TRANSLATE_NOOP("Media", "Francés")},
+        {QLocale::German, QT_TRANSLATE_NOOP("Media", "Alemán")},       {QLocale::Italian, QT_TRANSLATE_NOOP("Media", "Italiano")},    {QLocale::Portuguese, QT_TRANSLATE_NOOP("Media", "Portugués")},
+        {QLocale::Catalan, QT_TRANSLATE_NOOP("Media", "Catalán")},     {QLocale::Galician, QT_TRANSLATE_NOOP("Media", "Gallego")},    {QLocale::Basque, QT_TRANSLATE_NOOP("Media", "Euskera")},
+        {QLocale::Japanese, QT_TRANSLATE_NOOP("Media", "Japonés")},    {QLocale::Chinese, QT_TRANSLATE_NOOP("Media", "Chino")},       {QLocale::Korean, QT_TRANSLATE_NOOP("Media", "Coreano")},
+        {QLocale::Russian, QT_TRANSLATE_NOOP("Media", "Ruso")},        {QLocale::Arabic, QT_TRANSLATE_NOOP("Media", "Árabe")},        {QLocale::Dutch, QT_TRANSLATE_NOOP("Media", "Neerlandés")},
+        {QLocale::Polish, QT_TRANSLATE_NOOP("Media", "Polaco")},       {QLocale::Swedish, QT_TRANSLATE_NOOP("Media", "Sueco")},       {QLocale::NorwegianBokmal, QT_TRANSLATE_NOOP("Media", "Noruego")},
+        {QLocale::Danish, QT_TRANSLATE_NOOP("Media", "Danés")},        {QLocale::Finnish, QT_TRANSLATE_NOOP("Media", "Finés")},       {QLocale::Turkish, QT_TRANSLATE_NOOP("Media", "Turco")},
+        {QLocale::Greek, QT_TRANSLATE_NOOP("Media", "Griego")},        {QLocale::Hebrew, QT_TRANSLATE_NOOP("Media", "Hebreo")},       {QLocale::Hindi, QT_TRANSLATE_NOOP("Media", "Hindi")},
+        {QLocale::Czech, QT_TRANSLATE_NOOP("Media", "Checo")},         {QLocale::Hungarian, QT_TRANSLATE_NOOP("Media", "Húngaro")},   {QLocale::Romanian, QT_TRANSLATE_NOOP("Media", "Rumano")},
+        {QLocale::Ukrainian, QT_TRANSLATE_NOOP("Media", "Ucraniano")}, {QLocale::Thai, QT_TRANSLATE_NOOP("Media", "Tailandés")},      {QLocale::Vietnamese, QT_TRANSLATE_NOOP("Media", "Vietnamita")},
+        {QLocale::Indonesian, QT_TRANSLATE_NOOP("Media", "Indonesio")}, {QLocale::Latin, QT_TRANSLATE_NOOP("Media", "Latín")},
     };
     if (language == QLocale::AnyLanguage || language == QLocale::C) {
         return {};
     }
     const auto known = names.constFind(language);
     if (known != names.constEnd()) {
-        return known.value();
+        return QCoreApplication::translate("Media", known.value());
     }
     // The rest in their own words: «Íslenska».
     QString own = QLocale(language).nativeLanguageName();

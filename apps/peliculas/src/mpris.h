@@ -34,7 +34,7 @@ public:
     explicit MprisRoot(App *app);
     bool yes() const { return true; }
     bool no() const { return false; }
-    QString identity() const { return QStringLiteral("Películas"); }
+    QString identity() const { return tr("Películas"); }
     QString desktopEntry() const { return QStringLiteral("wonderland-peliculas"); }
     QStringList schemes() const { return {QStringLiteral("file")}; }
     QStringList mimeTypes() const;

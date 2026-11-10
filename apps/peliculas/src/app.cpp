@@ -148,7 +148,7 @@ void App::open(const QList<QUrl> &urls)
         if (m_player->hasMedia()) {
             m_player->useSubtitleFile(QUrl::fromLocalFile(subtitles.first()));
         } else {
-            Q_EMIT failed(QStringLiteral("Los subtítulos necesitan una película abierta."));
+            Q_EMIT failed(tr("Los subtítulos necesitan una película abierta."));
         }
         return;
     }
@@ -161,7 +161,7 @@ void App::open(const QList<QUrl> &urls)
         list = Media::expand(rest);
     }
     if (list.isEmpty()) {
-        Q_EMIT failed(QStringLiteral("Ahí no hay nada que reproducir."));
+        Q_EMIT failed(tr("Ahí no hay nada que reproducir."));
         return;
     }
     m_player->open(list, index);
@@ -174,7 +174,7 @@ void App::enqueue(const QList<QUrl> &urls)
 {
     const QStringList list = Media::expand(localPaths(urls));
     if (list.isEmpty()) {
-        Q_EMIT failed(QStringLiteral("Ahí no hay nada que reproducir."));
+        Q_EMIT failed(tr("Ahí no hay nada que reproducir."));
         return;
     }
     m_player->enqueue(list);

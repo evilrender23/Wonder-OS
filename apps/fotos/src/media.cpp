@@ -197,4 +197,20 @@ QString fold(const QString &text)
     return out;
 }
 
+static QLocale &shownLocale()
+{
+    static QLocale locale(QLocale::Spanish, QLocale::Spain);
+    return locale;
+}
+
+QLocale locale()
+{
+    return shownLocale();
+}
+
+void setLocale(const QLocale &locale)
+{
+    shownLocale() = locale;
+}
+
 }

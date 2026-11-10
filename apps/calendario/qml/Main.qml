@@ -20,7 +20,7 @@ ApplicationWindow {
     minimumWidth: 880
     minimumHeight: 480
     visible: true
-    title: "Calendario"
+    title: qsTr("Calendario")
     color: App.glass ? "transparent" : Theme.window
 
     onClosing: {
@@ -47,7 +47,8 @@ ApplicationWindow {
             return String(focus.year)
         case "day":
             // In a narrow window the long date would not fit beside the controls.
-            return bar.width < 780 ? month(App.weekdayName(focus.weekday)).slice(0, 3) + " " + focus.day + " " + App.monthName(focus.month).slice(0, 3) + " " + focus.year
+            //: A short date: %1 the weekday, %2 the day, %3 the month, %4 the year.
+            return bar.width < 780 ? qsTr("%1 %2 %3 %4").arg(month(App.weekdayName(focus.weekday)).slice(0, 3)).arg(focus.day).arg(App.monthName(focus.month).slice(0, 3)).arg(focus.year)
                 : month(App.longDate(day))
         case "week": {
             // A week may straddle two months, or two years.
@@ -182,9 +183,9 @@ ApplicationWindow {
     FileDialog {
         id: importDialog
         property string into
-        title: "Importar calendario"
+        title: qsTr("Importar calendario")
         fileMode: FileDialog.OpenFiles
-        nameFilters: ["Calendarios (*.ics *.ical *.ifb *.icalendar)", "Todos los archivos (*)"]
+        nameFilters: [qsTr("Calendarios (*.ics *.ical *.ifb *.icalendar)"), qsTr("Todos los archivos (*)")]
         currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
         onAccepted: {
             let total = 0
@@ -198,20 +199,20 @@ ApplicationWindow {
             }
             const name = App.agenda.calendar(into === "" ? App.agenda.defaultCalendar : into).name
             if (failed > 0 && total === 0)
-                toast.say(failed === 1 ? "El archivo no es un calendario que se pueda leer." : "Los archivos no son calendarios que se puedan leer.")
+                toast.say(failed === 1 ? qsTr("El archivo no es un calendario que se pueda leer.") : qsTr("Los archivos no son calendarios que se puedan leer."))
             else
-                toast.say((total === 1 ? "1 evento añadido" : total + " eventos añadidos") + " a «" + name + "».")
+                toast.say(total === 1 ? qsTr("1 evento añadido a «%1».").arg(name) : qsTr("%1 eventos añadidos a «%2».").arg(total).arg(name))
         }
     }
     FileDialog {
         id: exportDialog
         property string from
-        title: "Exportar calendario"
+        title: qsTr("Exportar calendario")
         fileMode: FileDialog.SaveFile
         defaultSuffix: "ics"
-        nameFilters: ["Calendarios (*.ics)"]
+        nameFilters: [qsTr("Calendarios (*.ics)")]
         currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
-        onAccepted: toast.say(App.agenda.exportFile(App.localPath(selectedFile), from) ? "Calendario exportado." : "No se ha podido escribir el archivo.")
+        onAccepted: toast.say(App.agenda.exportFile(App.localPath(selectedFile), from) ? qsTr("Calendario exportado.") : qsTr("No se ha podido escribir el archivo."))
     }
 
     FMenu {
@@ -223,16 +224,16 @@ ApplicationWindow {
             popup()
         }
         FMenuItem {
-            text: "Editar…"
+            text: qsTr("Editar…")
             onTriggered: calendarDialog.edit(calendarMenu.calendarId)
         }
         FMenuItem {
-            text: "Usar para los eventos nuevos"
+            text: qsTr("Usar para los eventos nuevos")
             checked: App.agenda.defaultCalendar === calendarMenu.calendarId
             onTriggered: App.agenda.defaultCalendar = calendarMenu.calendarId
         }
         FMenuItem {
-            text: "Mostrar solo este"
+            text: qsTr("Mostrar solo este")
             onTriggered: {
                 for (const calendar of App.agenda.calendars)
                     App.agenda.setVisible(calendar.id, calendar.id === calendarMenu.calendarId)
@@ -240,14 +241,14 @@ ApplicationWindow {
         }
         FSeparator {}
         FMenuItem {
-            text: "Importar aquí…"
+            text: qsTr("Importar aquí…")
             onTriggered: {
                 importDialog.into = calendarMenu.calendarId
                 importDialog.open()
             }
         }
         FMenuItem {
-            text: "Exportar…"
+            text: qsTr("Exportar…")
             onTriggered: {
                 exportDialog.from = calendarMenu.calendarId
                 exportDialog.open()
@@ -255,7 +256,7 @@ ApplicationWindow {
         }
         FSeparator {}
         FMenuItem {
-            text: "Eliminar…"
+            text: qsTr("Eliminar…")
             enabled: App.agenda.calendars.length > 1
             onTriggered: {
                 const info = calendarMenu.info
@@ -264,28 +265,29 @@ ApplicationWindow {
                     App.agenda.removeCalendar(id)
                     return
                 }
-                confirmDialog.ask("¿Eliminar el calendario «" + info.name + "»?",
-                    (info.events === 1 ? "Su evento se eliminará" : "Sus " + info.events + " eventos se eliminarán") + " con él. Esto no se puede deshacer.",
-                    "Eliminar", () => App.agenda.removeCalendar(id))
+                confirmDialog.ask(qsTr("¿Eliminar el calendario «%1»?").arg(info.name),
+                    info.events === 1 ? qsTr("Su evento se eliminará con él. Esto no se puede deshacer.")
+                        : qsTr("Sus %1 eventos se eliminarán con él. Esto no se puede deshacer.").arg(info.events),
+                    qsTr("Eliminar"), () => App.agenda.removeCalendar(id))
             }
         }
     }
     FMenu {
         id: moreMenu
         FMenuItem {
-            text: "Calendario nuevo…"
+            text: qsTr("Calendario nuevo…")
             onTriggered: calendarDialog.create()
         }
         FSeparator {}
         FMenuItem {
-            text: "Importar…"
+            text: qsTr("Importar…")
             onTriggered: {
                 importDialog.into = ""
                 importDialog.open()
             }
         }
         FMenuItem {
-            text: "Exportar los calendarios visibles…"
+            text: qsTr("Exportar los calendarios visibles…")
             onTriggered: {
                 exportDialog.from = ""
                 exportDialog.open()
@@ -323,7 +325,7 @@ ApplicationWindow {
                     }
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "Evento nuevo"
+                        text: qsTr("Evento nuevo")
                         color: Theme.text
                         font.pixelSize: 13
                     }
@@ -363,7 +365,7 @@ ApplicationWindow {
                 id: calendarsLabel
                 x: 20
                 y: mini.y + mini.height + 14
-                text: "Calendarios"
+                text: qsTr("Calendarios")
                 color: Theme.dim
                 font.pixelSize: 11
                 font.weight: Font.DemiBold
@@ -462,7 +464,7 @@ ApplicationWindow {
                     x: 20
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.max(0, controls.x - 32)
-                    text: win.searching ? "Buscar" : win.heading
+                    text: win.searching ? qsTr("Buscar") : win.heading
                     color: Theme.text
                     font.pixelSize: 21
                     font.weight: Font.DemiBold
@@ -493,7 +495,7 @@ ApplicationWindow {
                             Text {
                                 id: todayLabel
                                 anchors.centerIn: parent
-                                text: "Hoy"
+                                text: qsTr("Hoy")
                                 color: Theme.text
                                 font.pixelSize: 13
                             }
@@ -512,10 +514,10 @@ ApplicationWindow {
                     Segmented {
                         anchors.verticalCenter: parent.verticalCenter
                         options: [
-                            { key: "day", label: "Día" },
-                            { key: "week", label: "Semana" },
-                            { key: "month", label: "Mes" },
-                            { key: "year", label: "Año" }
+                            { key: "day", label: qsTr("Día") },
+                            { key: "week", label: qsTr("Semana") },
+                            { key: "month", label: qsTr("Mes") },
+                            { key: "year", label: qsTr("Año") }
                         ]
                         current: win.searching ? "" : win.mode
                         onPicked: key => win.show(key)
@@ -526,7 +528,7 @@ ApplicationWindow {
                         width: bar.width < 780 ? 120 : 190
                         leftPadding: 28
                         rightPadding: 26
-                        placeholderText: "Buscar"
+                        placeholderText: qsTr("Buscar")
                         Sym {
                             x: 8
                             anchors.verticalCenter: parent.verticalCenter
