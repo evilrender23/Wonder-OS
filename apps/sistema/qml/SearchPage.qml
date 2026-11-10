@@ -34,16 +34,16 @@ ScrollView {
     }
     readonly property var links: {
         const out = found.pages.filter(p => p.index !== shortcutsPage || shortcutCount === 0)
-            .map(p => ({ page: p.index, group: -1, shortcuts: "", icon: p.icon, title: p.title, detail: "Apartado" }))
+            .map(p => ({ page: p.index, group: -1, shortcuts: "", icon: p.icon, title: p.title, detail: qsTr("Apartado") }))
         if (shortcutCount > 0)
             out.push({
                 page: shortcutsPage, group: -1, shortcuts: query.trim(), icon: Schema.pages[shortcutsPage].icon,
                 title: Schema.pages[shortcutsPage].title,
-                detail: shortcutCount === 1 ? "1 atajo coincide" : shortcutCount + " atajos coinciden"
+                detail: shortcutCount === 1 ? qsTr("1 atajo coincide") : qsTr("%1 atajos coinciden").arg(shortcutCount)
             })
         for (const g of found.groups)
             if (g.table)
-                out.push({ page: g.page, group: g.group, shortcuts: "", icon: Schema.pages[g.page].icon, title: g.pageTitle + " › " + g.title, detail: "Tabla" })
+                out.push({ page: g.page, group: g.group, shortcuts: "", icon: Schema.pages[g.page].icon, title: g.pageTitle + " › " + g.title, detail: qsTr("Tabla") })
         return out
     }
     readonly property var groups: found.groups.filter(g => g.items.length > 0)
@@ -61,7 +61,7 @@ ScrollView {
             Layout.topMargin: 22
             Layout.bottomMargin: 4
             Layout.fillWidth: true
-            text: "Resultados de «" + root.query.trim() + "»"
+            text: qsTr("Resultados de «%1»").arg(root.query.trim())
             color: Theme.text
             font.pixelSize: 22
             font.weight: Font.DemiBold
@@ -73,7 +73,7 @@ ScrollView {
             Layout.topMargin: 10
             Layout.fillWidth: true
             visible: root.links.length === 0 && root.groups.length === 0
-            text: "Ningún ajuste coincide. Prueba con otra palabra, o con la clave de config.toml."
+            text: qsTr("Ningún ajuste coincide. Prueba con otra palabra, o con la clave de config.toml.")
             color: Theme.dim
             font.pixelSize: Theme.body
             wrapMode: Text.WordWrap

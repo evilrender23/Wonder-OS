@@ -20,7 +20,7 @@ Rectangle {
         id: heading
         x: 16
         y: 14
-        text: "A continuación"
+        text: qsTr("A continuación")
         color: Theme.text
         font.pixelSize: 15
         font.weight: Font.Bold
@@ -30,7 +30,7 @@ Rectangle {
         anchors.rightMargin: 14
         anchors.baseline: heading.baseline
         visible: panel.remaining > 0
-        text: "Borrar"
+        text: qsTr("Borrar")
         color: Theme.tint
         font.pixelSize: 12
         MouseArea {
@@ -46,7 +46,7 @@ Rectangle {
         visible: panel.remaining === 0
         horizontalAlignment: Text.AlignHCenter
         wrapMode: Text.WordWrap
-        text: panel.player.hasTrack ? "No hay nada más en la cola." : "Lo que elijas reproducir aparecerá aquí."
+        text: panel.player.hasTrack ? qsTr("No hay nada más en la cola.") : qsTr("Lo que elijas reproducir aparecerá aquí.")
         color: Theme.dim
         font.pixelSize: 12
     }
@@ -63,7 +63,7 @@ Rectangle {
             height: visible ? 34 : 8
             x: 16
             verticalAlignment: Text.AlignVCenter
-            text: "y " + App.songs(panel.remaining - panel.limit) + " más"
+            text: qsTr("y %1 más").arg(App.songs(panel.remaining - panel.limit))
             color: Theme.dim
             font.pixelSize: 12
         }
@@ -104,7 +104,7 @@ Rectangle {
                 }
                 Text {
                     width: parent.width
-                    text: row.modelData.artist
+                    text: App.shown(row.modelData.artist)
                     color: Theme.dim
                     font.pixelSize: 11
                     elide: Text.ElideRight

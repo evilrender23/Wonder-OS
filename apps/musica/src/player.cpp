@@ -180,7 +180,7 @@ void Player::load(bool autoplay, qint64 startAt)
     const Track track = path.isEmpty() ? Track() : m_library->track(path);
     if (!path.isEmpty() && !track.isValid()) {
         m_current = Track();
-        trackFailed(QStringLiteral("No se encuentra «%1».").arg(QFileInfo(path).fileName()));
+        trackFailed(tr("No se encuentra «%1».").arg(QFileInfo(path).fileName()));
         return;
     }
     m_current = track;
@@ -215,7 +215,7 @@ void Player::ended()
 
 void Player::trackFailed(const QString &message)
 {
-    Q_EMIT failed(m_current.isValid() ? QStringLiteral("No se puede reproducir «%1»: %2").arg(m_current.title, message) : message);
+    Q_EMIT failed(m_current.isValid() ? tr("No se puede reproducir «%1»: %2").arg(m_current.title, message) : message);
     // One bad file is skipped; a queue of nothing but bad files stops.
     if (++m_failures < m_queue.size() && m_queue.position() + 1 < m_queue.size() && m_queue.next()) {
         load(true);

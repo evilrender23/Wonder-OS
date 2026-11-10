@@ -116,7 +116,7 @@ Rectangle {
                 Text {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
-                    text: bar.player.hasTrack ? bar.track.artist + " — " + bar.track.album : ""
+                    text: bar.player.hasTrack ? App.shown(bar.track.artist) + " — " + App.shown(bar.track.album) : ""
                     color: Theme.dim
                     font.pixelSize: 11
                     elide: Text.ElideRight

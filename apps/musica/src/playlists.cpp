@@ -81,7 +81,7 @@ QString Playlists::create(const QString &name, const QStringList &paths)
 {
     QString title = name.trimmed();
     if (title.isEmpty()) {
-        title = QStringLiteral("Nueva playlist");
+        title = tr("Nueva playlist");
     }
     const QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     m_lists.append({id, title, paths});
@@ -147,7 +147,7 @@ void Playlists::removeAt(const QString &id, int index)
 QString Playlists::name(const QString &id) const
 {
     if (id == favorites()) {
-        return QStringLiteral("Favoritas");
+        return tr("Favoritas");
     }
     const Playlist *playlist = find(id);
     return playlist ? playlist->name : QString();

@@ -8,11 +8,11 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Svg)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Svg LinguistTools)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(XKBCOMMON REQUIRED IMPORTED_TARGET xkbcommon)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.8 I18N_SOURCE_LANGUAGE es I18N_TRANSLATED_LANGUAGES en)
 include(GNUInstallDirs)
 
 qt_add_executable(wonderland-sistema
@@ -39,13 +39,23 @@ qt_add_qml_module(wonderland-sistema
 )
 
 # Every default the pages show comes from the compositor's own reference, so they cannot drift.
-set(reference ${CMAKE_CURRENT_SOURCE_DIR}/../../config.reference.toml)
+get_filename_component(reference ../../config.reference.toml ABSOLUTE)
 set_source_files_properties(${reference} PROPERTIES QT_RESOURCE_ALIAS config.reference.toml)
 qt_add_resources(wonderland-sistema reference PREFIX /reference FILES ${reference})
 
 target_include_directories(wonderland-sistema PRIVATE src)
 target_compile_definitions(wonderland-sistema PRIVATE SISTEMA_VERSION="${PROJECT_VERSION}")
 target_link_libraries(wonderland-sistema PRIVATE Qt6::Quick Qt6::QuickControls2 Qt6::QuickDialogs2 Qt6::Svg PkgConfig::XKBCOMMON)
+
+# The texts are written in Spanish; English is the translation every other language gets.
+# lupdate reads every source of the target, and the reference config is not code.
+set_target_properties(wonderland-sistema PROPERTIES QT_EXCLUDE_SOURCES_FROM_TRANSLATION "${reference}")
+qt_add_translations(wonderland-sistema
+    SOURCE_TARGETS wonderland-sistema
+    TS_FILES i18n/wonderland-sistema_en.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -locations none -no-obsolete
+)
 
 install(TARGETS wonderland-sistema RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES wonderland-sistema.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)

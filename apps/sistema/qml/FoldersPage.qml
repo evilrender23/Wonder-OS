@@ -16,8 +16,8 @@ ScrollView {
     readonly property bool custom: pending !== "" && !colors.some(c => c[0] === pending)
 
     readonly property var colors: [
-        ["", "Azul (de fábrica)"], ["#ff453a", "Rojo"], ["#ff9f0a", "Naranja"], ["#ffd60a", "Amarillo"], ["#32d74b", "Verde"],
-        ["#40c8e0", "Turquesa"], ["#0a84ff", "Azul intenso"], ["#bf5af2", "Morado"], ["#ff6fae", "Rosa"], ["#ac8e68", "Marrón"], ["#98989d", "Gris"]
+        ["", qsTr("Azul (de fábrica)")], ["#ff453a", qsTr("Rojo")], ["#ff9f0a", qsTr("Naranja")], ["#ffd60a", qsTr("Amarillo")], ["#32d74b", qsTr("Verde")],
+        ["#40c8e0", qsTr("Turquesa")], ["#0a84ff", qsTr("Azul intenso")], ["#bf5af2", qsTr("Morado")], ["#ff6fae", qsTr("Rosa")], ["#ac8e68", qsTr("Marrón")], ["#98989d", qsTr("Gris")]
     ]
 
     function pick(color) {
@@ -73,7 +73,7 @@ ScrollView {
 
             Text {
                 Layout.leftMargin: 4
-                text: "Color de las carpetas"
+                text: qsTr("Color de las carpetas")
                 color: Theme.text
                 font.pixelSize: Theme.body
                 font.weight: Font.DemiBold
@@ -81,7 +81,7 @@ ScrollView {
             Text {
                 Layout.leftMargin: 4
                 Layout.fillWidth: true
-                text: "El color de las carpetas en el Escritorio y en Rabbit. Las que tienen un color propio («Personalizar carpeta…») lo conservan."
+                text: qsTr("El color de las carpetas en el Escritorio y en Rabbit. Las que tienen un color propio («Personalizar carpeta…») lo conservan.")
                 color: Theme.dim
                 font.pixelSize: Theme.small
                 wrapMode: Text.WordWrap
@@ -117,7 +117,7 @@ ScrollView {
                         }
                         Text {
                             Layout.alignment: Qt.AlignHCenter
-                            text: root.dirty ? "Vista previa" : "En uso"
+                            text: root.dirty ? qsTr("Vista previa") : qsTr("En uso")
                             color: Theme.dim
                             font.pixelSize: Theme.small
                         }
@@ -174,7 +174,7 @@ ScrollView {
                             spacing: 8
 
                             Text {
-                                text: "Color personalizado"
+                                text: qsTr("Color personalizado")
                                 color: Theme.text
                                 font.pixelSize: Theme.body
                             }
@@ -206,7 +206,7 @@ ScrollView {
                                 }
                             }
                             TButton {
-                                text: "Elegir…"
+                                text: qsTr("Elegir…")
                                 onClicked: {
                                     colorDialog.selectedColor = root.pending === "" ? "#3fa4f1" : root.pending
                                     colorDialog.open()
@@ -230,12 +230,12 @@ ScrollView {
                                 Layout.fillWidth: true
                             }
                             TButton {
-                                text: "Descartar"
+                                text: qsTr("Descartar")
                                 enabled: root.dirty
                                 onClicked: root.discard()
                             }
                             TButton {
-                                text: "Aplicar"
+                                text: qsTr("Aplicar")
                                 primary: true
                                 enabled: root.dirty
                                 onClicked: root.apply()
@@ -254,7 +254,7 @@ ScrollView {
     ColorDialog {
         id: colorDialog
 
-        title: "Color de las carpetas"
+        title: qsTr("Color de las carpetas")
         onAccepted: {
             const c = selectedColor
             const hex = n => Math.round(n * 255).toString(16).padStart(2, "0")

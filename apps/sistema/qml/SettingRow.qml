@@ -69,7 +69,7 @@ Item {
                         id: startupText
 
                         anchors.centerIn: parent
-                        text: "al reiniciar la sesión"
+                        text: qsTr("al reiniciar la sesión")
                         color: Theme.dim
                         font.pixelSize: 11
                     }
@@ -98,7 +98,7 @@ Item {
 
         TButton {
             text: "↺"
-            tip: "Volver al valor de fábrica"
+            tip: qsTr("Volver al valor de fábrica")
             opacity: root.modified ? 1 : 0
             enabled: root.modified
             implicitWidth: 30
@@ -318,14 +318,14 @@ Item {
                 id: fileField
 
                 implicitWidth: 250
-                placeholderText: "~/Imágenes/fondo.jpg"
+                placeholderText: qsTr("~/Imágenes/fondo.jpg")
                 onEditingFinished: {
                     if (text.trim() === "" ? (root.modified && !Config.unset(root.setting.path)) : !root.commit(text.trim()))
                         text = root.value ?? ""
                 }
             }
             TButton {
-                text: "Elegir…"
+                text: qsTr("Elegir…")
                 onClicked: fileDialog.open()
             }
             FileDialog {
@@ -375,7 +375,7 @@ Item {
             }
             TButton {
                 Layout.alignment: Qt.AlignRight
-                text: "Guardar"
+                text: qsTr("Guardar")
                 primary: true
                 visible: lines.parsed().join("\n") !== lines.saved
                 onClicked: root.commit(lines.parsed())

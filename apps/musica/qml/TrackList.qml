@@ -91,7 +91,7 @@ ListView {
             Text {
                 width: Math.min(implicitWidth, parent.width)
                 visible: text !== ""
-                text: list.artist
+                text: App.shown(list.artist)
                 color: Theme.tint
                 font.pixelSize: 20
                 elide: Text.ElideRight
@@ -114,12 +114,12 @@ ListView {
                 spacing: 10
                 PillButton {
                     symbol: "play-fill"
-                    text: "Reproducir"
+                    text: qsTr("Reproducir")
                     onClicked: list.play(0)
                 }
                 PillButton {
                     symbol: "shuffle"
-                    text: "Aleatorio"
+                    text: qsTr("Aleatorio")
                     onClicked: App.player.shuffleTracks(tracks.paths)
                 }
                 TButton {
@@ -170,7 +170,7 @@ ListView {
             Text {
                 x: 92
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Canción"
+                text: qsTr("Canción")
                 color: Theme.dim
                 font.pixelSize: 11
             }
@@ -178,7 +178,7 @@ ListView {
                 visible: list.wide
                 x: Math.round(parent.width * 0.56)
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Álbum"
+                text: qsTr("Álbum")
                 color: Theme.dim
                 font.pixelSize: 11
             }
@@ -186,7 +186,7 @@ ListView {
                 anchors.right: parent.right
                 anchors.rightMargin: 38
                 anchors.verticalCenter: parent.verticalCenter
-                text: "Duración"
+                text: qsTr("Duración")
                 color: Theme.dim
                 font.pixelSize: 11
             }
@@ -213,7 +213,7 @@ ListView {
         Text {
             anchors.centerIn: parent
             visible: tracks.count === 0
-            text: list.mode === "search" ? "Ninguna canción coincide." : (list.mode === "playlist" ? "Esta playlist está vacía. Añade canciones desde su menú «…»." : "")
+            text: list.mode === "search" ? qsTr("Ninguna canción coincide.") : (list.mode === "playlist" ? qsTr("Esta playlist está vacía. Añade canciones desde su menú «…».") : "")
             color: Theme.dim
             font.pixelSize: 13
         }
@@ -340,7 +340,7 @@ ListView {
             Text {
                 width: parent.width
                 visible: !list.numbered
-                text: row.artist
+                text: App.shown(row.artist)
                 color: Theme.dim
                 font.pixelSize: 11
                 elide: Text.ElideRight
@@ -354,7 +354,7 @@ ListView {
             anchors.right: love.left
             anchors.rightMargin: 12
             anchors.verticalCenter: parent.verticalCenter
-            text: row.album
+            text: App.shown(row.album)
             color: Theme.dim
             font.pixelSize: 12
             elide: Text.ElideRight

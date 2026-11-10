@@ -23,7 +23,7 @@ GridView {
         Text {
             x: 10
             y: 18
-            text: "Artistas"
+            text: qsTr("Artistas")
             color: Theme.text
             font.pixelSize: 26
             font.weight: Font.Bold
@@ -55,7 +55,7 @@ GridView {
             anchors.top: art.bottom
             anchors.topMargin: 8
             horizontalAlignment: Text.AlignHCenter
-            text: cell.modelData.name
+            text: App.shown(cell.modelData.name)
             color: Theme.text
             font.pixelSize: 13
             elide: Text.ElideRight
@@ -66,7 +66,7 @@ GridView {
             anchors.top: name.bottom
             anchors.topMargin: 1
             horizontalAlignment: Text.AlignHCenter
-            text: cell.modelData.albums === 1 ? "1 álbum" : cell.modelData.albums + " álbumes"
+            text: cell.modelData.albums === 1 ? qsTr("1 álbum") : qsTr("%1 álbumes").arg(cell.modelData.albums)
             color: Theme.dim
             font.pixelSize: 12
         }

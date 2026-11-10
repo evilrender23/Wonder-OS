@@ -56,12 +56,12 @@ GridView {
             visible: grid.artist !== ""
             PillButton {
                 symbol: "play-fill"
-                text: "Reproducir"
+                text: qsTr("Reproducir")
                 onClicked: App.player.playTracks(App.library.artistPaths(grid.artist), 0)
             }
             PillButton {
                 symbol: "shuffle"
-                text: "Aleatorio"
+                text: qsTr("Aleatorio")
                 onClicked: App.player.shuffleTracks(App.library.artistPaths(grid.artist))
             }
         }
@@ -153,7 +153,7 @@ GridView {
             anchors.right: art.right
             anchors.top: art.bottom
             anchors.topMargin: 6
-            text: cell.modelData.title
+            text: App.shown(cell.modelData.title)
             color: cell.current ? Theme.tint : Theme.text
             font.pixelSize: 13
             elide: Text.ElideRight
@@ -163,7 +163,7 @@ GridView {
             anchors.right: art.right
             anchors.top: name.bottom
             anchors.topMargin: 1
-            text: grid.showYear ? (cell.modelData.year > 0 ? cell.modelData.year : App.songs(cell.modelData.count)) : cell.modelData.artist
+            text: grid.showYear ? (cell.modelData.year > 0 ? cell.modelData.year : App.songs(cell.modelData.count)) : App.shown(cell.modelData.artist)
             color: Theme.dim
             font.pixelSize: 12
             elide: Text.ElideRight

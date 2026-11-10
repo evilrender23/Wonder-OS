@@ -66,7 +66,7 @@ bool Appearance::setFolderTint(const QString &color)
 {
     const QString tint = cleanColor(color);
     if (tint.isEmpty() && !color.trimmed().isEmpty()) {
-        setError(QStringLiteral("«%1» no es un color: se escribe como #rrggbb.").arg(color.trimmed()));
+        setError(tr("«%1» no es un color: se escribe como #rrggbb.").arg(color.trimmed()));
         return false;
     }
     // Whatever else the file holds stays as it is.
@@ -79,7 +79,7 @@ bool Appearance::setFolderTint(const QString &color)
     QDir().mkpath(QFileInfo(m_path).absolutePath());
     QSaveFile file(m_path);
     if (!file.open(QIODevice::WriteOnly) || file.write(QJsonDocument(object).toJson(QJsonDocument::Indented)) < 0 || !file.commit()) {
-        setError(QStringLiteral("No se puede guardar %1: %2").arg(m_path, file.errorString()));
+        setError(tr("No se puede guardar %1: %2").arg(m_path, file.errorString()));
         return false;
     }
     setError(QString());

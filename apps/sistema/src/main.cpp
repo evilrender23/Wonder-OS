@@ -7,12 +7,14 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QIcon>
+#include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QQuickWindow>
 #include <QStandardPaths>
 #include <QTimer>
+#include <QTranslator>
 
 static QString defaultConfigPath()
 {
@@ -29,21 +31,28 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("wonderland"));
     QCoreApplication::setApplicationName(QStringLiteral("wonderland-sistema"));
     QCoreApplication::setApplicationVersion(QStringLiteral(SISTEMA_VERSION));
-    QGuiApplication::setApplicationDisplayName(QStringLiteral("Sistema"));
     QGuiApplication::setDesktopFileName(QStringLiteral("wonderland-sistema"));
     QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/WonderlandSistema/wonderland-sistema.svg")));
 
+    // Los textos están escritos en español; cualquier otro idioma recibe el inglés.
+    QTranslator translator;
+    if (QLocale().language() != QLocale::Spanish
+        && translator.load(QStringLiteral(":/i18n/wonderland-sistema_en.qm"))) {
+        QCoreApplication::installTranslator(&translator);
+    }
+    QGuiApplication::setApplicationDisplayName(QCoreApplication::translate("main", "Sistema"));
+
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("Los ajustes del sistema de Wonderlands OS."));
+    parser.setApplicationDescription(QCoreApplication::translate("main", "Los ajustes del sistema de Wonderlands OS."));
     parser.addHelpOption();
     parser.addVersionOption();
-    const QCommandLineOption configOption(QStringLiteral("config"), QStringLiteral("El config.toml que se edita (por defecto, el del escritorio)."), QStringLiteral("archivo"));
-    const QCommandLineOption pageOption(QStringLiteral("page"), QStringLiteral("Abrir en este apartado (p. ej. atajos, teclado, ventanas)."), QStringLiteral("apartado"));
-    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QStringLiteral("auto (como el escritorio), light o dark."), QStringLiteral("modo"), QStringLiteral("auto"));
-    const QCommandLineOption shotOption(QStringLiteral("shot"), QStringLiteral("Guardar una imagen de la ventana en este archivo y salir (para pruebas)."), QStringLiteral("png"));
-    const QCommandLineOption lookFileOption(QStringLiteral("look-file"), QStringLiteral("El appearance.json que se edita (por defecto, el del escritorio)."), QStringLiteral("archivo"));
-    const QCommandLineOption pickTintOption(QStringLiteral("pick-tint"), QStringLiteral("Con --page carpetas: dejar este color elegido sin aplicarlo (para pruebas)."), QStringLiteral("#rrggbb"));
-    const QCommandLineOption searchOption(QStringLiteral("search"), QStringLiteral("Abrir con esta búsqueda hecha."), QStringLiteral("texto"));
+    const QCommandLineOption configOption(QStringLiteral("config"), QCoreApplication::translate("main", "El config.toml que se edita (por defecto, el del escritorio)."), QCoreApplication::translate("main", "archivo"));
+    const QCommandLineOption pageOption(QStringLiteral("page"), QCoreApplication::translate("main", "Abrir en este apartado (p. ej. atajos, teclado, ventanas)."), QCoreApplication::translate("main", "apartado"));
+    const QCommandLineOption appearanceOption(QStringLiteral("appearance"), QCoreApplication::translate("main", "auto (como el escritorio), light o dark."), QCoreApplication::translate("main", "modo"), QStringLiteral("auto"));
+    const QCommandLineOption shotOption(QStringLiteral("shot"), QCoreApplication::translate("main", "Guardar una imagen de la ventana en este archivo y salir (para pruebas)."), QStringLiteral("png"));
+    const QCommandLineOption lookFileOption(QStringLiteral("look-file"), QCoreApplication::translate("main", "El appearance.json que se edita (por defecto, el del escritorio)."), QCoreApplication::translate("main", "archivo"));
+    const QCommandLineOption pickTintOption(QStringLiteral("pick-tint"), QCoreApplication::translate("main", "Con --page carpetas: dejar este color elegido sin aplicarlo (para pruebas)."), QStringLiteral("#rrggbb"));
+    const QCommandLineOption searchOption(QStringLiteral("search"), QCoreApplication::translate("main", "Abrir con esta búsqueda hecha."), QCoreApplication::translate("main", "texto"));
     parser.addOptions({configOption, pageOption, searchOption, appearanceOption, shotOption, lookFileOption, pickTintOption});
     parser.process(app);
 

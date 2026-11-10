@@ -92,14 +92,14 @@ Popup {
         spacing: 12
 
         Text {
-            text: root.row ? "Editar atajo" : "Nuevo atajo"
+            text: root.row ? qsTr("Editar atajo") : qsTr("Nuevo atajo")
             color: Theme.text
             font.pixelSize: 18
             font.weight: Font.DemiBold
         }
 
         Text {
-            text: "Combinación"
+            text: qsTr("Combinación")
             color: Theme.dim
             font.pixelSize: Theme.small
         }
@@ -112,7 +112,7 @@ Popup {
                 TButton {
                     required property string modelData
 
-                    text: Bindings.modifierGlyphs[modelData] + (modelData === root.modKey ? " Mod" : (modelData === "super" ? " Super" : (modelData === "shift" ? " Mayús" : "")))
+                    text: Bindings.modifierGlyphs[modelData] + (modelData === root.modKey ? " Mod" : (modelData === "super" ? " Super" : (modelData === "shift" ? " " + qsTr("Mayús") : "")))
                     primary: root.mods.indexOf(modelData) >= 0
                     onClicked: root.toggle(modelData)
                 }
@@ -126,7 +126,7 @@ Popup {
                 id: keyField
 
                 Layout.fillWidth: true
-                placeholderText: "tecla: t, Return, F5, Print…"
+                placeholderText: qsTr("tecla: t, Return, F5, Print…")
             }
         }
         RowLayout {
@@ -143,7 +143,7 @@ Popup {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.recording ? "Pulsa las teclas…" : "⏺ Grabar pulsación"
+                    text: root.recording ? qsTr("Pulsa las teclas…") : qsTr("⏺ Grabar pulsación")
                     color: root.recording ? "#ffffff" : Theme.text
                     font.pixelSize: Theme.body
                 }
@@ -185,7 +185,7 @@ Popup {
             }
             Text {
                 Layout.fillWidth: true
-                text: "Las combinaciones que ya tienen un atajo no llegan a esta ventana: márcalas a mano."
+                text: qsTr("Las combinaciones que ya tienen un atajo no llegan a esta ventana: márcalas a mano.")
                 color: Theme.dim
                 font.pixelSize: Theme.small
                 wrapMode: Text.WordWrap
@@ -200,9 +200,9 @@ Popup {
             }
             Text {
                 Layout.fillWidth: true
-                text: !root.keyKnown ? "«" + root.key + "» no es el nombre de ninguna tecla."
-                    : (root.replaces ? "Ahora hace «" + Actions.describe(root.taken.value) + "»; se reemplazará."
-                    : (root.key === "" && root.mods.length > 0 ? "Solo modificadores: se dispara al soltarlos." : ""))
+                text: !root.keyKnown ? qsTr("«%1» no es el nombre de ninguna tecla.").arg(root.key)
+                    : (root.replaces ? qsTr("Ahora hace «%1»; se reemplazará.").arg(Actions.describe(root.taken.value))
+                    : (root.key === "" && root.mods.length > 0 ? qsTr("Solo modificadores: se dispara al soltarlos.") : ""))
                 color: !root.keyKnown || root.replaces ? Theme.danger : Theme.dim
                 font.pixelSize: Theme.small
                 wrapMode: Text.WordWrap
@@ -211,7 +211,7 @@ Popup {
 
         Text {
             Layout.topMargin: 6
-            text: "Acción"
+            text: qsTr("Acción")
             color: Theme.dim
             font.pixelSize: Theme.small
         }
@@ -221,8 +221,8 @@ Popup {
             Layout.fillWidth: true
             implicitHeight: 30
             font.pixelSize: Theme.body
-            model: Actions.list.map(a => a.group + " · " + a.label)
-            displayText: currentIndex < 0 ? "Otra (escrita a mano)" : currentText
+            model: Actions.list.map(a => Actions.groupLabel(a.group) + " · " + a.label)
+            displayText: currentIndex < 0 ? qsTr("Otra (escrita a mano)") : currentText
             onActivated: index => root.actionId = Actions.list[index].id
         }
         TField {
@@ -230,7 +230,7 @@ Popup {
 
             Layout.fillWidth: true
             visible: !root.action
-            placeholderText: "acción [argumento]"
+            placeholderText: qsTr("acción [argumento]")
         }
         TField {
             id: argField
@@ -238,9 +238,9 @@ Popup {
             Layout.fillWidth: true
             visible: root.action !== null && root.action.arg !== undefined && !Actions.args[root.action.arg]
             placeholderText: !root.action ? "" : ({
-                command: "orden, p. ej. firefox o sh -c '…'",
-                bookmark: "nombre del marcador, p. ej. 1",
-                layout: "next, prev o un índice desde 0"
+                command: qsTr("orden, p. ej. firefox o sh -c '…'"),
+                bookmark: qsTr("nombre del marcador, p. ej. 1"),
+                layout: qsTr("next, prev o un índice desde 0")
             })[root.action.arg] || ""
             onAccepted: root.save()
         }
@@ -272,11 +272,11 @@ Popup {
                 Layout.fillWidth: true
             }
             TButton {
-                text: "Cancelar"
+                text: qsTr("Cancelar")
                 onClicked: root.close()
             }
             TButton {
-                text: "Guardar"
+                text: qsTr("Guardar")
                 primary: true
                 enabled: root.comboValid && root.value !== ""
                 onClicked: root.save()

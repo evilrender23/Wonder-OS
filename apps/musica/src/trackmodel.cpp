@@ -59,7 +59,10 @@ void TrackModel::reload()
         const QStringList words = folded(m_key).split(QLatin1Char(' '), Qt::SkipEmptyParts);
         if (!words.isEmpty()) {
             for (const Track &track : library->tracks()) {
-                const QString hay = folded(track.title + QLatin1Char(' ') + track.artist + QLatin1Char(' ') + track.album + QLatin1Char(' ') + track.albumArtist);
+                // The «unknown» names are found by what the window calls them, too.
+                const App *app = App::instance();
+                const QString hay = folded(track.title + QLatin1Char(' ') + track.artist + QLatin1Char(' ') + track.album + QLatin1Char(' ') + track.albumArtist
+                                           + QLatin1Char(' ') + app->shown(track.artist) + QLatin1Char(' ') + app->shown(track.album));
                 const bool match = std::all_of(words.begin(), words.end(), [&hay](const QString &word) {
                     return hay.contains(word);
                 });

@@ -69,18 +69,18 @@ ColumnLayout {
             }
             Text {
                 Layout.preferredWidth: 78
-                text: ({ default: "de fábrica", changed: "cambiado", off: "desactivado", custom: "tuyo" })[line.modelData.state]
+                text: ({ default: qsTr("de fábrica"), changed: qsTr("cambiado"), off: qsTr("desactivado"), custom: qsTr("tuyo") })[line.modelData.state]
                 color: line.modelData.state === "default" ? Theme.faint : Theme.accent
                 font.pixelSize: Theme.small
             }
             TButton {
                 visible: line.modelData.state === "changed" || line.modelData.state === "off"
-                text: "Restaurar"
+                text: qsTr("Restaurar")
                 onClicked: Config.apply(Bindings.restore(root.spec.table, line.modelData))
             }
             TButton {
                 visible: line.modelData.state !== "off"
-                text: line.modelData.state === "custom" ? "Eliminar" : "Desactivar"
+                text: line.modelData.state === "custom" ? qsTr("Eliminar") : qsTr("Desactivar")
                 destructive: true
                 onClicked: Config.apply(Bindings.remove(root.spec.table, line.modelData))
             }
@@ -121,7 +121,7 @@ ColumnLayout {
             onAccepted: parent.add()
         }
         TButton {
-            text: "Añadir"
+            text: qsTr("Añadir")
             enabled: newKey.text.trim() !== "" && newValue.text.trim() !== ""
             onClicked: parent.add()
         }

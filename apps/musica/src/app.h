@@ -63,6 +63,9 @@ public:
     /// «42 minutos», «1 hora y 12 minutos».
     Q_INVOKABLE QString span(qint64 ms) const;
     Q_INVOKABLE QString songs(int count) const;
+    /// A name as the window writes it: the library keeps the «unknown» artist and
+    /// album under their Spanish names, which are also what tells them apart.
+    Q_INVOKABLE QString shown(const QString &name) const;
     Q_INVOKABLE void reveal(const QString &path) const;
     Q_INVOKABLE QVariant setting(const QString &key, const QVariant &fallback) const;
     Q_INVOKABLE void setSetting(const QString &key, const QVariant &value);

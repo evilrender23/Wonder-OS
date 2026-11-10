@@ -20,7 +20,7 @@ ApplicationWindow {
     minimumWidth: 780
     minimumHeight: 460
     visible: true
-    title: App.player.hasTrack ? App.player.current.title + " — " + App.player.current.artist : "Música"
+    title: App.player.hasTrack ? App.player.current.title + " — " + App.shown(App.player.current.artist) : qsTr("Música")
     color: App.glass ? "transparent" : Theme.window
 
     onClosing: {
@@ -153,7 +153,7 @@ ApplicationWindow {
 
     FolderDialog {
         id: folderDialog
-        title: "Añadir carpeta de música"
+        title: qsTr("Añadir carpeta de música")
         onAccepted: App.library.addFolder(selectedFolder)
     }
 
@@ -162,7 +162,7 @@ ApplicationWindow {
     function newPlaylist(paths) {
         pendingPaths = paths
         renaming = ""
-        nameDialog.ask("Nueva playlist", "", "Crear")
+        nameDialog.ask(qsTr("Nueva playlist"), "", qsTr("Crear"))
     }
     NameDialog {
         id: nameDialog
@@ -174,7 +174,7 @@ ApplicationWindow {
                 if (win.pendingPaths.length === 0)
                     win.show("playlist", id)
                 else
-                    toast.say("Añadido a «" + name + "».")
+                    toast.say(qsTr("Añadido a «%1».").arg(name))
             }
         }
     }
@@ -201,23 +201,23 @@ ApplicationWindow {
         }
 
         FMenuItem {
-            text: "Reproducir"
+            text: qsTr("Reproducir")
             onTriggered: App.player.playTracks(songMenu.paths, 0)
         }
         FMenuItem {
-            text: "Reproducir a continuación"
+            text: qsTr("Reproducir a continuación")
             onTriggered: App.player.playNext(songMenu.paths)
         }
         FMenuItem {
-            text: "Añadir a la cola"
+            text: qsTr("Añadir a la cola")
             onTriggered: App.player.addToQueue(songMenu.paths)
         }
         FSeparator {}
         FMenu {
             id: addMenu
-            title: "Añadir a una playlist"
+            title: qsTr("Añadir a una playlist")
             FMenuItem {
-                text: "Nueva playlist…"
+                text: qsTr("Nueva playlist…")
                 onTriggered: win.newPlaylist(songMenu.paths)
             }
             FSeparator {
@@ -230,7 +230,7 @@ ApplicationWindow {
                     text: modelData.name
                     onTriggered: {
                         App.playlists.add(modelData.id, songMenu.paths)
-                        toast.say("Añadido a «" + modelData.name + "».")
+                        toast.say(qsTr("Añadido a «%1».").arg(modelData.name))
                     }
                 }
                 onObjectAdded: (index, object) => addMenu.insertItem(index + 2, object)
@@ -239,28 +239,28 @@ ApplicationWindow {
         }
         FMenuItem {
             visible: songMenu.single
-            text: songMenu.favorite ? "Quitar de Favoritas" : "Añadir a Favoritas"
+            text: songMenu.favorite ? qsTr("Quitar de Favoritas") : qsTr("Añadir a Favoritas")
             onTriggered: App.playlists.toggleFavorite(songMenu.paths[0])
         }
         FMenuItem {
             visible: !songMenu.single
-            text: "Añadir a Favoritas"
+            text: qsTr("Añadir a Favoritas")
             onTriggered: App.playlists.add("favorites", songMenu.paths)
         }
         FSeparator {}
         FMenuItem {
             visible: songMenu.albumKey !== "" && !(win.route.page === "album" && win.route.key === songMenu.albumKey)
-            text: "Ir al álbum"
+            text: qsTr("Ir al álbum")
             onTriggered: win.openAlbum(songMenu.albumKey)
         }
         FMenuItem {
             visible: songMenu.artist !== "" && !(win.route.page === "artist" && win.route.key === songMenu.artist)
-            text: "Ir al artista"
+            text: qsTr("Ir al artista")
             onTriggered: win.go("artist", songMenu.artist)
         }
         FMenuItem {
             visible: songMenu.single
-            text: "Mostrar en Rabbit"
+            text: qsTr("Mostrar en Rabbit")
             onTriggered: App.reveal(songMenu.paths[0])
         }
         FSeparator {
@@ -268,7 +268,7 @@ ApplicationWindow {
         }
         FMenuItem {
             visible: songMenu.slot >= 0
-            text: songMenu.playlistId === "favorites" ? "Quitar de Favoritas" : "Quitar de la playlist"
+            text: songMenu.playlistId === "favorites" ? qsTr("Quitar de Favoritas") : qsTr("Quitar de la playlist")
             onTriggered: App.playlists.removeAt(songMenu.playlistId, songMenu.slot)
         }
     }
@@ -281,11 +281,11 @@ ApplicationWindow {
             popup()
         }
         FMenuItem {
-            text: "Reproducir"
+            text: qsTr("Reproducir")
             onTriggered: App.player.playTracks(App.playlists.paths(playlistMenu.playlistId), 0)
         }
         FMenuItem {
-            text: "Añadir a la cola"
+            text: qsTr("Añadir a la cola")
             onTriggered: App.player.addToQueue(App.playlists.paths(playlistMenu.playlistId))
         }
         FSeparator {
@@ -293,15 +293,15 @@ ApplicationWindow {
         }
         FMenuItem {
             visible: playlistMenu.playlistId !== "favorites"
-            text: "Cambiar nombre…"
+            text: qsTr("Cambiar nombre…")
             onTriggered: {
                 win.renaming = playlistMenu.playlistId
-                nameDialog.ask("Cambiar nombre", App.playlists.name(playlistMenu.playlistId), "Guardar")
+                nameDialog.ask(qsTr("Cambiar nombre"), App.playlists.name(playlistMenu.playlistId), qsTr("Guardar"))
             }
         }
         FMenuItem {
             visible: playlistMenu.playlistId !== "favorites"
-            text: "Eliminar playlist"
+            text: qsTr("Eliminar playlist")
             onTriggered: App.playlists.remove(playlistMenu.playlistId)
         }
     }
@@ -309,11 +309,11 @@ ApplicationWindow {
     FMenu {
         id: libraryMenu
         FMenuItem {
-            text: "Añadir carpeta de música…"
+            text: qsTr("Añadir carpeta de música…")
             onTriggered: folderDialog.open()
         }
         FMenuItem {
-            text: "Actualizar biblioteca"
+            text: qsTr("Actualizar biblioteca")
             enabled: !App.library.scanning
             onTriggered: App.library.rescan()
         }
@@ -324,7 +324,7 @@ ApplicationWindow {
             model: App.library.folders
             delegate: FMenuItem {
                 required property string modelData
-                text: "Quitar «" + modelData.split("/").pop() + "»"
+                text: qsTr("Quitar «%1»").arg(modelData.split("/").pop())
                 onTriggered: App.library.removeFolder(modelData)
             }
             onObjectAdded: (index, object) => libraryMenu.insertItem(index + 3, object)
@@ -359,7 +359,7 @@ ApplicationWindow {
                 x: 12
                 y: 14
                 width: parent.width - 24
-                placeholderText: "Buscar"
+                placeholderText: qsTr("Buscar")
                 placeholderTextColor: Theme.dim
                 color: Theme.text
                 font.pixelSize: 13
@@ -424,17 +424,17 @@ ApplicationWindow {
                     Text {
                         leftPadding: 9
                         bottomPadding: 4
-                        text: "Biblioteca"
+                        text: qsTr("Biblioteca")
                         color: Theme.dim
                         font.pixelSize: 11
                         font.weight: Font.DemiBold
                     }
                     Repeater {
                         model: [
-                            { page: "recent", symbol: "clock", text: "Añadido recientemente" },
-                            { page: "artists", symbol: "mic", text: "Artistas" },
-                            { page: "albums", symbol: "disc", text: "Álbumes" },
-                            { page: "songs", symbol: "music", text: "Canciones" },
+                            { page: "recent", symbol: "clock", text: qsTr("Añadido recientemente") },
+                            { page: "artists", symbol: "mic", text: qsTr("Artistas") },
+                            { page: "albums", symbol: "disc", text: qsTr("Álbumes") },
+                            { page: "songs", symbol: "music", text: qsTr("Canciones") },
                         ]
                         SideItem {
                             required property var modelData
@@ -449,14 +449,14 @@ ApplicationWindow {
                         leftPadding: 9
                         topPadding: 16
                         bottomPadding: 4
-                        text: "Playlists"
+                        text: qsTr("Playlists")
                         color: Theme.dim
                         font.pixelSize: 11
                         font.weight: Font.DemiBold
                     }
                     SideItem {
                         symbol: "heart"
-                        text: "Favoritas"
+                        text: qsTr("Favoritas")
                         selected: win.route.page === "playlist" && win.route.key === "favorites"
                         onClicked: win.show("playlist", "favorites")
                         onMenuRequested: playlistMenu.showFor("favorites")
@@ -474,7 +474,7 @@ ApplicationWindow {
                     }
                     SideItem {
                         symbol: "plus"
-                        text: "Nueva playlist"
+                        text: qsTr("Nueva playlist")
                         tone: Theme.dim
                         onClicked: win.newPlaylist([])
                     }
@@ -490,7 +490,7 @@ ApplicationWindow {
                     x: 19
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width - 60
-                    text: App.library.scanning ? "Actualizando biblioteca…" : App.songs(App.library.count)
+                    text: App.library.scanning ? qsTr("Actualizando biblioteca…") : App.songs(App.library.count)
                     color: Theme.dim
                     font.pixelSize: 11
                     elide: Text.ElideRight
@@ -572,7 +572,7 @@ ApplicationWindow {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             topPadding: 6
-                            text: App.library.scanning ? "Buscando música…" : "Tu música aparecerá aquí"
+                            text: App.library.scanning ? qsTr("Buscando música…") : qsTr("Tu música aparecerá aquí")
                             color: Theme.text
                             font.pixelSize: 20
                             font.weight: Font.Bold
@@ -583,8 +583,8 @@ ApplicationWindow {
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WordWrap
                             text: App.library.folders.length > 0
-                                ? "No hay canciones en " + App.library.folders.map(f => "«" + f.split("/").pop() + "»").join(", ") + ". Copia música ahí, arrastra archivos a esta ventana o añade otra carpeta."
-                                : "Añade una carpeta con tu música, o arrastra canciones a esta ventana."
+                                ? qsTr("No hay canciones en %1. Copia música ahí, arrastra archivos a esta ventana o añade otra carpeta.").arg(App.library.folders.map(f => qsTr("«%1»").arg(f.split("/").pop())).join(", "))
+                                : qsTr("Añade una carpeta con tu música, o arrastra canciones a esta ventana.")
                             color: Theme.dim
                             font.pixelSize: 13
                         }
@@ -592,7 +592,7 @@ ApplicationWindow {
                         PillButton {
                             anchors.horizontalCenter: parent.horizontalCenter
                             symbol: "folder-plus"
-                            text: "Añadir carpeta…"
+                            text: qsTr("Añadir carpeta…")
                             onClicked: folderDialog.open()
                         }
                     }
@@ -645,7 +645,7 @@ ApplicationWindow {
     Component {
         id: albumsPage
         AlbumGrid {
-            heading: win.route.page === "recent" ? "Añadido recientemente" : "Álbumes"
+            heading: win.route.page === "recent" ? qsTr("Añadido recientemente") : qsTr("Álbumes")
             albums: win.route.page === "recent" ? App.library.recentAlbums : App.library.albums
             onAlbumOpened: key => win.go("album", key)
             onMenuRequested: album => songMenu.showFor({ paths: App.library.albumPaths(album.key), albumKey: album.key, artist: album.artist })
@@ -660,7 +660,7 @@ ApplicationWindow {
     Component {
         id: artistPage
         AlbumGrid {
-            heading: win.route.key
+            heading: App.shown(win.route.key)
             artist: win.route.key
             showYear: true
             canGoBack: win.backStack.length > 0
@@ -676,7 +676,7 @@ ApplicationWindow {
             readonly property string query: search.text.trim()
             mode: win.route.page === "search" ? "search" : "songs"
             key: mode === "search" ? query : ""
-            heading: mode === "search" ? "Resultados de «" + query + "»" : "Canciones"
+            heading: mode === "search" ? qsTr("Resultados de «%1»").arg(query) : qsTr("Canciones")
             onMenuRequested: row => songMenu.showFor({ paths: [row.path], albumKey: row.albumKey, artist: row.artist })
         }
     }
@@ -686,7 +686,7 @@ ApplicationWindow {
             readonly property var album: App.library.count >= 0 ? App.library.album(win.route.key) : ({})
             mode: "album"
             key: win.route.key
-            heading: album.title ?? ""
+            heading: App.shown(album.title ?? "")
             artist: album.artist ?? ""
             detail: [album.genre ?? "", album.year > 0 ? String(album.year) : ""].filter(part => part !== "").join(" · ")
             coverPath: album.cover ?? ""
@@ -704,7 +704,7 @@ ApplicationWindow {
             mode: "playlist"
             key: win.route.key
             heading: App.playlists.list.length >= 0 ? App.playlists.name(win.route.key) : ""
-            detail: "Playlist"
+            detail: qsTr("Playlist")
             coverPath: tracks.paths.length > 0 ? tracks.paths[0] : ""
             coverSymbol: favorites ? "heart" : "list-music"
             canGoBack: win.backStack.length > 0

@@ -57,7 +57,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: "Atajos de teclado"
+                text: qsTr("Atajos de teclado")
                 color: Theme.text
                 font.pixelSize: 22
                 font.weight: Font.DemiBold
@@ -66,11 +66,11 @@ Item {
                 id: search
 
                 implicitWidth: 220
-                placeholderText: "Buscar"
+                placeholderText: qsTr("Buscar")
                 text: root.startQuery
             }
             TButton {
-                text: "＋ Nuevo atajo"
+                text: qsTr("＋ Nuevo atajo")
                 primary: true
                 onClicked: dialog.openFor(null)
             }
@@ -80,7 +80,7 @@ Item {
             Layout.rightMargin: 24
             Layout.topMargin: 6
             Layout.fillWidth: true
-            text: "«Mod» es la tecla " + Bindings.modifierGlyphs[root.modKey] + " (se cambia en General). Los cambios se aplican al momento."
+            text: qsTr("«Mod» es la tecla %1 (se cambia en General). Los cambios se aplican al momento.").arg(Bindings.modifierGlyphs[root.modKey])
             color: Theme.dim
             font.pixelSize: Theme.small
             wrapMode: Text.WordWrap
@@ -129,7 +129,7 @@ Item {
                         visible: line.heading
                         anchors.verticalCenter: parent.verticalCenter
                         x: 14
-                        text: line.modelData.section
+                        text: Actions.groupLabel(line.modelData.section)
                         color: Theme.dim
                         font.pixelSize: Theme.small
                         font.weight: Font.DemiBold
@@ -150,7 +150,7 @@ Item {
                         }
                         Text {
                             visible: line.modelData.state === "changed" || line.modelData.state === "off"
-                            text: line.modelData.state === "off" ? "desactivado" : "cambiado"
+                            text: line.modelData.state === "off" ? qsTr("desactivado") : qsTr("cambiado")
                             color: Theme.accent
                             font.pixelSize: Theme.small
                         }
@@ -161,17 +161,17 @@ Item {
                         }
                         TButton {
                             visible: hover.hovered && line.modelData.state !== "off"
-                            text: "Editar"
+                            text: qsTr("Editar")
                             onClicked: dialog.openFor(line.modelData)
                         }
                         TButton {
                             visible: hover.hovered && (line.modelData.state === "changed" || line.modelData.state === "off")
-                            text: "Restaurar"
+                            text: qsTr("Restaurar")
                             onClicked: Config.apply(Bindings.restore(root.table, line.modelData))
                         }
                         TButton {
                             visible: hover.hovered && line.modelData.state !== "off"
-                            text: line.modelData.state === "custom" ? "Eliminar" : "Desactivar"
+                            text: line.modelData.state === "custom" ? qsTr("Eliminar") : qsTr("Desactivar")
                             destructive: true
                             onClicked: Config.apply(Bindings.remove(root.table, line.modelData))
                         }
@@ -181,7 +181,7 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     visible: list.count === 0
-                    text: "Ningún atajo coincide."
+                    text: qsTr("Ningún atajo coincide.")
                     color: Theme.dim
                     font.pixelSize: Theme.body
                 }

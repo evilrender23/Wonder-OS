@@ -25,7 +25,7 @@ ApplicationWindow {
     minimumWidth: 820
     minimumHeight: 480
     visible: true
-    title: "Sistema"
+    title: qsTr("Sistema")
     color: Theme.window
 
     // The stock controls (switches, combo boxes, check boxes) take the desktop's colours from here.
@@ -76,7 +76,7 @@ ApplicationWindow {
                     Layout.leftMargin: 8
                     Layout.topMargin: 10
                     Layout.bottomMargin: 10
-                    text: "Sistema"
+                    text: qsTr("Sistema")
                     color: Theme.text
                     font.pixelSize: 18
                     font.weight: Font.DemiBold
@@ -88,7 +88,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.bottomMargin: 8
                     rightPadding: 28
-                    placeholderText: "Buscar"
+                    placeholderText: qsTr("Buscar")
                     text: startSearch
                     Keys.onEscapePressed: clear()
 
@@ -160,14 +160,14 @@ ApplicationWindow {
                 }
                 TButton {
                     Layout.fillWidth: true
-                    text: "Deshacer el último cambio"
+                    text: qsTr("Deshacer el último cambio")
                     enabled: Config.canUndo
                     onClicked: Config.undo()
                 }
                 TButton {
                     Layout.fillWidth: true
-                    text: "Abrir config.toml"
-                    tip: Config.path + "\nLas reglas de ventanas y los monitores se editan ahí."
+                    text: qsTr("Abrir config.toml")
+                    tip: Config.path + "\n" + qsTr("Las reglas de ventanas y los monitores se editan ahí.")
                     onClicked: App.openFile(Config.path)
                 }
             }
@@ -197,19 +197,19 @@ ApplicationWindow {
                     Text {
                         Layout.fillWidth: true
                         text: Config.error !== "" ? Config.error
-                            : "No se encuentra driftwm: los cambios se guardan sin que el escritorio los compruebe."
+                            : qsTr("No se encuentra driftwm: los cambios se guardan sin que el escritorio los compruebe.")
                         color: Theme.danger
                         font.pixelSize: Theme.small
                         wrapMode: Text.Wrap
                     }
                     TButton {
                         visible: Config.error !== ""
-                        text: "Recargar"
+                        text: qsTr("Recargar")
                         onClicked: Config.reload()
                     }
                     TButton {
                         visible: Config.error !== ""
-                        text: "Cerrar"
+                        text: qsTr("Cerrar")
                         onClicked: Config.clearError()
                     }
                 }

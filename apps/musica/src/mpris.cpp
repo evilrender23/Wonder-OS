@@ -162,9 +162,9 @@ QVariantMap MprisPlayer::metadata() const
         {QStringLiteral("mpris:trackid"), QVariant::fromValue(QDBusObjectPath(QStringLiteral("/org/wonderland/Musica/track/") + id))},
         {QStringLiteral("mpris:length"), qlonglong(m_player->duration() * 1000)},
         {QStringLiteral("xesam:title"), track.title},
-        {QStringLiteral("xesam:artist"), QStringList{track.artist}},
-        {QStringLiteral("xesam:album"), track.album},
-        {QStringLiteral("xesam:albumArtist"), QStringList{track.albumOwner()}},
+        {QStringLiteral("xesam:artist"), QStringList{m_app->shown(track.artist)}},
+        {QStringLiteral("xesam:album"), m_app->shown(track.album)},
+        {QStringLiteral("xesam:albumArtist"), QStringList{m_app->shown(track.albumOwner())}},
         {QStringLiteral("xesam:url"), QUrl::fromLocalFile(track.path).toString()},
     };
     if (track.number > 0) {

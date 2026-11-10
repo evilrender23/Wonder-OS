@@ -47,11 +47,11 @@ function compose(mods, key, modKey) {
 
 const modifierGlyphs = { super: "❖", ctrl: "Ctrl", alt: "Alt", shift: "⇧", mod3: "Mod3" }
 const keyGlyphs = {
-    "return": "↵", "space": "Espacio", "up": "↑", "down": "↓", "left": "←", "right": "→", "tab": "⇥", "escape": "Esc",
-    "backspace": "⌫", "delete": "Supr", "equal": "=", "minus": "−", "plus": "+", "comma": ",", "period": ".", "slash": "/",
-    "print": "Impr Pant", "prior": "Re Pág", "next": "Av Pág", "home": "Inicio", "end": "Fin", "insert": "Ins",
-    "xf86audioraisevolume": "Vol +", "xf86audiolowervolume": "Vol −", "xf86audiomute": "Silencio",
-    "xf86monbrightnessup": "Brillo +", "xf86monbrightnessdown": "Brillo −",
+    "return": "↵", "space": qsTr("Espacio"), "up": "↑", "down": "↓", "left": "←", "right": "→", "tab": "⇥", "escape": "Esc",
+    "backspace": "⌫", "delete": qsTr("Supr"), "equal": "=", "minus": "−", "plus": "+", "comma": ",", "period": ".", "slash": "/",
+    "print": qsTr("Impr Pant"), "prior": qsTr("Re Pág"), "next": qsTr("Av Pág"), "home": qsTr("Inicio"), "end": qsTr("Fin"), "insert": "Ins",
+    "xf86audioraisevolume": "Vol +", "xf86audiolowervolume": "Vol −", "xf86audiomute": qsTr("Silencio"),
+    "xf86monbrightnessup": qsTr("Brillo +"), "xf86monbrightnessdown": qsTr("Brillo −"),
     "xf86audioplay": "▶", "xf86audiopause": "⏸", "xf86audionext": "⏭", "xf86audioprev": "⏮", "xf86audiostop": "⏹"
 }
 

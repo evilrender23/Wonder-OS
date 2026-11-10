@@ -157,17 +157,28 @@ QString App::span(qint64 ms) const
     const qint64 minutes = qMax(qint64(1), (ms + 30000) / 60000);
     const qint64 hours = minutes / 60;
     const qint64 rest = minutes % 60;
-    const QString minuteText = rest == 1 ? QStringLiteral("1 minuto") : QStringLiteral("%1 minutos").arg(rest);
+    const QString minuteText = rest == 1 ? tr("1 minuto") : tr("%1 minutos").arg(rest);
     if (hours == 0) {
         return minuteText;
     }
-    const QString hourText = hours == 1 ? QStringLiteral("1 hora") : QStringLiteral("%1 horas").arg(hours);
-    return rest == 0 ? hourText : hourText + QStringLiteral(" y ") + minuteText;
+    const QString hourText = hours == 1 ? tr("1 hora") : tr("%1 horas").arg(hours);
+    return rest == 0 ? hourText : tr("%1 y %2").arg(hourText, minuteText);
 }
 
 QString App::songs(int count) const
 {
-    return count == 1 ? QStringLiteral("1 canción") : QStringLiteral("%L1 canciones").arg(count);
+    return count == 1 ? tr("1 canción") : tr("%L1 canciones").arg(count);
+}
+
+QString App::shown(const QString &name) const
+{
+    if (name == TagReader::unknownArtist()) {
+        return tr("Artista desconocido");
+    }
+    if (name == TagReader::unknownAlbum()) {
+        return tr("Álbum desconocido");
+    }
+    return name;
 }
 
 void App::reveal(const QString &path) const
