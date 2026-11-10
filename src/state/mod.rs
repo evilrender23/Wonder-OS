@@ -1028,6 +1028,9 @@ pub struct DriftWm {
     /// launchers leak the trigger key into the previously focused window.
     pub suppressed_keys: HashSet<u32>,
 
+    /// Drops the second press of a chattering key (`input.keyboard.debounce`).
+    pub bounce: crate::input::keyboard::BounceFilter,
+
     /// Mouse buttons currently held down. Cleared on VT switch and session
     /// pause alongside `suppressed_keys`.
     pub held_buttons: HashSet<u32>,

@@ -87,6 +87,7 @@ const pages = [
                 items: [
                     s("input.keyboard.repeat_rate", "int", "Velocidad de repetición", "Teclas por segundo.", { min: 1, max: 100, unit: "/s" }),
                     s("input.keyboard.repeat_delay", "int", "Retardo antes de repetir", "", { min: 100, max: 2000, step: 10, unit: "ms" }),
+                    s("input.keyboard.debounce", "int", "Filtro de doble pulsación", "Ignora una tecla que se repite sola justo después de soltarla (letras dobles por un interruptor gastado). 0 lo desactiva; entre 30 y 60 ms va bien en casi cualquier teclado.", { min: 0, max: 200, step: 5, unit: "ms" }),
                     s("input.keyboard.num_lock", "bool", "Bloq Num activado al iniciar", "", { startup: true }),
                     s("input.keyboard.caps_lock", "bool", "Bloq Mayús activado al iniciar", "", { startup: true })
                 ]

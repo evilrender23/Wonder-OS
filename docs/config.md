@@ -144,6 +144,12 @@ Default: `200`
 
 ms before repeat starts
 
+### `debounce`
+
+Default: `0`
+
+ms; drop a key pressed again this soon after its own release (a worn switch typing a letter twice). 0 = off; 30-60 suits most keyboards
+
 ### `layout_independent`
 
 Default: `true`

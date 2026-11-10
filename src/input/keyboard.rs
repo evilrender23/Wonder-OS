@@ -1,6 +1,8 @@
 //! Keyboard event handling: VT-switch, session-lock forwarding, compositor
 //! action lookup + execution, and key-repeat bookkeeping.
 
+use std::collections::{HashMap, HashSet};
+
 use driftwm::sync::MutexExt;
 use smithay::{
     backend::{
@@ -22,6 +24,7 @@ impl DriftWm {
     /// and forcing a redraw per frame, on the VT we just left.
     pub(crate) fn reset_held_input_state(&mut self) {
         self.suppressed_keys.clear();
+        self.bounce.reset();
         self.held_buttons.clear();
         self.held_action = None;
         self.stage.cancel_cycle();
@@ -34,6 +37,15 @@ impl DriftWm {
         let key_state = event.state();
         let keycode = event.key_code();
         let keycode_u32: u32 = keycode.into();
+
+        // A chattering switch: drop the phantom press and its release before
+        // anything — lock screen, bindings, clients — can count it as a keystroke.
+        if self
+            .bounce
+            .is_bounce(keycode_u32, key_state, time, self.config.key_debounce_ms)
+        {
+            return;
+        }
 
         // A virtual keyboard may have left the focused client on its own keymap.
         let seat = self.seat.clone();
@@ -222,6 +234,66 @@ fn is_enter_keysym(raw: u32) -> bool {
     raw == keysyms::KEY_Return || raw == keysyms::KEY_KP_Enter
 }
 
+/// Bounce filter for worn or dirty key switches, which report one physical
+/// press as press, release, press, release a few milliseconds apart — a doubled
+/// letter. A key pressed again within the window of its own last release is
+/// dropped, together with the release that follows it.
+///
+/// Per key, so fast typing across different keys is never touched; only the
+/// same key twice inside the window is.
+#[derive(Default)]
+pub(crate) struct BounceFilter {
+    /// Event time (ms) of each key's last release.
+    released_at: HashMap<u32, u32>,
+    /// Keys whose press was dropped: their release is dropped too, so no
+    /// client sees a release without a press.
+    dropped: HashSet<u32>,
+}
+
+impl BounceFilter {
+    /// Whether this event is chatter and must be swallowed. `window_ms == 0`
+    /// turns the filter off.
+    pub(crate) fn is_bounce(
+        &mut self,
+        keycode: u32,
+        key_state: KeyState,
+        time_ms: u32,
+        window_ms: u32,
+    ) -> bool {
+        if window_ms == 0 {
+            // Turned off mid-chatter: still swallow the release of a press we
+            // already dropped.
+            self.released_at.clear();
+            return key_state == KeyState::Released && self.dropped.remove(&keycode);
+        }
+        match key_state {
+            KeyState::Pressed => {
+                // Event time is a wrapping u32 millisecond counter.
+                let bounce = self
+                    .released_at
+                    .get(&keycode)
+                    .is_some_and(|released| time_ms.wrapping_sub(*released) < window_ms);
+                if bounce {
+                    self.dropped.insert(keycode);
+                }
+                bounce
+            }
+            KeyState::Released => {
+                // A dropped press's release restarts the window too, so a
+                // switch that keeps chattering stays filtered.
+                self.released_at.insert(keycode, time_ms);
+                self.dropped.remove(&keycode)
+            }
+        }
+    }
+
+    /// Forget everything — key delivery was interrupted (VT switch, lock).
+    pub(crate) fn reset(&mut self) {
+        self.released_at.clear();
+        self.dropped.clear();
+    }
+}
+
 /// Tells a held chord modifier apart from a real key landing on top. The
 /// modifier keysyms are the contiguous block Shift_L … Hyper_R, minus the two
 /// lock keysyms in that range (Caps_Lock, Shift_Lock): those toggle rather than
@@ -318,6 +390,66 @@ mod tests {
     }
 
     const NONE: Modifiers = Modifiers::EMPTY;
+
+    use KeyState::{Pressed, Released};
+
+    #[test]
+    fn a_chattering_key_types_once() {
+        let mut b = BounceFilter::default();
+        assert!(!b.is_bounce(30, Pressed, 1000, 40));
+        assert!(!b.is_bounce(30, Released, 1050, 40));
+        // The switch bounces 8ms later: phantom press and its release.
+        assert!(b.is_bounce(30, Pressed, 1058, 40));
+        assert!(b.is_bounce(30, Released, 1062, 40));
+        // Still chattering: the window restarted at the dropped release.
+        assert!(b.is_bounce(30, Pressed, 1095, 40));
+        assert!(b.is_bounce(30, Released, 1100, 40));
+    }
+
+    #[test]
+    fn a_deliberate_double_letter_gets_through() {
+        let mut b = BounceFilter::default();
+        assert!(!b.is_bounce(30, Pressed, 1000, 40));
+        assert!(!b.is_bounce(30, Released, 1060, 40));
+        assert!(!b.is_bounce(30, Pressed, 1100, 40), "exactly the window");
+        assert!(!b.is_bounce(30, Released, 1160, 40));
+    }
+
+    #[test]
+    fn other_keys_are_never_filtered() {
+        let mut b = BounceFilter::default();
+        assert!(!b.is_bounce(30, Pressed, 1000, 40));
+        assert!(!b.is_bounce(30, Released, 1010, 40));
+        assert!(!b.is_bounce(31, Pressed, 1011, 40));
+        assert!(!b.is_bounce(31, Released, 1020, 40));
+    }
+
+    #[test]
+    fn zero_turns_the_filter_off() {
+        let mut b = BounceFilter::default();
+        assert!(!b.is_bounce(30, Pressed, 1000, 0));
+        assert!(!b.is_bounce(30, Released, 1001, 0));
+        assert!(!b.is_bounce(30, Pressed, 1002, 0));
+        assert!(!b.is_bounce(30, Released, 1003, 0));
+    }
+
+    #[test]
+    fn turning_it_off_still_swallows_the_release_of_a_dropped_press() {
+        let mut b = BounceFilter::default();
+        b.is_bounce(30, Pressed, 1000, 40);
+        b.is_bounce(30, Released, 1010, 40);
+        assert!(b.is_bounce(30, Pressed, 1015, 40));
+        assert!(b.is_bounce(30, Released, 1020, 0));
+        assert!(!b.is_bounce(30, Pressed, 1025, 0));
+    }
+
+    #[test]
+    fn the_window_survives_the_event_clock_wrapping() {
+        let mut b = BounceFilter::default();
+        b.is_bounce(30, Pressed, u32::MAX - 20, 40);
+        b.is_bounce(30, Released, u32::MAX - 5, 40);
+        assert!(b.is_bounce(30, Pressed, 4, 40));
+    }
 
     #[test]
     fn clean_alt_shift_tap_fires_on_release() {

@@ -1367,6 +1367,7 @@ impl SessionLockHandler for DriftWm {
         // mid-cycle; reset these so none survive the locked window.
         self.stage.cancel_cycle();
         self.suppressed_keys.clear();
+        self.bounce.reset();
         self.tap.reset();
         if let Some(pending) = self.pending_middle_click.take() {
             self.loop_handle.remove(pending.timer_token);

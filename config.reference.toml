@@ -97,6 +97,9 @@
 # model = ""                 # XKB model (e.g., "pc105")
 # repeat_rate = 25           # keys/sec
 # repeat_delay = 200         # ms before repeat starts
+# debounce = 0               # ms; drop a key pressed again this soon after its
+                             # own release (a worn switch typing a letter
+                             # twice). 0 = off; 30-60 suits most keyboards
 # layout_independent = true  # match bindings by physical key across layouts
 # num_lock = true            # num lock state on startup
 # caps_lock = false          # caps lock state on startup

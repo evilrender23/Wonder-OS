@@ -181,6 +181,9 @@ pub struct Config {
     /// Keyboard repeat delay (ms) and rate (keys/sec).
     pub repeat_delay: i32,
     pub repeat_rate: i32,
+    /// Bounce filter (ms): a key pressed again this soon after its own release
+    /// is a chattering switch, not a keystroke, and is dropped. 0 = off.
+    pub key_debounce_ms: u32,
     /// Edge auto-pan: activation zone width in pixels from viewport edge.
     pub edge_zone: f64,
     /// Edge auto-pan: speed range (px/frame). Quadratic ramp from min to max.
@@ -1144,6 +1147,12 @@ impl Config {
                 "input.keyboard.repeat_rate",
                 &mut errors,
             ),
+            key_debounce_ms: non_negative(
+                raw.input.keyboard.debounce.unwrap_or(0),
+                "input.keyboard.debounce",
+                &mut errors,
+            )
+            .unsigned_abs(),
             edge_zone: non_negative(
                 raw.navigation.edge_pan.zone.unwrap_or(100.0),
                 "navigation.edge_pan.zone",

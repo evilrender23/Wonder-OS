@@ -193,6 +193,7 @@ pub(super) struct MouseDeviceFileConfig {
 pub(super) struct KeyboardConfig {
     pub repeat_rate: Option<i32>,
     pub repeat_delay: Option<i32>,
+    pub debounce: Option<i32>,
     pub layout: Option<String>,
     pub variant: Option<String>,
     pub options: Option<String>,

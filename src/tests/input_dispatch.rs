@@ -366,6 +366,30 @@ fn releasing_the_key_ends_a_repeated_action() {
     assert_eq!(last_configured(&mut f, id, &surface), (440, 300));
 }
 
+/// A worn switch reports one press as two, a millisecond apart (the fake clock
+/// ticks 1ms per event). With the bounce filter on, the binding runs once.
+#[test]
+fn a_chattering_key_runs_its_binding_once() {
+    let mut f = Fixture::with_config(config(
+        r#"
+        [input.keyboard]
+        debounce = 40
+        [keybindings]
+        "z" = "grow-window right"
+    "#,
+    ));
+    f.add_output(1, (1920, 1080));
+    let id = f.add_client();
+    let surface = map_window(&mut f, id, "term", (400, 300));
+
+    key_press(&mut f, KEY_Z);
+    key_release(&mut f, KEY_Z);
+    key_press(&mut f, KEY_Z);
+    key_release(&mut f, KEY_Z);
+
+    assert_eq!(last_configured(&mut f, id, &surface), (420, 300));
+}
+
 /// A VT switch is the case where the release never arrives — it lands on the VT
 /// we left. Left latched, the action goes on resizing the window at the repeat
 /// rate, redrawing every output per frame, on a session nobody is looking at.
