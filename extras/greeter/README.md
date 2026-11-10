@@ -17,6 +17,9 @@ Keyboard only is enough: type, `Enter`; `Esc` clears or goes back.
 
 ## Install
 
+The distro's `./install.sh` installs it and makes it the login manager
+(`--no-greeter` skips that). By hand:
+
     extras/greeter/install.sh            # install; your login manager stays
     extras/greeter/install.sh --enable   # ...and make it the login manager
     extras/greeter/install.sh --disable  # back to the one you had

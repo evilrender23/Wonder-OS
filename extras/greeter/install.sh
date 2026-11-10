@@ -98,13 +98,16 @@ fi
 # --- Install -------------------------------------------------------------------
 
 step "Packages"
-if command -v pacman >/dev/null 2>&1; then
+if [[ ${WONDERLAND_SKIP_PACKAGES:-0} == 1 ]]; then
+    info "skipped: greetd and quickshell have to be installed already"
+elif command -v pacman >/dev/null 2>&1; then
     as_root pacman -S --needed --noconfirm greetd quickshell
 else
     info "no pacman here: install greetd and quickshell with your package manager"
 fi
 if [[ $DRY_RUN -eq 0 ]]; then
     command -v qs >/dev/null 2>&1 || die "Quickshell (qs) is not installed"
+    command -v greetd >/dev/null 2>&1 || die "greetd is not installed"
     [[ -x $PREFIX/bin/driftwm ]] || die "$PREFIX/bin/driftwm is missing: run ./install.sh first"
     if ! getent passwd greeter >/dev/null; then
         as_root useradd --system --no-create-home --home-dir "$VAR" \

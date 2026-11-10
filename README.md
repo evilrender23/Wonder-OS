@@ -34,6 +34,10 @@ Wonder OS es una distribución Linux basada en CachyOS.
 
 `./install.sh --help` muestra las opciones.
 
+El instalador pone la pantalla de inicio de sesión de Wonder OS (`extras/greeter`) como gestor de
+inicio de sesión desde el siguiente arranque. `./install.sh --no-greeter` deja el que haya, y
+`extras/greeter/install.sh --disable` vuelve al anterior.
+
 ## Licencia
 
 GPL-3.0-or-later. Ver [LICENSE](LICENSE) y [NOTICE.md](NOTICE.md).

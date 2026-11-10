@@ -47,6 +47,8 @@ Steps (all on by default):
   --no-session     don't build/install the compositor and the login session
   --no-apps        don't build/install the apps in apps/
   --no-desktop     don't install the bar, theme, scripts and wallpapers
+  --no-greeter     don't install Wonderland's login screen (extras/greeter)
+                   and make it the login manager; the one you have stays
 
 Options:
   --fresh-config   replace an existing ~/.config/driftwm/config.toml with the
@@ -112,7 +114,8 @@ if [[ -z $here || ! -f $here/Cargo.toml || ! -f $here/dev/scripts/install-wonder
         case $a in
         -h | --help) usage; exit 0 ;;
         -n | --dry-run) DRY_RUN=1 ;;
-        --no-deps | --no-session | --no-apps | --no-desktop | --fresh-config | --update | \
+        --no-deps | --no-session | --no-apps | --no-desktop | --no-greeter | --fresh-config | \
+            --update | \
             -y | --yes | --uninstall) ;;
         *) usage >&2; die "unknown option: $a" ;;
         esac
@@ -145,7 +148,7 @@ fi
 ROOT="$here"
 cd "$ROOT"
 
-DO_DEPS=1 DO_SESSION=1 DO_APPS=1 DO_DESKTOP=1 FRESH_CONFIG=0 UPDATE=0 UNINSTALL=0
+DO_DEPS=1 DO_SESSION=1 DO_APPS=1 DO_DESKTOP=1 DO_GREETER=1 FRESH_CONFIG=0 UPDATE=0 UNINSTALL=0
 passthrough=()
 for a in "$@"; do
     case $a in
@@ -153,6 +156,7 @@ for a in "$@"; do
     --no-session) DO_SESSION=0 ;;
     --no-apps) DO_APPS=0 ;;
     --no-desktop) DO_DESKTOP=0 ;;
+    --no-greeter) DO_GREETER=0 ;;
     --fresh-config) FRESH_CONFIG=1 ;;
     --update) UPDATE=1; continue ;;
     -y | --yes) YES=1 ;;
@@ -199,6 +203,13 @@ if [[ $UNINSTALL -eq 1 ]]; then
     printf '%sUninstall WonderlandWM%s from %s.\n' "$B" "$R" "$PREFIX"
     info "Your config in $cfg_dir and the pacman packages stay."
     confirm "Continue?" || exit 0
+    if [[ -e /etc/wonderland-greeter || -x $PREFIX/bin/wonderland-greeter ]]; then
+        # First, while the compositor it runs is still there: the login manager
+        # you had before comes back.
+        greeter_args=(--uninstall)
+        [[ $DRY_RUN -eq 1 ]] && greeter_args+=(-n)
+        extras/greeter/install.sh "${greeter_args[@]}"
+    fi
     step "Login session and compositor"
     as_root sh dev/scripts/install-wonderlandwm --uninstall
     step "Apps"
@@ -248,11 +259,13 @@ if [[ $DO_DESKTOP -eq 1 ]]; then
     fi
     info "  scripts/, quickshell/ and wallpapers/ there are replaced (old ones kept as .bak)"
 fi
+[[ $DO_GREETER -eq 1 ]] &&
+    info "• login screen: Wonderland's greeter (greetd) becomes the login manager, from the next boot (sudo)"
 [[ $DRY_RUN -eq 1 ]] && info "${YLW}dry run: nothing is changed${R}"
 echo
 confirm "Continue?" || exit 0
 
-if [[ $DRY_RUN -eq 0 && ($DO_DEPS -eq 1 || $DO_SESSION -eq 1 || $DO_APPS -eq 1) ]]; then
+if [[ $DRY_RUN -eq 0 && ($DO_DEPS -eq 1 || $DO_SESSION -eq 1 || $DO_APPS -eq 1 || $DO_GREETER -eq 1) ]]; then
     # Ask for the password once, up front, instead of halfway through a build.
     sudo -v || die "sudo is needed for the system-wide steps"
     # Keep it fresh through a long build so it doesn't ask again halfway.
@@ -473,6 +486,26 @@ if [[ $DO_DESKTOP -eq 1 ]]; then
     fi
 fi
 
+# --- Login screen -------------------------------------------------------------------
+
+# Last: it runs the installed compositor and reads the desktop's config.toml
+# for the monitors, the keyboard layout and the wallpaper.
+if [[ $DO_GREETER -eq 1 ]]; then
+    step "Installing the login screen and making it the login manager"
+    if [[ $DRY_RUN -eq 0 && ! -x $PREFIX/bin/driftwm ]]; then
+        warn "$PREFIX/bin/driftwm is missing (--no-session?); the login screen needs it"
+        failed+=("login screen")
+    else
+        # Its own dry run prints what it would do, so it runs either way.
+        greeter_args=(--enable)
+        [[ $DRY_RUN -eq 1 ]] && greeter_args+=(-n)
+        if ! env WONDERLAND_SKIP_PACKAGES="$((1 - DO_DEPS))" extras/greeter/install.sh "${greeter_args[@]}"; then
+            warn "extras/greeter/install.sh failed; your login manager is the one you had"
+            failed+=("login screen")
+        fi
+    fi
+fi
+
 # --- Check ------------------------------------------------------------------------
 
 step "Checking"
@@ -509,6 +542,9 @@ if [[ $DO_SESSION -eq 1 && $DRY_RUN -eq 0 ]]; then
     fi
     [[ -f /usr/share/wayland-sessions/wonderlandwm.desktop ]] && ok "login session \"WonderlandWM\" installed"
 fi
+if [[ $DO_GREETER -eq 1 && $DRY_RUN -eq 0 ]] && systemctl is-enabled --quiet greetd.service 2>/dev/null; then
+    ok "Wonderland's login screen is the login manager, from the next boot"
+fi
 
 echo
 if [[ ${#failed[@]} -gt 0 ]]; then
@@ -528,5 +564,8 @@ if [[ $DO_SESSION -eq 1 ]]; then
     info "Way out if something goes wrong: Super+Ctrl+Shift+Q (or, from a TTY: systemctl --user stop driftwm)."
     [[ -f $state_dir/driftwm.prev ]] &&
         info "Back to the previous compositor: sudo install -m755 $state_dir/driftwm.prev $PREFIX/bin/driftwm"
+fi
+if [[ $DO_GREETER -eq 1 ]]; then
+    info "The login screen is Wonderland's own from the next boot. Back to the one you had: extras/greeter/install.sh --disable"
 fi
 info "Update later with: $ROOT/install.sh --update"
