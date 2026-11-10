@@ -210,7 +210,7 @@ Scope {
                     height: win.barHeight
                     radius: 18
                     readonly property color base: Theme.p.elevated
-                    color: Qt.rgba(base.r, base.g, base.b, Theme.dark ? 0.86 : 0.88)
+                    color: Theme.glassy(base, Theme.dark ? 0.86 : 0.88)
                     border.width: 1
                     border.color: Theme.p.stroke2
                 }

@@ -136,6 +136,12 @@ blur = true
 app_id = "wonderland-bar"
 blur = true
 
+# The dock, translucent with the same setting. Its surface spans the screen
+# but the frost follows what it paints, so only the dock itself is frosted.
+[[window_rules]]
+app_id = "wonderland-dock"
+blur = true
+
 # Spotlight and the display settings: frosted glass, rounded, with a shadow.
 [[window_rules]]
 app_id = "wonderland-spotlight"
