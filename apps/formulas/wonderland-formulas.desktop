@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Fórmulas
+Name[en]=Formulas
+GenericName=Editor de fórmulas
+GenericName[en]=Formula Editor
+Comment=Fórmulas matemáticas en LaTeX, a la vista mientras se escriben
+Comment[en]=Mathematical formulas in LaTeX, previewed as you type
+Exec=wonderland-formulas %F
+Icon=wonderland-formulas
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-formulas
+MimeType=application/x-wonderland-formula;application/vnd.oasis.opendocument.formula;text/x-tex;
+Categories=Office;Education;Math;Science;Qt;
+Keywords=fórmula;fórmulas;ecuación;matemáticas;latex;mathml;math;formula;equation;

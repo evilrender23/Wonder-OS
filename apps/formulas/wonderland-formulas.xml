@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-wonderland-formula">
+    <comment>Wonderland formula</comment>
+    <comment xml:lang="es">Fórmula de Wonderland</comment>
+    <sub-class-of type="application/json"/>
+    <icon name="wonderland-formulas"/>
+    <glob pattern="*.wform"/>
+  </mime-type>
+</mime-info>
