@@ -1,0 +1,4 @@
+[portal]
+DBusName=org.freedesktop.impl.portal.desktop.rabbit
+Interfaces=org.freedesktop.impl.portal.FileChooser;
+UseIn=driftwm;wonderland

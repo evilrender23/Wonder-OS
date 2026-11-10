@@ -12,6 +12,9 @@ QtObject {
         function onWindowRequested(url, select) {
             root.open(url, select)
         }
+        function onPickRequested(picker) {
+            root.open(String(picker.folder) !== "" ? picker.folder : Prefs.pickFolder, [], picker)
+        }
         function onInfoRequested(url) {
             root.open(App.parentUrl(url), [url]).showInfo(url)
         }
@@ -41,12 +44,14 @@ QtObject {
         onTriggered: App.saveShot(root.look)
     }
 
-    function open(url, select) {
-        const window = windowComponent.createObject(null, { startUrl: url, startSelect: select, first: windows.length === 0, cascade: windows.length })
+    function open(url, select, picker) {
+        const window = windowComponent.createObject(null, { startUrl: url, startSelect: select, first: windows.length === 0, cascade: windows.length, picker: picker ?? null })
         windows = windows.concat([window])
         window.closing.connect(() => {
             windows = windows.filter(other => other !== window)
             window.destroy()
+            if (picker)
+                App.pickClosed(picker)
         })
         return window
     }

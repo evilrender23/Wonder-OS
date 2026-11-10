@@ -272,6 +272,32 @@ void App::requestWindow(const QUrl &url, const QList<QUrl> &select)
     Q_EMIT windowRequested(Places::canonical(url), select);
 }
 
+void App::pick(Picker *picker)
+{
+    Q_EMIT pickRequested(picker);
+}
+
+void App::pickClosed(Picker *picker)
+{
+    if (picker) {
+        picker->cancel();
+        picker->deleteLater();
+    }
+}
+
+QUrl App::childUrl(const QUrl &folder, const QString &name) const
+{
+    if (!folder.isLocalFile() || name.isEmpty() || name.contains(QLatin1Char('/')) || name == QLatin1String(".") || name == QLatin1String("..")) {
+        return {};
+    }
+    return QUrl::fromLocalFile(QDir(folder.toLocalFile()).filePath(name));
+}
+
+bool App::exists(const QUrl &url) const
+{
+    return url.isLocalFile() && QFileInfo::exists(url.toLocalFile());
+}
+
 void App::quickLook(const QList<QUrl> &urls, QObject *source, bool update)
 {
     if (!urls.isEmpty()) {

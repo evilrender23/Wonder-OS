@@ -9,6 +9,7 @@
 #include <QtQml/qqmlregistration.h>
 
 #include "fileops.h"
+#include "picker.h"
 #include "places.h"
 
 class DragNotice;
@@ -92,6 +93,14 @@ public:
     QList<QUrl> testLook() const { return m_testLook; }
     void setTestLook(const QList<QUrl> &urls) { m_testLook = urls; }
 
+    /// Another app asks for a file: a window opens to choose it in.
+    void pick(Picker *picker);
+    /// That window is gone, and the request with it.
+    Q_INVOKABLE void pickClosed(Picker *picker);
+    /// Where `name` would be inside a folder on disk; empty when it can't be a file's name there.
+    Q_INVOKABLE QUrl childUrl(const QUrl &folder, const QString &name) const;
+    Q_INVOKABLE bool exists(const QUrl &url) const;
+
     Q_INVOKABLE QUrl parentUrl(const QUrl &url) const;
     Q_INVOKABLE bool isInside(const QUrl &url, const QUrl &ancestor) const;
     Q_INVOKABLE QVariantList crumbs(const QUrl &url) const;
@@ -128,6 +137,7 @@ Q_SIGNALS:
     void trashEmptyChanged();
     void darkChanged();
     void windowRequested(const QUrl &url, const QList<QUrl> &select);
+    void pickRequested(Picker *picker);
     void lookRequested(const QList<QUrl> &urls, QObject *source, bool update);
     void infoRequested(const QUrl &url);
     void folderSized(const QUrl &url, const QString &text);

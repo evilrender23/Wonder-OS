@@ -4,7 +4,7 @@
 <context>
     <name>RabbitWindow</name>
     <message numerus="yes">
-        <location filename="../qml/RabbitWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="306"/>
         <source>Delete %n item(s) immediately?</source>
         <translation>
             <numerusform>Delete %n item immediately?</numerusform>
@@ -12,7 +12,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/RabbitWindow.qml" line="705"/>
+        <location filename="../qml/RabbitWindow.qml" line="791"/>
         <source>%n item(s)</source>
         <translation>
             <numerusform>%n item</numerusform>

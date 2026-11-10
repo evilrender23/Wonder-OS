@@ -14,4 +14,6 @@ Settings {
     property bool statusBar: true
     property int windowWidth: 1000
     property int windowHeight: 620
+    /// Where the last file was chosen for another app: the next "Open" starts there.
+    property string pickFolder
 }

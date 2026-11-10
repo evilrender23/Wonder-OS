@@ -54,6 +54,19 @@ private Q_SLOTS:
         QCOMPARE(model.fileNames(), QStringList({QStringLiteral("file2.txt"), QStringLiteral("file10.txt"), QStringLiteral("Alpha.md"), QStringLiteral("beta")}));
     }
 
+    void aFilterKeepsFoldersAndTheFilesThatFit()
+    {
+        DirModel model;
+        model.setGlobs({QStringLiteral("*.MD")});
+        load(model, QUrl::fromLocalFile(m_dir.path()));
+        QCOMPARE(model.fileNames(), QStringList({QStringLiteral("Alpha.md"), QStringLiteral("beta")}));
+        model.setGlobs({});
+        model.setMimes({QStringLiteral("text/plain")});
+        QTRY_COMPARE_WITH_TIMEOUT(model.count(), 4, 10000);
+        model.setMimes({QStringLiteral("image/*")});
+        QTRY_COMPARE_WITH_TIMEOUT(model.fileNames(), QStringList({QStringLiteral("beta")}), 10000);
+    }
+
     void showsHidden()
     {
         DirModel model;

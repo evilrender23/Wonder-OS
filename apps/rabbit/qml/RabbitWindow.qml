@@ -8,6 +8,12 @@ ApplicationWindow {
     property var startSelect: []
     property bool first: false
     property int cascade: 0
+    /// Set when another app asked for a file: this window chooses it instead of browsing.
+    property Picker picker: null
+    readonly property bool picking: picker !== null
+    readonly property string placeTitle: App.places.titleFor(location)
+    /// What "Open" or "Save" would answer now; empty when the choice isn't one yet.
+    readonly property var pickUrls: picking ? pickChoice(dir.selectedCount, nameField.text, location) : []
 
     property url location
     property var backStack: []
@@ -39,16 +45,18 @@ ApplicationWindow {
     readonly property bool typing: activeFocusItem instanceof TextInput
     readonly property int arrangeSortKey: ({ name: DirModel.ByName, kind: DirModel.ByKind, modified: DirModel.ByModified, size: DirModel.BySize })[layout.arrange] ?? DirModel.ByName
 
-    width: App.testing ? App.testSize.width : Prefs.windowWidth
-    height: App.testing ? App.testSize.height : Prefs.windowHeight
+    width: App.testing ? App.testSize.width : (picking ? 920 : Prefs.windowWidth)
+    height: App.testing ? App.testSize.height : (picking ? 580 : Prefs.windowHeight)
     minimumWidth: 560
     minimumHeight: 340
     visible: true
-    title: App.places.titleFor(location)
+    title: picking && picker.title !== "" ? picker.title : placeTitle
     color: App.glass ? "transparent" : Theme.window
     onClosing: {
         layout.flush()
-        if (!App.testing) {
+        if (picking)
+            picker.cancel()
+        else if (!App.testing) {
             Prefs.windowWidth = width
             Prefs.windowHeight = height
         }
@@ -59,6 +67,8 @@ ApplicationWindow {
         url: rabbit.location
         search: rabbit.searchText
         showHidden: Prefs.showHidden
+        globs: rabbit.picking ? rabbit.picker.globs : []
+        mimes: rabbit.picking ? rabbit.picker.mimes : []
         sortKey: rabbit.sortOverride >= 0 ? rabbit.sortOverride : (rabbit.view === "list" ? rabbit.listSortKey : rabbit.arrangeSortKey)
         // Sorted by date or size, icons lead with the newest and the largest, as lists do.
         ascending: rabbit.view === "list" ? rabbit.listAscending : ![DirModel.ByModified, DirModel.BySize].includes(sortKey)
@@ -80,6 +90,10 @@ ApplicationWindow {
             dir.selectUrls(startSelect)
         if (App.testing && first)
             testStep.start()
+        if (picking && picker.saving) {
+            nameField.text = picker.name
+            Qt.callLater(nameField.editName)
+        }
     }
 
     // --- Navigation -------------------------------------------------------
@@ -139,11 +153,18 @@ ApplicationWindow {
             toast(qsTr("Items in the Trash can’t be opened. Put them back first."))
         } else if (item.isDir) {
             go(item.url)
+        } else if (picking) {
+            dir.selectOnly(row)
+            acceptPick()
         } else {
             App.open(item.url, item.mime, item.isApp)
         }
     }
     function openSelection() {
+        if (picking) {
+            acceptPick()
+            return
+        }
         const rows = dir.selectedRows()
         if (rows.length === 1) {
             openRow(rows[0])
@@ -155,6 +176,68 @@ ApplicationWindow {
                 App.requestWindow(item.url)
             else
                 App.open(item.url, item.mime, item.isApp)
+        }
+    }
+
+    // --- Choosing a file for another app ----------------------------------
+
+    function pickChoice() {
+        if (picker.saving) {
+            const url = App.childUrl(location, nameField.text.trim())
+            return String(url) !== "" ? [url] : []
+        }
+        const items = dir.selectedRows().map(row => dir.get(row))
+        if (picker.folders) {
+            if (items.length === 0)
+                return scheme === "file" ? [location] : []
+            return items.length === 1 && items[0].isDir && items[0].path !== "" ? [items[0].url] : []
+        }
+        if (!items.length || (items.length > 1 && !picker.multiple))
+            return []
+        return items.every(item => !item.isDir && item.path !== "") ? items.map(item => item.url) : []
+    }
+    /// The one folder selected where a file is wanted: "Open" goes into it.
+    function pickFolderToEnter() {
+        if (!picking || picker.folders || dir.selectedCount !== 1)
+            return ""
+        const item = dir.get(dir.selectedRows()[0])
+        return item.isDir ? item.url : ""
+    }
+    function acceptPick(typed) {
+        const folder = pickFolderToEnter()
+        if (String(folder) !== "" && !typed) {
+            go(folder)
+            return
+        }
+        const urls = pickUrls
+        if (!urls.length)
+            return
+        const answer = () => {
+            if (!App.testing && scheme === "file")
+                Prefs.pickFolder = location
+            picker.accept(urls)
+        }
+        if (picker.saving && App.exists(urls[0]))
+            confirm(qsTr("“%1” already exists. Replace it?").arg(namesOf(urls)[0]), qsTr("Replacing it overwrites what it holds now."), qsTr("Replace"), answer)
+        else
+            answer()
+    }
+    Connections {
+        target: rabbit.picker
+        function onFinished() {
+            if (!App.testing)
+                rabbit.close()
+        }
+    }
+    Connections {
+        target: rabbit.picking && rabbit.picker.saving ? dir : null
+        // Clicking a file offers its name, to save over it.
+        function onSelectionChanged() {
+            if (dir.selectedCount !== 1)
+                return
+            const item = dir.get(dir.selectedRows()[0])
+            if (!item.isDir)
+                nameField.text = item.fileName
         }
     }
 
@@ -293,7 +376,10 @@ ApplicationWindow {
                 back()
             return true
         case Qt.Key_Escape:
-            dir.clearSelection()
+            if (picking)
+                picker.cancel()
+            else
+                dir.clearSelection()
             return true
         case Qt.Key_F2:
             rename()
@@ -457,7 +543,7 @@ ApplicationWindow {
                 anchors.right: rightTools.left
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                text: dir.search !== "" ? qsTr("Searching “%1”").arg(rabbit.title) : rabbit.title
+                text: dir.search !== "" ? qsTr("Searching “%1”").arg(rabbit.placeTitle) : rabbit.placeTitle
                 elide: Text.ElideMiddle
                 color: Theme.text
                 font.pixelSize: 15
@@ -686,7 +772,7 @@ ApplicationWindow {
         Rectangle {
             id: statusBar
             visible: Prefs.statusBar
-            anchors.bottom: parent.bottom
+            anchors.bottom: pickBar.top
             width: parent.width
             height: visible ? 24 : 0
             color: Theme.chrome
@@ -749,11 +835,125 @@ ApplicationWindow {
         }
 
         Rectangle {
+            id: pickBar
+            visible: rabbit.picking
+            anchors.bottom: parent.bottom
+            width: parent.width
+            height: visible ? 52 : 0
+            color: Theme.chrome
+            Rectangle {
+                width: parent.width
+                height: 1
+                color: Theme.border
+            }
+            Row {
+                x: 12
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 8
+                TButton {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: rabbit.picking && (rabbit.picker.saving || rabbit.picker.folders)
+                    symbol: "folder-plus"
+                    active: rabbit.writable
+                    onClicked: rabbit.newFolder()
+                }
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: nameField.visible
+                    text: qsTr("Name:")
+                    color: Theme.dim
+                    font.pixelSize: 13
+                }
+                TextField {
+                    id: nameField
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: rabbit.picking && rabbit.picker.saving
+                    width: Math.max(160, Math.min(320, pickBar.width - pickButtons.width - filterButton.width - 150))
+                    height: 28
+                    leftPadding: 8
+                    rightPadding: 8
+                    font.pixelSize: 13
+                    color: Theme.text
+                    selectionColor: Theme.accent
+                    selectedTextColor: "white"
+                    background: Rectangle {
+                        radius: 7
+                        color: Theme.field
+                        border.color: nameField.activeFocus ? Theme.accent : "transparent"
+                        border.width: 2
+                    }
+                    /// Ready to type over the name, up to its extension.
+                    function editName() {
+                        forceActiveFocus()
+                        const dot = text.lastIndexOf(".")
+                        select(0, dot > 0 ? dot : text.length)
+                    }
+                    onAccepted: rabbit.acceptPick(true)
+                    Keys.onEscapePressed: rabbit.picker.cancel()
+                }
+                Rectangle {
+                    id: filterButton
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: rabbit.picking && rabbit.picker.filterNames.length > 0
+                    width: visible ? Math.min(240, filterText.implicitWidth + 40) : 0
+                    height: 28
+                    radius: 7
+                    color: Theme.field
+                    Text {
+                        id: filterText
+                        x: 10
+                        width: parent.width - 34
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: filterButton.visible ? rabbit.picker.filterNames[rabbit.picker.filter] : ""
+                        elide: Text.ElideRight
+                        color: Theme.text
+                        font.pixelSize: 13
+                    }
+                    Sym {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+                        size: 13
+                        name: "chevrons-up-down"
+                        color: Theme.dim
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: filterMenu.popup(filterButton, 0, -filterMenu.height - 4)
+                    }
+                }
+            }
+            Row {
+                id: pickButtons
+                anchors.right: parent.right
+                anchors.rightMargin: 12
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 8
+                PanelButton {
+                    text: qsTr("Cancel")
+                    onClicked: rabbit.picker.cancel()
+                }
+                PanelButton {
+                    primary: true
+                    active: rabbit.pickUrls.length > 0 || String(rabbit.pickFolderToEnter(dir.selectedCount)) !== ""
+                    text: {
+                        if (!rabbit.picking)
+                            return ""
+                        if (rabbit.picker.acceptLabel !== "")
+                            return rabbit.picker.acceptLabel
+                        return rabbit.picker.saving ? qsTr("Save") : (rabbit.picker.folders ? qsTr("Choose") : qsTr("Open"))
+                    }
+                    onClicked: rabbit.acceptPick()
+                }
+            }
+        }
+
+        Rectangle {
             id: toastBox
             visible: toastTimer.running
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 62
+            anchors.bottomMargin: 62 + pickBar.height
             width: Math.min(parent.width - 60, toastText.implicitWidth + 28)
             height: toastText.height + 16
             radius: 9
@@ -932,6 +1132,22 @@ ApplicationWindow {
     }
 
     FMenu {
+        id: filterMenu
+        Instantiator {
+            model: rabbit.picking ? rabbit.picker.filterNames : []
+            delegate: FMenuItem {
+                required property string modelData
+                required property int index
+                text: modelData
+                checked: rabbit.picking && rabbit.picker.filter === index
+                onTriggered: rabbit.picker.filter = index
+            }
+            onObjectAdded: (index, object) => filterMenu.insertItem(index, object)
+            onObjectRemoved: (index, object) => filterMenu.removeItem(object)
+        }
+    }
+
+    FMenu {
         id: backgroundMenuPopup
         FMenuItem {
             text: qsTr("New Folder")
@@ -1040,10 +1256,12 @@ ApplicationWindow {
         id: panelButton
         property string text
         property bool primary: false
+        property bool active: true
         signal clicked()
         width: Math.max(86, buttonText.implicitWidth + 28)
         height: 28
         radius: 7
+        opacity: active ? 1 : 0.45
         color: primary ? Theme.accent : Theme.field
         Text {
             id: buttonText
@@ -1054,7 +1272,7 @@ ApplicationWindow {
         }
         MouseArea {
             anchors.fill: parent
-            onClicked: panelButton.clicked()
+            onClicked: if (panelButton.active) panelButton.clicked()
         }
     }
 
@@ -1361,6 +1579,19 @@ ApplicationWindow {
             break
         case "newfolder":
             newFolder()
+            break
+        case "accept":
+            // The window's "Open" or "Save", when another app asked for a file.
+            acceptPick()
+            break
+        case "cancel":
+            picker.cancel()
+            break
+        case "name":
+            nameField.text = rest
+            break
+        case "filter":
+            picker.filter = Number(parts[1])
             break
         case "dump":
             console.log("LAYOUT " + dir.fileNames().map(name => name + "=" + pane.positions[name].x + "," + pane.positions[name].y).join(" "))

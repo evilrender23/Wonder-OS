@@ -14,57 +14,57 @@
         <translation>No se ha encontrado ninguna aplicación de terminal.</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="365"/>
+        <location filename="../src/app.cpp" line="391"/>
         <source>%1 available</source>
         <translation>%1 disponibles</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="379"/>
+        <location filename="../src/app.cpp" line="405"/>
         <source>Folder</source>
         <translation>Carpeta</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="397"/>
+        <location filename="../src/app.cpp" line="423"/>
         <source>%1 (%2 bytes)</source>
         <translation>%1 (%2 bytes)</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="411"/>
+        <location filename="../src/app.cpp" line="437"/>
         <source>Read &amp; Write</source>
         <translation>Leer y escribir</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="411"/>
+        <location filename="../src/app.cpp" line="437"/>
         <source>Read only</source>
         <translation>Solo lectura</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="411"/>
+        <location filename="../src/app.cpp" line="437"/>
         <source>Write only</source>
         <translation>Solo escritura</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="411"/>
+        <location filename="../src/app.cpp" line="437"/>
         <source>No Access</source>
         <translation>Sin acceso</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="434"/>
+        <location filename="../src/app.cpp" line="460"/>
         <source>%1 for %2</source>
         <translation>%1 en %2</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="434"/>
+        <location filename="../src/app.cpp" line="460"/>
         <source>1 item</source>
         <translation>1 ítem</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="434"/>
+        <location filename="../src/app.cpp" line="460"/>
         <source>%1 items</source>
         <translation>%1 ítems</translation>
     </message>
     <message>
-        <location filename="../src/app.cpp" line="469"/>
+        <location filename="../src/app.cpp" line="495"/>
         <source>Tags can’t be saved on this disk.</source>
         <translation>Las etiquetas no se pueden guardar en este disco.</translation>
     </message>
@@ -110,19 +110,19 @@
 <context>
     <name>DirModel</name>
     <message>
-        <location filename="../src/dirmodel.cpp" line="76"/>
-        <location filename="../src/dirmodel.cpp" line="85"/>
+        <location filename="../src/dirmodel.cpp" line="77"/>
+        <location filename="../src/dirmodel.cpp" line="86"/>
         <source>Alias</source>
         <translation>Alias</translation>
     </message>
     <message>
-        <location filename="../src/dirmodel.cpp" line="76"/>
+        <location filename="../src/dirmodel.cpp" line="77"/>
         <source>Folder</source>
         <translation>Carpeta</translation>
     </message>
     <message>
-        <location filename="../src/dirmodel.cpp" line="93"/>
-        <location filename="../src/dirmodel.cpp" line="536"/>
+        <location filename="../src/dirmodel.cpp" line="94"/>
+        <location filename="../src/dirmodel.cpp" line="577"/>
         <source>Application</source>
         <translation>Aplicación</translation>
     </message>
@@ -513,12 +513,27 @@
 <context>
     <name>RabbitWindow</name>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="139"/>
+        <location filename="../qml/RabbitWindow.qml" line="153"/>
         <source>Items in the Trash can’t be opened. Put them back first.</source>
         <translation>Los ítems de la papelera no se pueden abrir. Restáuralos primero.</translation>
     </message>
+    <message>
+        <location filename="../qml/RabbitWindow.qml" line="221"/>
+        <source>“%1” already exists. Replace it?</source>
+        <translation>«%1» ya existe. ¿Quieres reemplazarlo?</translation>
+    </message>
+    <message>
+        <location filename="../qml/RabbitWindow.qml" line="221"/>
+        <source>Replacing it overwrites what it holds now.</source>
+        <translation>Al reemplazarlo se pierde su contenido actual.</translation>
+    </message>
+    <message>
+        <location filename="../qml/RabbitWindow.qml" line="221"/>
+        <source>Replace</source>
+        <translation>Reemplazar</translation>
+    </message>
     <message numerus="yes">
-        <location filename="../qml/RabbitWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="306"/>
         <source>Delete %n item(s) immediately?</source>
         <translation>
             <numerusform>¿Eliminar %n ítem inmediatamente?</numerusform>
@@ -526,74 +541,74 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="306"/>
         <source>This can’t be undone.</source>
         <translation>Esta acción no se puede deshacer.</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="306"/>
         <source>Delete</source>
         <translation>Eliminar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="228"/>
+        <location filename="../qml/RabbitWindow.qml" line="311"/>
         <source>Empty the Trash?</source>
         <translation>¿Vaciar la papelera?</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="228"/>
+        <location filename="../qml/RabbitWindow.qml" line="311"/>
         <source>Everything in it is deleted for good.</source>
         <translation>Todo su contenido se eliminará definitivamente.</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="228"/>
-        <location filename="../qml/RabbitWindow.qml" line="826"/>
-        <location filename="../qml/RabbitWindow.qml" line="942"/>
+        <location filename="../qml/RabbitWindow.qml" line="311"/>
+        <location filename="../qml/RabbitWindow.qml" line="1026"/>
+        <location filename="../qml/RabbitWindow.qml" line="1158"/>
         <source>Empty Trash</source>
         <translation>Vaciar papelera</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="266"/>
+        <location filename="../qml/RabbitWindow.qml" line="349"/>
         <source>Path copied: %1</source>
         <translation>Ruta copiada: %1</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="266"/>
+        <location filename="../qml/RabbitWindow.qml" line="349"/>
         <source>%1 paths copied</source>
         <translation>%1 rutas copiadas</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="460"/>
+        <location filename="../qml/RabbitWindow.qml" line="546"/>
         <source>Searching “%1”</source>
         <translation>Buscando en «%1»</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="517"/>
+        <location filename="../qml/RabbitWindow.qml" line="603"/>
         <source>Search</source>
         <translation>Buscar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="595"/>
+        <location filename="../qml/RabbitWindow.qml" line="681"/>
         <source>No Results</source>
         <translation>Sin resultados</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="595"/>
+        <location filename="../qml/RabbitWindow.qml" line="681"/>
         <source>The Trash is empty</source>
         <translation>La papelera está vacía</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="595"/>
+        <location filename="../qml/RabbitWindow.qml" line="681"/>
         <source>This folder is empty</source>
         <translation>Esta carpeta está vacía</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="705"/>
+        <location filename="../qml/RabbitWindow.qml" line="791"/>
         <source>%1 of %2 selected</source>
         <translation>%1 de %2 seleccionados</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/RabbitWindow.qml" line="705"/>
+        <location filename="../qml/RabbitWindow.qml" line="791"/>
         <source>%n item(s)</source>
         <translation>
             <numerusform>%n ítem</numerusform>
@@ -601,230 +616,247 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="789"/>
+        <location filename="../qml/RabbitWindow.qml" line="863"/>
+        <source>Name:</source>
+        <translation>Nombre:</translation>
+    </message>
+    <message>
+        <location filename="../qml/RabbitWindow.qml" line="944"/>
+        <location filename="../qml/RabbitWindow.qml" line="989"/>
         <source>Open</source>
         <translation>Abrir</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="795"/>
+        <location filename="../qml/RabbitWindow.qml" line="944"/>
+        <source>Save</source>
+        <translation>Guardar</translation>
+    </message>
+    <message>
+        <location filename="../qml/RabbitWindow.qml" line="944"/>
+        <source>Choose</source>
+        <translation>Elegir</translation>
+    </message>
+    <message>
+        <location filename="../qml/RabbitWindow.qml" line="995"/>
         <source>Open With</source>
         <translation>Abrir con</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="810"/>
+        <location filename="../qml/RabbitWindow.qml" line="1010"/>
         <source>Open in New Window</source>
         <translation>Abrir en una ventana nueva</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="815"/>
+        <location filename="../qml/RabbitWindow.qml" line="1015"/>
         <source>Put Back</source>
         <translation>Restaurar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="821"/>
+        <location filename="../qml/RabbitWindow.qml" line="1021"/>
         <source>Delete Immediately…</source>
         <translation>Eliminar inmediatamente…</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="821"/>
+        <location filename="../qml/RabbitWindow.qml" line="1021"/>
         <source>Move to Trash</source>
         <translation>Trasladar a la papelera</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="833"/>
-        <location filename="../qml/RabbitWindow.qml" line="949"/>
+        <location filename="../qml/RabbitWindow.qml" line="1033"/>
+        <location filename="../qml/RabbitWindow.qml" line="1165"/>
         <source>Get Info</source>
         <translation>Obtener información</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="837"/>
+        <location filename="../qml/RabbitWindow.qml" line="1037"/>
         <source>Rename</source>
         <translation>Renombrar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="842"/>
+        <location filename="../qml/RabbitWindow.qml" line="1042"/>
         <source>Compress</source>
         <translation>Comprimir</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="847"/>
+        <location filename="../qml/RabbitWindow.qml" line="1047"/>
         <source>Extract Here</source>
         <translation>Extraer aquí</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="852"/>
+        <location filename="../qml/RabbitWindow.qml" line="1052"/>
         <source>Duplicate</source>
         <translation>Duplicar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="857"/>
+        <location filename="../qml/RabbitWindow.qml" line="1057"/>
         <source>Make Alias</source>
         <translation>Crear alias</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="862"/>
+        <location filename="../qml/RabbitWindow.qml" line="1062"/>
         <source>Quick Look</source>
         <translation>Vista rápida</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="868"/>
+        <location filename="../qml/RabbitWindow.qml" line="1068"/>
         <source>Copy</source>
         <translation>Copiar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="872"/>
+        <location filename="../qml/RabbitWindow.qml" line="1072"/>
         <source>Cut</source>
         <translation>Cortar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="877"/>
+        <location filename="../qml/RabbitWindow.qml" line="1077"/>
         <source>Copy Path</source>
         <translation>Copiar ruta</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="919"/>
+        <location filename="../qml/RabbitWindow.qml" line="1119"/>
         <source>Customize Folder…</source>
         <translation>Personalizar carpeta…</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="929"/>
+        <location filename="../qml/RabbitWindow.qml" line="1129"/>
         <source>Add to Sidebar</source>
         <translation>Añadir a la barra lateral</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="937"/>
+        <location filename="../qml/RabbitWindow.qml" line="1153"/>
         <source>New Folder</source>
         <translation>Nueva carpeta</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="954"/>
+        <location filename="../qml/RabbitWindow.qml" line="1170"/>
         <source>Paste</source>
         <translation>Pegar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="959"/>
+        <location filename="../qml/RabbitWindow.qml" line="1175"/>
         <source>Copy Folder Path</source>
         <translation>Copiar ruta de la carpeta</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="964"/>
+        <location filename="../qml/RabbitWindow.qml" line="1180"/>
         <source>Undo</source>
         <translation>Deshacer</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="974"/>
+        <location filename="../qml/RabbitWindow.qml" line="1190"/>
         <source>Clean Up</source>
         <translation>Alinear</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="979"/>
+        <location filename="../qml/RabbitWindow.qml" line="1195"/>
         <source>Clean Up By</source>
         <translation>Alinear por</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="982"/>
+        <location filename="../qml/RabbitWindow.qml" line="1198"/>
         <source>Name</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="986"/>
-        <location filename="../qml/RabbitWindow.qml" line="1190"/>
+        <location filename="../qml/RabbitWindow.qml" line="1202"/>
+        <location filename="../qml/RabbitWindow.qml" line="1408"/>
         <source>Kind</source>
         <translation>Clase</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="990"/>
+        <location filename="../qml/RabbitWindow.qml" line="1206"/>
         <source>Date Modified</source>
         <translation>Fecha de modificación</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="994"/>
-        <location filename="../qml/RabbitWindow.qml" line="1191"/>
+        <location filename="../qml/RabbitWindow.qml" line="1210"/>
+        <location filename="../qml/RabbitWindow.qml" line="1409"/>
         <source>Size</source>
         <translation>Tamaño</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="999"/>
+        <location filename="../qml/RabbitWindow.qml" line="1215"/>
         <source>Reset Icon Positions</source>
         <translation>Restablecer la posición de los iconos</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1005"/>
+        <location filename="../qml/RabbitWindow.qml" line="1221"/>
         <source>Show Hidden Files</source>
         <translation>Mostrar archivos ocultos</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1011"/>
+        <location filename="../qml/RabbitWindow.qml" line="1227"/>
         <source>Show Path Bar</source>
         <translation>Mostrar la barra de ruta</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1017"/>
+        <location filename="../qml/RabbitWindow.qml" line="1233"/>
         <source>Open in Terminal</source>
         <translation>Abrir en el terminal</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1095"/>
+        <location filename="../qml/RabbitWindow.qml" line="933"/>
+        <location filename="../qml/RabbitWindow.qml" line="1313"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1121"/>
+        <location filename="../qml/RabbitWindow.qml" line="1339"/>
         <source>Go to the folder:</source>
         <translation>Ir a la carpeta:</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1142"/>
+        <location filename="../qml/RabbitWindow.qml" line="1360"/>
         <source>The folder can’t be found.</source>
         <translation>No se encuentra la carpeta.</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1177"/>
+        <location filename="../qml/RabbitWindow.qml" line="1395"/>
         <source>Calculating size…</source>
         <translation>Calculando tamaño…</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1192"/>
+        <location filename="../qml/RabbitWindow.qml" line="1410"/>
         <source>Where</source>
         <translation>Ubicación</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1193"/>
+        <location filename="../qml/RabbitWindow.qml" line="1411"/>
         <source>Created</source>
         <translation>Creación</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1194"/>
+        <location filename="../qml/RabbitWindow.qml" line="1412"/>
         <source>Modified</source>
         <translation>Modificación</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1195"/>
+        <location filename="../qml/RabbitWindow.qml" line="1413"/>
         <source>Last opened</source>
         <translation>Última apertura</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1196"/>
+        <location filename="../qml/RabbitWindow.qml" line="1414"/>
         <source>Dimensions</source>
         <translation>Dimensiones</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1197"/>
+        <location filename="../qml/RabbitWindow.qml" line="1415"/>
         <source>Original</source>
         <translation>Original</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1198"/>
+        <location filename="../qml/RabbitWindow.qml" line="1416"/>
         <source>Owner</source>
         <translation>Propietario</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1199"/>
+        <location filename="../qml/RabbitWindow.qml" line="1417"/>
         <source>Group</source>
         <translation>Grupo</translation>
     </message>
     <message>
-        <location filename="../qml/RabbitWindow.qml" line="1200"/>
+        <location filename="../qml/RabbitWindow.qml" line="1418"/>
         <source>Everyone</source>
         <translation>Todos</translation>
     </message>
@@ -898,64 +930,69 @@
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="51"/>
+        <location filename="../src/main.cpp" line="54"/>
         <source>The Wonderlands OS file manager.</source>
         <translation>El gestor de archivos de Wonderlands OS.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="54"/>
+        <location filename="../src/main.cpp" line="57"/>
         <source>Folders to open, or files to reveal.</source>
         <translation>Carpetas que abrir o archivos que mostrar.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="55"/>
+        <location filename="../src/main.cpp" line="58"/>
         <source>Start in this view: icons, list or gallery.</source>
         <translation>Empezar en esta vista: icons, list o gallery.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="56"/>
+        <location filename="../src/main.cpp" line="59"/>
         <source>auto (follow the desktop), light or dark.</source>
         <translation>auto (seguir al escritorio), light o dark.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="57"/>
+        <location filename="../src/main.cpp" line="60"/>
         <source>Save a picture of the window to this file and quit (for tests).</source>
         <translation>Guardar una imagen de la ventana en este archivo y salir (para pruebas).</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="58"/>
+        <location filename="../src/main.cpp" line="61"/>
         <source>With --shot: actions to perform first, separated by “;”.</source>
         <translation>Con --shot: acciones que realizar antes, separadas por «;».</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="59"/>
+        <location filename="../src/main.cpp" line="62"/>
         <source>With --shot: the window size, as WIDTHxHEIGHT.</source>
         <translation>Con --shot: el tamaño de la ventana, como ANCHOxALTO.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="60"/>
+        <location filename="../src/main.cpp" line="63"/>
         <source>Start without a window and wait to be asked for one (how the session starts it for “Show in folder”).</source>
         <translation>Arrancar sin ventana y esperar a que se pida una (así lo arranca la sesión para «Mostrar en la carpeta»).</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="61"/>
+        <location filename="../src/main.cpp" line="64"/>
         <source>Quick Look: preview the given files, or close the preview if it is showing them.</source>
         <translation>Vista rápida: previsualiza los archivos indicados, o cierra la vista si ya los muestra.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="62"/>
+        <location filename="../src/main.cpp" line="65"/>
         <source>Quick Look: if a preview is open, show the given files in it.</source>
         <translation>Vista rápida: si hay una vista abierta, muestra en ella los archivos indicados.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="63"/>
+        <location filename="../src/main.cpp" line="66"/>
         <source>Open “Customize Folder” on the folders instead of showing them.</source>
         <translation>Abrir «Personalizar carpeta» en las carpetas en lugar de mostrarlas.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="64"/>
+        <location filename="../src/main.cpp" line="67"/>
         <source>Print the picture of each customized folder, making it if needed, and quit.</source>
         <translation>Imprimir la imagen de cada carpeta personalizada, creándola si hace falta, y salir.</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="68"/>
+        <source>With --shot: the window other apps get to choose a file in: open, open-many, folder or save.</source>
+        <translation>Con --shot: la ventana en la que otras apps eligen un archivo: open, open-many, folder o save.</translation>
     </message>
 </context>
 </TS>

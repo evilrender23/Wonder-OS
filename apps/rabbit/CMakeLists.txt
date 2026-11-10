@@ -31,6 +31,7 @@ set(core_sources
     src/app.cpp src/app.h
     src/dragnotice.cpp src/dragnotice.h
     src/look.cpp src/look.h
+    src/picker.cpp src/picker.h
 )
 set(core_libs
     Qt6::Quick Qt6::Widgets Qt6::Svg Qt6::DBus
@@ -82,13 +83,17 @@ install(FILES wonderland-rabbit.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/app
 # Lets the session start us when an app asks to "Show in folder" (org.freedesktop.FileManager1).
 configure_file(org.wonderland.Rabbit.FileManager1.service.in org.wonderland.Rabbit.FileManager1.service @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.wonderland.Rabbit.FileManager1.service DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services)
+# "Open" and "Save" in other apps: the portal finds Rabbit through these two.
+configure_file(org.freedesktop.impl.portal.desktop.rabbit.service.in org.freedesktop.impl.portal.desktop.rabbit.service @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.freedesktop.impl.portal.desktop.rabbit.service DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services)
+install(FILES rabbit.portal DESTINATION ${CMAKE_INSTALL_DATADIR}/xdg-desktop-portal/portals)
 install(FILES assets/wonderland-rabbit.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
 
 option(RABBIT_BUILD_TESTS "Build Rabbit tests" ON)
 if(RABBIT_BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     enable_testing()
-    foreach(t format layout dirmodel places openwith dragnotice look folderlook opsreport legacy)
+    foreach(t format layout dirmodel places openwith dragnotice look folderlook opsreport legacy picker)
         qt_add_executable(tst_${t} tests/tst_${t}.cpp ${core_sources})
         target_include_directories(tst_${t} PRIVATE src)
         target_link_libraries(tst_${t} PRIVATE ${core_libs} Qt6::Test)

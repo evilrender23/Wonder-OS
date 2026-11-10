@@ -50,6 +50,8 @@ class DirModel : public QAbstractListModel
     Q_PROPERTY(bool ascending READ ascending WRITE setAscending NOTIFY sortChanged)
     Q_PROPERTY(bool foldersFirst READ foldersFirst WRITE setFoldersFirst NOTIFY sortChanged)
     Q_PROPERTY(bool showHidden READ showHidden WRITE setShowHidden NOTIFY showHiddenChanged)
+    Q_PROPERTY(QStringList globs READ globs WRITE setGlobs NOTIFY filterChanged)
+    Q_PROPERTY(QStringList mimes READ mimes WRITE setMimes NOTIFY filterChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     Q_PROPERTY(QString error READ error NOTIFY errorChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
@@ -101,6 +103,12 @@ public:
     void setFoldersFirst(bool foldersFirst);
     bool showHidden() const { return m_showHidden; }
     void setShowHidden(bool show);
+    /// With either set, only the files whose name fits one of `globs` or whose
+    /// type is one of `mimes` are listed. Folders always are: they lead to more.
+    QStringList globs() const { return m_globs; }
+    void setGlobs(const QStringList &globs);
+    QStringList mimes() const { return m_mimes; }
+    void setMimes(const QStringList &mimes);
     bool loading() const { return m_loading; }
     QString error() const { return m_error; }
     int count() const { return m_entries.size(); }
@@ -136,6 +144,7 @@ Q_SIGNALS:
     void searchChanged();
     void sortChanged();
     void showHiddenChanged();
+    void filterChanged();
     void loadingChanged();
     void errorChanged();
     void countChanged();
@@ -161,6 +170,7 @@ private:
     void setSelected(int row, bool selected);
     void applyPendingSelection(int row);
     bool isVirtual() const;
+    bool passesFilter(const Entry &entry) const;
 
     QUrl m_url;
     QString m_search;
@@ -168,6 +178,8 @@ private:
     bool m_ascending = true;
     bool m_foldersFirst = false;
     bool m_showHidden = false;
+    QStringList m_globs;
+    QStringList m_mimes;
     bool m_loading = false;
     QString m_error;
     QList<Entry> m_entries;

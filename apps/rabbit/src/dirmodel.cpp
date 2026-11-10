@@ -17,6 +17,7 @@
 #include <QFile>
 #include <QMimeDatabase>
 #include <QPointer>
+#include <QRegularExpression>
 #include <QStandardPaths>
 #include <QThread>
 #include <QTimer>
@@ -295,6 +296,46 @@ void DirModel::setFoldersFirst(bool foldersFirst)
     Q_EMIT sortChanged();
 }
 
+void DirModel::setGlobs(const QStringList &globs)
+{
+    if (globs == m_globs) {
+        return;
+    }
+    m_globs = globs;
+    Q_EMIT filterChanged();
+    reload();
+}
+
+void DirModel::setMimes(const QStringList &mimes)
+{
+    if (mimes == m_mimes) {
+        return;
+    }
+    m_mimes = mimes;
+    Q_EMIT filterChanged();
+    reload();
+}
+
+bool DirModel::passesFilter(const Entry &entry) const
+{
+    if (entry.isDir || (m_globs.isEmpty() && m_mimes.isEmpty())) {
+        return true;
+    }
+    const QString name = entry.url.fileName();
+    for (const QString &glob : m_globs) {
+        if (QRegularExpression::fromWildcard(glob, Qt::CaseInsensitive).match(name).hasMatch()) {
+            return true;
+        }
+    }
+    const QMimeType type = QMimeDatabase().mimeTypeForName(entry.mime);
+    for (const QString &mime : m_mimes) {
+        if (mime.endsWith(QLatin1String("/*")) ? entry.mime.startsWith(mime.chopped(1)) : (entry.mime == mime || type.inherits(mime))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void DirModel::setShowHidden(bool show)
 {
     if (show == m_showHidden) {
@@ -457,11 +498,11 @@ void DirModel::reload()
                 entry.selected = false;
                 addEntries({entry});
                 const int moved = rowForUrl(entry.url);
-                if (selected) {
+                if (selected && moved >= 0) {
                     setSelected(moved, true);
                     Q_EMIT selectionChanged();
                 }
-                if (wasCurrent) {
+                if (wasCurrent && moved >= 0) {
                     setCurrentRow(moved);
                     m_anchorRow = moved;
                 }
@@ -697,6 +738,9 @@ void DirModel::applyPendingSelection(int row)
 
 void DirModel::addEntries(QList<Entry> entries)
 {
+    entries.removeIf([this](const Entry &entry) {
+        return !passesFilter(entry);
+    });
     if (entries.isEmpty()) {
         return;
     }

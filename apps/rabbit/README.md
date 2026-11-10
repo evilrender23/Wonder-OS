@@ -91,6 +91,13 @@ bus. The install adds a D-Bus service file so the session starts Rabbit for it; 
 under `~/.local` it takes precedence over Dolphin's. A file manager that is already running keeps
 the name until it quits.
 
+"Open" and "Save" in other apps are Rabbit windows too: it answers
+`org.freedesktop.impl.portal.FileChooser` (`rabbit.portal`), and the session's
+`driftwm-portals.conf` prefers it for that interface. The window is the usual one with a bar
+underneath: the name to save under, the file types the app offers, Cancel and Open/Save.
+`--shot out.png --pick open|open-many|folder|save --do 'select:a.txt;accept'` tries it without
+another app and prints what it would answer.
+
 For tests, `--shot out.png --do 'actions'` performs actions, saves a picture of the window and
 quits. Actions are separated by `;` — for instance
 `--do 'move:notes.txt:400:200;dump'` moves an icon and prints every icon's position.

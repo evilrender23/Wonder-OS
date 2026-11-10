@@ -3,6 +3,7 @@
 #include "folderlook.h"
 #include "legacy.h"
 #include "opsreport.h"
+#include "picker.h"
 #include "providers.h"
 
 #include <QApplication>
@@ -24,6 +25,8 @@ static const QString service = QStringLiteral("org.wonderland.Rabbit");
 static const QString fileManagerPath = QStringLiteral("/org/freedesktop/FileManager1");
 static const QString fileManagerInterface = QStringLiteral("org.freedesktop.FileManager1");
 static const QString lookInterface = QStringLiteral("org.wonderland.Rabbit.QuickLook");
+static const QString portalService = QStringLiteral("org.freedesktop.impl.portal.desktop.rabbit");
+static const QString portalPath = QStringLiteral("/org/freedesktop/portal/desktop");
 
 static QUrl urlFromArgument(const QString &argument)
 {
@@ -62,7 +65,8 @@ int main(int argc, char *argv[])
     const QCommandLineOption lookUpdateOption(QStringLiteral("look-update"), QCoreApplication::translate("main", "Quick Look: if a preview is open, show the given files in it."));
     const QCommandLineOption customizeOption(QStringLiteral("customize"), QCoreApplication::translate("main", "Open “Customize Folder” on the folders instead of showing them."));
     const QCommandLineOption folderIconOption(QStringLiteral("folder-icon"), QCoreApplication::translate("main", "Print the picture of each customized folder, making it if needed, and quit."));
-    parser.addOptions({viewOption, appearanceOption, shotOption, doOption, sizeOption, serviceOption, lookOption, lookUpdateOption, customizeOption, folderIconOption});
+    const QCommandLineOption pickOption(QStringLiteral("pick"), QCoreApplication::translate("main", "With --shot: the window other apps get to choose a file in: open, open-many, folder or save."), QStringLiteral("kind"));
+    parser.addOptions({viewOption, appearanceOption, shotOption, doOption, sizeOption, serviceOption, lookOption, lookUpdateOption, customizeOption, folderIconOption, pickOption});
     parser.process(app);
 
     FolderLooks::self()->setPainter([](const FolderLook &look) {
@@ -163,7 +167,11 @@ int main(int argc, char *argv[])
         new FileManagerAdaptor(&rabbit);
         new RabbitAdaptor(&rabbit);
         new LookAdaptor(&rabbit);
+        new FileChooserAdaptor(&rabbit);
         bus.registerObject(fileManagerPath, &rabbit);
+        // "Open" and "Save" in other apps: the portal asks whoever holds this name.
+        bus.registerObject(portalPath, &rabbit);
+        bus.registerService(portalService);
         // Other apps' "Show in folder" looks for this name; a running Dolphin may hold it already.
         // Queued: if that Dolphin quits, the name comes to us.
         bus.interface()->registerService(QStringLiteral("org.freedesktop.FileManager1"), QDBusConnectionInterface::QueueService, QDBusConnectionInterface::DontAllowReplacement);
@@ -196,6 +204,14 @@ int main(int argc, char *argv[])
         if (folders.isEmpty()) {
             return 0;
         }
+        return app.exec();
+    }
+    if (testing && parser.isSet(pickOption)) {
+        auto *picker = Picker::forTest(parser.value(pickOption), folders.isEmpty() ? rabbit.homeUrl() : folders.constFirst(), &rabbit);
+        QObject::connect(picker, &Picker::finished, &rabbit, [](uint response, const QStringList &uris) {
+            QTextStream(stdout) << "PICKED " << response << ' ' << uris.join(QLatin1Char(' ')) << '\n';
+        });
+        rabbit.pick(picker);
         return app.exec();
     }
     for (const QUrl &url : std::as_const(folders)) {
