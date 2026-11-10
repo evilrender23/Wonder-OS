@@ -27,7 +27,6 @@ Wonder OS es una distribución Linux basada en CachyOS.
   - `peliculas` — Películas, reproductor de vídeo
   - `rabbit` — Rabbit, gestor de archivos
   - `sistema` — Sistema, ajustes del sistema
-  - `wondermirror` — Wonder Mirror, aplicaciones de Windows como ventanas del escritorio
   - `wonderterm` — terminal
   - `wonderupdate` — WonderUpdate, el actualizador
 - **Escritorio** (`extras/`): configuración, barra y shell en Quickshell, pantalla de inicio de
