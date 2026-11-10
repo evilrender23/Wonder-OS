@@ -12,7 +12,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/RabbitWindow.qml" line="661"/>
+        <location filename="../qml/RabbitWindow.qml" line="705"/>
         <source>%n item(s)</source>
         <translation>
             <numerusform>%n item</numerusform>

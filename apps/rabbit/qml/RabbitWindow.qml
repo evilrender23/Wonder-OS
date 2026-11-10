@@ -257,6 +257,19 @@ ApplicationWindow {
         toastText.text = message
         toastTimer.restart()
     }
+    /// Puts the paths on the clipboard as text, one per line, and says so.
+    function copyPath(urls) {
+        const paths = urls.map(url => App.displayPath(url)).filter(path => path !== "")
+        if (!paths.length)
+            return ""
+        App.ops.copyText(paths.join("\n"))
+        toast(paths.length === 1 ? qsTr("Path copied: %1").arg(paths[0]) : qsTr("%1 paths copied").arg(paths.length))
+        return paths.join("\n")
+    }
+    /// The selection's paths, or this folder's when nothing is selected.
+    function copyPathOfSelection() {
+        return copyPath(dir.selectedCount ? dir.selectedUrls() : (virtualPlace ? [] : [location]))
+    }
     /// Keys every view answers the same way. True if the key was used.
     function handleKey(event) {
         const command = event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)
@@ -365,6 +378,7 @@ ApplicationWindow {
     Key { sequences: ["Ctrl+Shift+N"]; onActivated: rabbit.newFolder() }
     Shortcut { sequences: ["Ctrl+W"]; onActivated: rabbit.close() }
     Key { sequences: ["Ctrl+C"]; onActivated: if (dir.selectedCount) App.ops.copyToClipboard(dir.selectedUrls()) }
+    Key { sequences: ["Ctrl+Shift+C"]; onActivated: rabbit.copyPathOfSelection() }
     Key { sequences: ["Ctrl+X"]; onActivated: if (dir.selectedCount && rabbit.writable) App.ops.cutToClipboard(dir.selectedUrls()) }
     Key { sequences: ["Ctrl+V"]; onActivated: if (rabbit.writable) App.ops.paste(rabbit.location) }
     Key { sequences: ["Ctrl+A"]; onActivated: dir.selectAll() }
@@ -631,10 +645,40 @@ ApplicationWindow {
                             MouseArea {
                                 anchors.fill: parent
                                 anchors.margins: -4
-                                onClicked: rabbit.go(crumb.modelData.url)
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                // Right click: this crumb's path, without going there.
+                                onClicked: mouse => mouse.button === Qt.RightButton ? rabbit.copyPath([crumb.modelData.url]) : rabbit.go(crumb.modelData.url)
                             }
                         }
                     }
+                }
+            }
+            Rectangle {
+                id: copyPathButton
+                anchors.right: parent.right
+                y: 1
+                width: 30
+                height: parent.height - 1
+                // Opaque: a long path slides under the button instead of over it.
+                color: Theme.chrome
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: 2
+                    radius: 5
+                    color: Theme.hover
+                    visible: copyPathArea.containsMouse
+                }
+                Sym {
+                    anchors.centerIn: parent
+                    size: 12
+                    name: "copy"
+                    color: copyPathArea.containsMouse ? Theme.text : Theme.dim
+                }
+                MouseArea {
+                    id: copyPathArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: rabbit.copyPath([rabbit.location])
                 }
             }
         }
@@ -832,7 +876,7 @@ ApplicationWindow {
         FMenuItem {
             text: qsTr("Copy Path")
             visible: rabbit.menuItem !== null && rabbit.menuItem.path !== ""
-            onTriggered: App.ops.copyText(rabbit.menuItem.path)
+            onTriggered: rabbit.copyPath(rabbit.menuUrls)
         }
         FSeparator {
             visible: tagRow.visible
@@ -910,6 +954,11 @@ ApplicationWindow {
             text: qsTr("Paste")
             enabled: rabbit.writable && App.ops.canPaste
             onTriggered: App.ops.paste(rabbit.location)
+        }
+        FMenuItem {
+            text: qsTr("Copy Folder Path")
+            enabled: !rabbit.virtualPlace
+            onTriggered: rabbit.copyPath([rabbit.location])
         }
         FMenuItem {
             text: App.ops.undoText !== "" ? App.ops.undoText : qsTr("Undo")
@@ -1302,6 +1351,13 @@ ApplicationWindow {
             break
         case "customize":
             App.customizeFolder(dir.get(dir.selectedRows()[0]).url)
+            break
+        case "bgmenu":
+            backgroundMenu()
+            break
+        case "copypath":
+            // Ctrl+Shift+C; "copypath:crumb:N" is a right click on the Nth crumb.
+            console.log("COPIED " + (parts[1] === "crumb" ? copyPath([crumbs.model[Number(parts[2])].url]) : copyPathOfSelection()))
             break
         case "newfolder":
             newFolder()
