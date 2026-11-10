@@ -82,7 +82,13 @@ find_wonderland_source() {
 }
 
 query_wonderland() {
-    wl_updates=() wl_commits=() wl_ahead=0
+    wl_updates=() wl_commits=() wl_ahead=0 wl_managed="" wl_tip=""
+    # An install that recorded its version updates from WonderUpdate's own
+    # clone (auto.sh); an older one, from the checkout it was installed from.
+    if read_stamp; then
+        query_wonderland_managed
+        return 0
+    fi
     find_wonderland_source || return 0
     # Nothing to compare with on a detached HEAD or a branch that tracks nothing.
     git -C "$wl_source" rev-parse --verify -q '@{upstream}' >/dev/null 2>&1 || return 0

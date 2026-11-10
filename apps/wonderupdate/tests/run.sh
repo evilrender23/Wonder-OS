@@ -254,6 +254,153 @@ out="$(printf 'y\n\n\n\n' | "$wonderupdate" 2>&1)"
 expect_eq "update: a failed AUR upgrade exits with 6" $? 6
 expect_in "update: Flatpak still upgraded after an AUR failure" "$(<"$log")" "flatpak update"$'\n'
 
+# --- Automatic updates: an install that recorded its version ----------------------
+# A published repository whose install.sh is a fake: it logs how it was called
+# and, on a real install, records the version the way the real one does.
+stamp="$XDG_STATE_HOME/wonderlandwm/version.json"
+managed="$HOME/.local/share/wonderos/source"
+auto_state="$XDG_STATE_HOME/wonderupdate"
+
+write_stamp() { # commit branch repo options
+    mkdir -p "$(dirname "$stamp")"
+    printf '{\n  "commit": "%s",\n  "date": "",\n  "branch": "%s",\n  "repo": "%s",\n  "options": "%s",\n  "dirty": false\n}\n' "$1" "$2" "$3" "$4" >"$stamp"
+}
+
+auto_setup() {
+    reset_fakes
+    fake checkupdates 'exit 2'
+    fake paru 'exit 0'
+    fake flatpak 'exit 0'
+    rm -rf "$work/pub" "$work/pub.git" "$work/mine"
+    git "${git_env[@]}" init -q "$work/pub"
+    cat >"$work/pub/install.sh" <<'EOF'
+#!/usr/bin/env bash
+echo "install.sh $*" >>"$FAKE_LOG"
+[[ -f $FAKE_DIR/state-build-fails ]] && exit 1
+case " $* " in *" --build-only "*) exit 0 ;; esac
+mkdir -p "$XDG_STATE_HOME/wonderlandwm"
+printf '{\n  "commit": "%s",\n  "branch": "main",\n  "repo": "%s",\n  "options": "--no-greeter",\n  "dirty": false\n}\n' \
+    "$(git rev-parse HEAD)" "$(git remote get-url origin)" >"$XDG_STATE_HOME/wonderlandwm/version.json"
+EOF
+    chmod +x "$work/pub/install.sh"
+    git -C "$work/pub" add -A
+    git -C "$work/pub" "${git_env[@]}" commit -qm "First version"
+    installed="$(git -C "$work/pub" rev-parse HEAD)"
+    git clone -q --bare "$work/pub" "$work/pub.git"
+    git -C "$work/pub" remote add origin "$work/pub.git"
+    write_stamp "$installed" main "$work/pub.git" "--no-greeter --fresh-config; rm -rf /"
+}
+
+publish() {
+    echo "$1" >>"$work/pub/file"
+    git -C "$work/pub" add -A
+    git -C "$work/pub" "${git_env[@]}" commit -qm "$1"
+    git -C "$work/pub" push -q origin main
+}
+
+wait_prepare() {
+    for _ in {1..100}; do
+        grep -q '^\(READY\|ERROR\)' "$auto_state/auto.log" 2>/dev/null && return 0
+        sleep 0.1
+    done
+    return 1
+}
+
+auto_setup
+out="$("$wonderupdate" --check --json)"
+expect_eq "auto: up to date with the published branch" "$(json_get 'd["count"]' <<<"$out")" 0
+sleep 0.3
+expect_not_in "auto: nothing is built without a new version" "$(<"$log")" "install.sh"
+
+publish "Add a new widget"
+tip="$(git -C "$work/pub" rev-parse HEAD)"
+out="$("$wonderupdate" --check --json)"
+expect_eq "auto: the new version is found without a clone" "$(json_get 'd["wonderland"][0]["to"]' <<<"$out")" "${tip:0:7}"
+wait_prepare
+expect_in "auto: built in the background" "$(<"$log")" "install.sh --build-only --no-greeter"
+expect_not_in "auto: only known options are repeated" "$(<"$log")" "fresh-config"
+expect_not_in "auto: nothing is installed in the background" "$(<"$log")" "install.sh --yes"
+expect_eq "auto: the build is recorded as ready" "$(grep '^READY' "$auto_state/auto.log")" "READY $tip"
+expect_eq "auto: the clone is at the new version" "$(git -C "$managed" rev-parse HEAD)" "$tip"
+expect_eq "auto: the installed version is still the old one" "$(sed -n 's/.*"commit": "\(.*\)",/\1/p' "$stamp")" "$installed"
+expect_logged "auto: ready notification" "is ready to install"
+out="$("$wonderupdate" --list 2>&1)"
+expect_in "auto: the list says it is built" "$out" "already built"
+expect_in "auto: the list shows the new commits" "$out" "Add a new widget"
+
+: >"$log"
+"$wonderupdate" --check
+sleep 0.5
+expect_not_in "auto: a built version isn't built again" "$(<"$log")" "install.sh"
+
+out="$("$wonderupdate" --apply </dev/null 2>&1)"
+expect_eq "auto: --apply succeeds" $? 0
+expect_in "auto: --apply installs with the recorded options" "$(<"$log")" "install.sh --yes --no-greeter"
+expect_eq "auto: the new version is the installed one" "$(sed -n 's/.*"commit": "\(.*\)",/\1/p' "$stamp")" "$tip"
+expect_in "auto: the install is recorded" "$(<"$auto_state/auto.log")" "APPLIED $tip"
+expect_eq "auto: nothing pending afterwards" "$("$wonderupdate" --status --json | json_get 'd["count"]')" 0
+expect_not_in "auto: only the desktop is touched by --apply" "$(<"$log")" "pacman"
+
+# The full update goes the same way, and a later version waits its turn.
+publish "Second change"
+tip="$(git -C "$work/pub" rev-parse HEAD)"
+: >"$log"
+"$wonderupdate" --check
+sleep 0.5
+expect_not_in "auto: builds are spaced out" "$(<"$log")" "install.sh"
+out="$(printf 'y\n' | "$wonderupdate" 2>&1)"
+expect_in "auto: the full update installs it" "$(<"$log")" "install.sh --yes --no-greeter"
+expect_eq "auto: installed by the full update" "$(sed -n 's/.*"commit": "\(.*\)",/\1/p' "$stamp")" "$tip"
+
+# A build that fails is not retried for the same version, and doesn't hide it.
+auto_setup
+mkdir -p "$XDG_CONFIG_HOME/wonderupdate"
+printf 'AutoBuildInterval = 0\n' >"$XDG_CONFIG_HOME/wonderupdate/wonderupdate.conf"
+publish "Broken build"
+: >"$work/state-build-fails"
+"$wonderupdate" --check
+wait_prepare
+expect_in "auto: a failed build is recorded" "$(<"$auto_state/auto.log")" "ERROR"
+: >"$log"
+out="$("$wonderupdate" --check --json)"
+sleep 0.5
+expect_not_in "auto: a failed build isn't retried" "$(<"$log")" "install.sh"
+expect_eq "auto: the update is still offered" "$(json_get 'd["count"]' <<<"$out")" 1
+rm -f "$work/state-build-fails"
+
+# Turned off: found, listed, not built.
+auto_setup
+mkdir -p "$XDG_CONFIG_HOME/wonderupdate"
+printf 'NoAutoUpdate\n' >"$XDG_CONFIG_HOME/wonderupdate/wonderupdate.conf"
+publish "Something new"
+out="$("$wonderupdate" --check --json)"
+sleep 0.5
+expect_eq "auto: NoAutoUpdate still finds the update" "$(json_get 'd["count"]' <<<"$out")" 1
+expect_not_in "auto: NoAutoUpdate builds nothing" "$(<"$log")" "install.sh"
+
+# A development install (commits nobody published) is left to its owner.
+auto_setup
+git clone -q "$work/pub.git" "$work/mine"
+echo local >"$work/mine/local"
+git -C "$work/mine" add -A
+git -C "$work/mine" "${git_env[@]}" commit -qm "Local work"
+write_stamp "$(git -C "$work/mine" rev-parse HEAD)" main "$work/pub.git" ""
+"$wonderupdate" --prepare >/dev/null 2>&1
+expect_eq "auto: --prepare refuses an unpublished install" $? 6
+expect_not_in "auto: an unpublished install isn't built" "$(<"$log")" "install.sh"
+out="$("$wonderupdate" --check --json)"
+expect_eq "auto: an unpublished install isn't offered updates" "$(json_get 'd["count"]' <<<"$out")" 0
+
+# A stamp that can't be trusted is as good as none.
+auto_setup
+write_stamp "$installed" '--upload-pack=touch $HOME/pwned' "$work/pub.git" ""
+publish "Something new"
+out="$("$wonderupdate" --check --json)"
+expect_eq "auto: a malformed stamp is ignored" "$(json_get 'd["count"]' <<<"$out")" 0
+"$wonderupdate" --apply </dev/null >/dev/null 2>&1
+expect_eq "auto: --apply without a stamp exits with 11" $? 11
+rm -f "$stamp"
+
 reset_fakes
 printf "%s\n" "-------8<---" "'sshd.service'" "'cups.service'" "-------8<---" >"$work/state-services"
 out="$(printf '2\n' | "$wonderupdate" --services 2>&1)"

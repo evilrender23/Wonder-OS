@@ -19,7 +19,7 @@ else
     libdir="$datadir/lib"
 fi
 
-for lib in common sources check news upgrade maintenance; do
+for lib in common auto sources check news upgrade maintenance; do
     # shellcheck source=/dev/null
     source "$libdir/$lib.sh" || exit 1
 done
@@ -46,6 +46,9 @@ Opciones:
   -j, --json           con --check o --status, escribe el estado en JSON
       --status         muestra el resultado de la última comprobación
       --terminal       abre una terminal y actualiza en ella
+      --prepare        descarga y compila la versión nueva del escritorio sin
+                       instalar nada (lo que se hace solo, en segundo plano)
+      --apply          instala la versión nueva del escritorio, y nada más
       --enable         activa la comprobación automática (timer de systemd)
       --disable        desactiva la comprobación automática
       --gen-config     crea el archivo de configuración (--force lo sobrescribe)
@@ -77,6 +80,10 @@ Options:
   -j, --json           with --check or --status, print the status as JSON
       --status         print the result of the last check
       --terminal       open a terminal and update in it
+      --prepare        download and build the desktop's new version without
+                       installing anything (what happens by itself, in the
+                       background)
+      --apply          install the desktop's new version, and nothing else
       --enable         enable the automatic check (systemd timer)
       --disable        disable the automatic check
       --gen-config     create the configuration file (--force overwrites it)
@@ -112,6 +119,8 @@ while [[ $# -gt 0 ]]; do
     -j | --json) json_output=1 ;;
     --status) action=status ;;
     --terminal) action=terminal ;;
+    --prepare) action=prepare ;;
+    --apply) action=apply ;;
     --enable) action=enable ;;
     --disable) action=disable ;;
     --gen-config) action=gen-config ;;
@@ -212,6 +221,8 @@ services)
     restart_services standalone
     ;;
 terminal) open_in_terminal "${devel_flag[@]}" ;;
+prepare) run_prepare ;;
+apply) run_apply ;;
 enable)
     systemctl --user enable --now "$name.timer" || exit 9
     info_msg "$(t "Automatic update checks enabled (at login, then every hour)")"

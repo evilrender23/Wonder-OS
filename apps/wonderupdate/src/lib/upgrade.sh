@@ -47,6 +47,10 @@ upgrade_flatpak() {
 upgrade_wonderland() {
     main_msg "$(t "Updating Wonderland...")"
     echo
+    if [[ -n $wl_managed ]]; then
+        upgrade_wonderland_managed
+        return 0
+    fi
     # Fast-forward only: local work in the checkout is never rewritten or merged.
     if [[ $wl_ahead -gt 0 ]]; then
         warning_msg "$(t "%s has local commits its upstream doesn't have; update it by hand (git pull)" "$wl_source")"

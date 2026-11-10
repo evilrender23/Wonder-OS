@@ -15,10 +15,47 @@ inglés según el idioma del sistema.
 | Repositorios | `checkupdates` (sin root, no toca la base de datos de pacman) | `pacman -Syu` |
 | AUR | `paru -Qua` / `yay -Qua` | `paru -Sua` / `yay -Sua` |
 | Flatpak | `flatpak remote-ls --updates` (respeta `flatpak mask`) | `flatpak update` |
-| Wonderland | `git fetch` en el checkout desde el que se instaló el escritorio | `git pull --ff-only` + `./install.sh --yes` |
+| Wonderland | la punta de la rama instalada, preguntada al repositorio | se compila sola en segundo plano; instalarla es `./install.sh --yes` con las mismas opciones |
 
-El checkout de Wonderland solo avanza por *fast-forward*: si tiene commits
-propios que no están en su origen, WonderUpdate avisa y no lo toca.
+## Actualización automática del escritorio
+
+No hay versiones publicadas: cada equipo compila la punta de la rama desde la
+que se instaló.
+
+1. `./install.sh`, al terminar bien una instalación completa, anota qué dejó
+   instalado en `~/.local/state/wonderlandwm/version.json`: commit, rama,
+   repositorio y las opciones `--no-deps` / `--no-greeter` que se usaron.
+2. Cada comprobación pregunta al repositorio por la punta de esa rama. Si no
+   es el commit instalado, la versión nueva se descarga y se compila en segundo
+   plano, con la prioridad más baja y sin root, en un clon propio
+   (`~/.local/share/wonderos/source`). El checkout en el que trabajas no se
+   toca nunca.
+3. Instalar pide contraseña (`/usr/local`), así que eso espera: cuando la
+   compilación termina llega una notificación «Wonder OS … está listo para
+   instalar», y su botón abre una terminal con `wonderupdate --apply`, que solo
+   instala lo ya compilado, con las mismas opciones de la instalación anterior
+   (quien instaló con `--no-greeter` conserva su gestor de inicio de sesión).
+   `wonderupdate` a secas la instala igual, junto con los paquetes.
+4. El compositor nuevo entra al volver a iniciar sesión; el anterior queda en
+   `~/.local/state/wonderlandwm/driftwm.prev`.
+
+`~/.local/state/wonderupdate/auto.log` sigue el proceso con una línea por
+suceso (`STEP n/3 …`, `READY <commit>`, `ERROR …`, `APPLIED <commit>`) y
+`build.log` guarda la salida de la compilación.
+
+Lo que no hace:
+
+- Una instalación sin `version.json` (anterior a esto) sigue como antes: se
+  actualiza con `git pull --ff-only` en el checkout del que salió, que solo
+  avanza por *fast-forward*; si tiene commits propios, WonderUpdate avisa y no
+  lo toca. Pasa al modo automático la próxima vez que se ejecute `./install.sh`.
+- Una instalación de desarrollo (su commit no está en la rama publicada) no se
+  actualiza sola.
+- Si la compilación en segundo plano falla, no se reintenta para esa versión;
+  la actualización se sigue ofreciendo y se puede instalar desde la terminal.
+- `NoAutoUpdate` en la configuración desactiva la compilación en segundo plano
+  (la actualización se sigue listando) y `AutoBuildInterval` fija las horas
+  mínimas entre dos compilaciones (6 por defecto).
 
 ## Uso
 
@@ -26,6 +63,8 @@ propios que no están en su origen, WonderUpdate avisa y no lo toca.
 wonderupdate              # actualización completa, con preguntas
 wonderupdate --check      # comprobación desatendida: estado para la barra + notificación
 wonderupdate --list       # qué hay pendiente (código de salida 7 si no hay nada)
+wonderupdate --apply      # instala la versión nueva del escritorio, y nada más
+wonderupdate --prepare    # la descarga y la compila sin instalar (lo que se hace solo)
 wonderupdate --news 10    # últimas noticias de Arch
 wonderupdate --services   # servicios que siguen usando archivos antiguos
 wonderupdate --enable     # comprobación automática al iniciar sesión y cada hora
@@ -82,6 +121,7 @@ versiones conservar en la caché, checkout de Wonderland, terminal…).
 | 8 | `--news`: no se pudieron obtener las noticias |
 | 9 | `--enable` / `--disable`: systemd devolvió un error |
 | 10 | error con el archivo de configuración |
+| 11 | `--prepare` / `--apply`: la instalación no tiene `version.json` |
 
 ## Instalación y pruebas
 

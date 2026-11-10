@@ -11,6 +11,7 @@ config_file="${XDG_CONFIG_HOME:-$HOME/.config}/$name/$name.conf"
 
 
 no_color="" no_version="" no_aur="" no_flatpak="" no_wonderland="" no_notification="" no_news=""
+no_auto_update="" auto_build_interval=6
 news_num=5 news_timeout=10 update_check_timeout=30
 old_packages_num=3 uninstalled_packages_num=0
 aur_helper="" su_cmd="" diff_prog="" wonderland_source="" terminal=""
@@ -44,6 +45,8 @@ load_config() {
         NoWonderland) no_wonderland=1 ;;
         NoNotification) no_notification=1 ;;
         NoNews) no_news=1 ;;
+        NoAutoUpdate) no_auto_update=1 ;;
+        AutoBuildInterval) config_number "$key" "$val" 0 && auto_build_interval=$val ;;
         NewsNum) config_number "$key" "$val" 1 && news_num=$val ;;
         NewsTimeout) config_number "$key" "$val" 1 && news_timeout=$val ;;
         UpdateCheckTimeout) config_number "$key" "$val" 1 && update_check_timeout=$val ;;
@@ -320,4 +323,17 @@ declare -A ES=(
     ["%s has been created"]="Se ha creado %s"
     ["No configuration file yet; create one with: %s --gen-config"]="Aún no hay archivo de configuración; créalo con: %s --gen-config"
     ["Example configuration not found"]="No se encontró la configuración de ejemplo"
+    ["Install now"]="Instalar ahora"
+    ["Later"]="Más tarde"
+    ["Wonder OS %s is ready to install"]="Wonder OS %s está listo para instalar"
+    ["This install has no version stamp; run install.sh once to get automatic updates"]="Esta instalación no tiene sello de versión; ejecuta install.sh una vez para tener actualizaciones automáticas"
+    ["Downloading the code (%s)"]="Descargando el código (%s)"
+    ["Could not download %s (details in %s)"]="No se pudo descargar %s (detalles en %s)"
+    ["The installed version has commits that are not published; it is not updated automatically"]="La versión instalada tiene commits sin publicar; no se actualiza sola"
+    ["Building %s (this takes a few minutes)"]="Compilando %s (tarda unos minutos)"
+    ["The build failed (details in %s); the update can still be installed from a terminal"]="La compilación ha fallado (detalles en %s); la actualización se puede instalar igualmente desde una terminal"
+    ["Ready: install it with %s"]="Lista: instálala con %s"
+    ["Waiting for the background build to finish..."]="Esperando a que termine la compilación en segundo plano..."
+    ["The installed version was built with uncommitted changes; the published version replaces it"]="La versión instalada se compiló con cambios sin confirmar; la versión publicada la sustituye"
+    ["already built: installing it is quick"]="ya compilada: instalarla es rápido"
 )

@@ -64,6 +64,8 @@ run_check() {
 
     [[ -n $json_output ]] && cat "$status_file"
 
+    maybe_prepare
+
     # Only what wasn't already announced is worth a notification.
     if [[ $count -gt 0 && $(<"$last_updates_file") != "$previous" ]]; then
         notify_updates "$count"
@@ -94,6 +96,7 @@ print_wonderland() {
     [[ ${#wl_updates[@]} -gt 0 ]] || return 0
     main_msg "$(t "Wonderland:")"
     echo "${wl_updates[0]}  $dim$(t "%s new change(s) in %s" "${#wl_commits[@]}" "$wl_source")$off"
+    is_prepared && detail "$(t "already built: installing it is quick")"
     local i
     for ((i = 0; i < ${#wl_commits[@]} && i < 10; i++)); do
         detail "${wl_commits[i]}"

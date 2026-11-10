@@ -16,6 +16,14 @@
 # Don't send a desktop notification when a check finds something new.
 #NoNotification
 
+# Don't build new versions of the Wonderland desktop in the background. They
+# are still listed, and installing them from a terminal builds them then.
+#NoAutoUpdate
+
+# Hours to leave between two background builds (0: build every new version as
+# soon as a check finds it).
+#AutoBuildInterval = 6
+
 # Don't show the Arch News before updating.
 #NoNews
 

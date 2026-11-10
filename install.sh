@@ -59,6 +59,9 @@ Options:
                    WonderlandWM one (the old file is kept as a timestamped .bak).
                    By default an existing config is left as it is.
   --update         git pull the repository first, then install
+  --build-only     build the compositor and the apps, install nothing and ask
+                   for nothing (no sudo): what WonderUpdate runs in the
+                   background, so that the install that follows is quick
   -y, --yes        don't ask for confirmation
   -n, --dry-run    print what would be done, change nothing
   --uninstall      remove what the installer put in /usr/local
@@ -119,7 +122,7 @@ if [[ -z $here || ! -f $here/Cargo.toml || ! -f $here/dev/scripts/install-wonder
         -h | --help) usage; exit 0 ;;
         -n | --dry-run) DRY_RUN=1 ;;
         --no-deps | --no-session | --no-apps | --no-desktop | --no-greeter | --fresh-config | \
-            --update | \
+            --update | --build-only | \
             -y | --yes | --uninstall) ;;
         *) usage >&2; die "unknown option: $a" ;;
         esac
@@ -153,6 +156,7 @@ ROOT="$here"
 cd "$ROOT"
 
 DO_DEPS=1 DO_SESSION=1 DO_APPS=1 DO_DESKTOP=1 DO_GREETER=1 FRESH_CONFIG=0 UPDATE=0 UNINSTALL=0
+BUILD_ONLY=0
 passthrough=()
 for a in "$@"; do
     case $a in
@@ -163,6 +167,7 @@ for a in "$@"; do
     --no-greeter) DO_GREETER=0 ;;
     --fresh-config) FRESH_CONFIG=1 ;;
     --update) UPDATE=1; continue ;;
+    --build-only) BUILD_ONLY=1 ;;
     -y | --yes) YES=1 ;;
     -n | --dry-run) DRY_RUN=1 ;;
     --uninstall) UNINSTALL=1 ;;
@@ -174,6 +179,15 @@ done
 
 [[ $(uname -s) == Linux ]] || die "WonderlandWM is a Linux compositor"
 [[ $EUID -ne 0 ]] || die "run it as your normal user (it asks for sudo when it needs it)"
+
+# What was asked for, before --build-only narrows it down: the version stamp
+# records a complete install only.
+FULL_INSTALL=0
+[[ $DO_SESSION -eq 1 && $DO_APPS -eq 1 && $DO_DESKTOP -eq 1 && $BUILD_ONLY -eq 0 ]] && FULL_INSTALL=1
+if [[ $BUILD_ONLY -eq 1 ]]; then
+    [[ $UNINSTALL -eq 0 && $UPDATE -eq 0 ]] || die "--build-only goes with neither --uninstall nor --update"
+    DO_DEPS=0 DO_DESKTOP=0 DO_GREETER=0 YES=1
+fi
 
 if [[ $UPDATE -eq 1 ]]; then
     step "Updating the repository"
@@ -265,11 +279,12 @@ if [[ $DO_DESKTOP -eq 1 ]]; then
 fi
 [[ $DO_GREETER -eq 1 ]] &&
     info "• login screen: Wonderland's greeter (greetd) becomes the login manager, from the next boot (sudo)"
+[[ $BUILD_ONLY -eq 1 ]] && info "${YLW}build only: nothing is installed${R}"
 [[ $DRY_RUN -eq 1 ]] && info "${YLW}dry run: nothing is changed${R}"
 echo
 confirm "Continue?" || exit 0
 
-if [[ $DRY_RUN -eq 0 && ($DO_DEPS -eq 1 || $DO_SESSION -eq 1 || $DO_APPS -eq 1 || $DO_GREETER -eq 1) ]]; then
+if [[ $DRY_RUN -eq 0 && $BUILD_ONLY -eq 0 && ($DO_DEPS -eq 1 || $DO_SESSION -eq 1 || $DO_APPS -eq 1 || $DO_GREETER -eq 1) ]]; then
     # Ask for the password once, up front, instead of halfway through a build.
     sudo -v || die "sudo is needed for the system-wide steps"
     # Keep it fresh through a long build so it doesn't ask again halfway.
@@ -337,7 +352,9 @@ if [[ $DO_SESSION -eq 1 ]]; then
     # user's own CARGO_TARGET_DIR says.
     run env CARGO_TARGET_DIR="$ROOT/target" cargo build --release --locked
     [[ $DRY_RUN -eq 1 || -x target/release/driftwm ]] || die "the build left no target/release/driftwm"
+fi
 
+if [[ $DO_SESSION -eq 1 && $BUILD_ONLY -eq 0 ]]; then
     step "Installing the compositor and the login session"
     installed="$PREFIX/bin/driftwm"
     if [[ -f $installed ]] && ! cmp -s "$installed" target/release/driftwm; then
@@ -366,7 +383,7 @@ if [[ $DO_APPS -eq 1 && ${#apps[@]} -gt 0 ]]; then
         "$PREFIX/share/icons/hicolor/scalable/apps/wonderland-finder.svg"
     )
     for f in "${finder_files[@]}"; do
-        if [[ -e $f ]]; then
+        if [[ $BUILD_ONLY -eq 0 && -e $f ]]; then
             as_root rm -f "${finder_files[@]}"
             run rm -rf target/apps/finder
             break
@@ -387,12 +404,12 @@ if [[ $DO_APPS -eq 1 && ${#apps[@]} -gt 0 ]]; then
                 run cmake -S "$d" -B "target/apps/$name" "${gen[@]}" \
                     -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX"
                 run cmake --build "target/apps/$name" --parallel
-                as_root cmake --install "target/apps/$name"
+                [[ $BUILD_ONLY -eq 1 ]] || as_root cmake --install "target/apps/$name"
                 ;;
             make)
                 # The Makefile installs from the app's own target/.
                 grep -q '^build:' "$d/Makefile" && run env -u CARGO_TARGET_DIR make -C "$d" build
-                as_root make -C "$d" install PREFIX="$PREFIX"
+                [[ $BUILD_ONLY -eq 1 ]] || as_root make -C "$d" install PREFIX="$PREFIX"
                 ;;
             esac
         )
@@ -403,7 +420,7 @@ if [[ $DO_APPS -eq 1 && ${#apps[@]} -gt 0 ]]; then
             failed+=("app $name")
         fi
     done
-    if [[ $DRY_RUN -eq 0 ]]; then
+    if [[ $DRY_RUN -eq 0 && $BUILD_ONLY -eq 0 ]]; then
         if command -v update-desktop-database >/dev/null 2>&1; then
             sudo update-desktop-database -q "$PREFIX/share/applications" 2>/dev/null || true
         fi
@@ -498,6 +515,16 @@ if [[ $DO_APPS -eq 1 && ${#apps[@]} -gt 0 ]]; then
     fi
 fi
 
+if [[ $BUILD_ONLY -eq 1 ]]; then
+    echo
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        printf '%sBuilt with problems:%s %s\n' "$YLW$B" "$R" "${failed[*]}"
+        exit 1
+    fi
+    printf '%sBuild finished:%s nothing was installed.\n' "$GRN$B" "$R"
+    exit 0
+fi
+
 # --- Desktop ----------------------------------------------------------------------
 
 if [[ $DO_DESKTOP -eq 1 ]]; then
@@ -582,6 +609,36 @@ if [[ $DRY_RUN -eq 1 ]]; then
     printf '%sDry run finished:%s nothing was changed.\n' "$GRN$B" "$R"
     exit 0
 fi
+
+# What is installed now, for WonderUpdate: the commit, where it came from and
+# the steps that were left out, so that an update repeats the same install.
+# A partial install changes none of that and leaves the stamp alone; one that
+# has no published branch behind it is a development install, which never
+# updates itself.
+write_version_stamp() {
+    local stamp="$state_dir/version.json" commit date branch repo dirty=false options=() a
+    [[ $FULL_INSTALL -eq 1 ]] || return 0
+    commit="$(git rev-parse HEAD 2>/dev/null)" || commit=""
+    branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" || branch=""
+    repo="$(git remote get-url origin 2>/dev/null)" || repo=""
+    if [[ -z $commit || -z $branch || -z $repo || $branch$repo == *[\"\\]* ]]; then
+        rm -f "$stamp"
+        return 0
+    fi
+    date="$(git log -1 --format=%cI 2>/dev/null)" || date=""
+    [[ -z $(git status --porcelain --untracked-files=no 2>/dev/null) ]] || dirty=true
+    for a in "${passthrough[@]}"; do
+        case $a in
+        --no-deps | --no-greeter) options+=("$a") ;;
+        esac
+    done
+    mkdir -p "$state_dir"
+    printf '{\n  "commit": "%s",\n  "date": "%s",\n  "branch": "%s",\n  "repo": "%s",\n  "options": "%s",\n  "dirty": %s\n}\n' \
+        "$commit" "$date" "$branch" "$repo" "${options[*]}" "$dirty" >"$stamp.new" &&
+        mv "$stamp.new" "$stamp"
+}
+write_version_stamp || warn "could not record the installed version in $state_dir/version.json"
+
 printf '%sWonderlandWM is installed.%s\n' "$GRN$B" "$R"
 if [[ $DO_SESSION -eq 1 ]]; then
     info "Log out and pick \"WonderlandWM\" on the login screen."
