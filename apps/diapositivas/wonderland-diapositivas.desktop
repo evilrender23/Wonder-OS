@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Diapositivas
+Name[en]=Slides
+GenericName=Presentaciones
+GenericName[en]=Presentations
+Comment=Presentaciones con diapositivas
+Comment[en]=Slide presentations
+Exec=wonderland-diapositivas %F
+Icon=wonderland-diapositivas
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-diapositivas
+MimeType=application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.oasis.opendocument.presentation;
+Categories=Office;Presentation;Qt;
+Keywords=presentación;pptx;odp;powerpoint;keynote;slides;presentation;
