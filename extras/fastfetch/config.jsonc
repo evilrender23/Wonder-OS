@@ -7,7 +7,8 @@
     "source": "~/.config/fastfetch/wonderland.txt",
     "padding": { "top": 1, "left": 2, "right": 4 }
   },
-  "display": { "separator": "  ", "color": { "keys": "cyan" } },
+  // Long values are cut at the window's edge: a line that wraps would land on top of the logo.
+  "display": { "separator": "  ", "color": { "keys": "cyan" }, "disableLinewrap": true },
   "modules": [
     "title",
     "separator",
@@ -16,7 +17,11 @@
     { "type": "wm", "key": "WM" },
     { "type": "terminal", "key": "Terminal" },
     { "type": "shell", "key": "Shell" },
-    { "type": "packages", "key": "Packages" },
+    {
+      "type": "packages",
+      "key": "Packages",
+      "format": "{?pacman}{pacman} (pacman){?}{?flatpak-all}, {flatpak-all} (flatpak){?}"
+    },
     { "type": "cpu", "key": "CPU" },
     { "type": "gpu", "key": "GPU" },
     { "type": "memory", "key": "Memory" },
