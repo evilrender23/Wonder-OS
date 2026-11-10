@@ -41,7 +41,6 @@ impl XdgShellHandler for DriftWm {
     fn new_toplevel(&mut self, surface: ToplevelSurface) {
         tracing::info!("New toplevel surface");
         let wl_surface = surface.wl_surface().clone();
-        self.context_menu_client_answered(&wl_surface);
         let window = Window::new_wayland_window(surface);
 
         // Place at screen center (no size offset — size unknown until first commit).
@@ -104,8 +103,6 @@ impl XdgShellHandler for DriftWm {
 
     fn new_popup(&mut self, surface: PopupSurface, _positioner: PositionerState) {
         tracing::info!("New popup surface");
-        self.context_menu_client_answered(surface.wl_surface());
-
         let popup = PopupKind::Xdg(surface);
         self.unconstrain_popup(&popup);
 

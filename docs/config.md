@@ -1172,15 +1172,9 @@ A maximize from the window (its maximize button or a title-bar double-click), th
 
 Default: `"none"`
 
-Command run when a plain right-click got no answer from the app under it, and at once on empty canvas or a driftwm title bar: the hook a shell draws a fallback context menu from. The click always reaches the app first. It answered if it opened a menu or a window, or repainted the clicked window (a menu drawn inside it) within context_menu_delay ms of the release. A drag or a long press never counts, nor does a right-click a binding took. The command gets DRIFTWM_MENU_TARGET (window, titlebar or canvas), DRIFTWM_MENU_X / DRIFTWM_MENU_Y (output-relative), DRIFTWM_MENU_OUTPUT, and for a window DRIFTWM_MENU_WINDOW (its id) and DRIFTWM_MENU_APP_ID.
+Command run for a plain right-click on empty canvas or on a driftwm title bar: the hook a shell draws a desktop context menu from. A right-click inside a window is the app's alone and never runs it. A drag or a long press never counts, nor does a right-click a binding took. The command gets DRIFTWM_MENU_TARGET (titlebar or canvas), DRIFTWM_MENU_X / DRIFTWM_MENU_Y (output-relative), DRIFTWM_MENU_OUTPUT, and for a title bar DRIFTWM_MENU_WINDOW (its id) and DRIFTWM_MENU_APP_ID.
 
 "none" = off
-
-### `context_menu_delay`
-
-Default: `150`
-
-ms; raise it for apps slow to open their menu
 
 Mouse bindings: "Modifier+...+Trigger" = "action", merged with the defaults; "none" unbinds one. Contexts: on-window, on-canvas, and anywhere as the fallback. Triggers: left, right, middle, trackpad-scroll, wheel-scroll, and wheel-up / wheel-down (once per notch).
 

@@ -29,9 +29,9 @@ focus_follows_mouse = true
 # The shaders installed to ~/.config/driftwm/wallpapers/ work the same way with
 # type = "shader".
 
-# Fallback context menu: a right-click the app leaves unanswered (and any on
-# empty canvas or a title bar) opens the shell's menu. Apps that show their own
-# menu keep it. Turn it off, or mute it per app, from the bar's settings.
+# Desktop context menu: a right-click on empty canvas or on a title bar opens
+# the shell's menu. Inside a window the right-click is the app's alone. Turn it
+# off from the bar's settings.
 [mouse]
 context_menu = "qs -p ~/.config/driftwm/quickshell ipc call contextmenu open \"$DRIFTWM_MENU_TARGET\" \"$DRIFTWM_MENU_X\" \"$DRIFTWM_MENU_Y\" \"$DRIFTWM_MENU_OUTPUT\" \"$DRIFTWM_MENU_WINDOW\""
 

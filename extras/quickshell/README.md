@@ -126,17 +126,16 @@ IPC: `qs ipc call dock toggle` y `qs ipc call dock toggleAutohide`.
 
 ## Menú contextual (clic derecho)
 
-`contextmenu/ContextMenu.qml` dibuja un menú donde la aplicación no ofrece el suyo. El compositor entrega siempre el clic derecho a la app y solo ejecuta `[mouse] context_menu` si esta no responde: no abre un popup ni una ventana y no repinta la superficie pulsada en `context_menu_delay` ms (150 por defecto). En el lienzo vacío y en la barra de título aparece al instante. Un clic derecho con un binding propio, un arrastre o una pulsación larga no lo abren.
+`contextmenu/ContextMenu.qml` dibuja el menú del escritorio y el de la barra de título. El compositor ejecuta `[mouse] context_menu` solo para un clic derecho en el lienzo vacío o en una barra de título dibujada por él; dentro de una ventana el clic derecho es de la aplicación y nunca abre este menú. Un clic derecho con un binding propio, un arrastre o una pulsación larga tampoco lo abren.
 
 El contenido se arma en cada apertura según lo pulsado:
 
 | Dónde | Qué ofrece |
 |---|---|
-| Ventana | lo seleccionado (abrir enlace, escribir a un correo, abrir una ruta, copiar un color, resultado de una cuenta, buscar, copiar), nueva ventana y acciones del `.desktop` de la app, y las acciones de ventana |
-| Barra de título | acciones de ventana y de la app |
+| Barra de título | acciones de ventana y de la app (nueva ventana y acciones de su `.desktop`) |
 | Lienzo | con los iconos del escritorio activos: nueva carpeta, nuevo documento de texto, ordenar iconos y abrir la carpeta Escritorio; además terminal, Spotlight, navegación (solo lo que aplica: zoom si no está al 100 %, alinear si hay varias pantallas), ventanas a las que saltar, fondos, pantallas, tema y ajustes |
 
-El portapapeles solo añade una fila cuando contiene algo que se puede abrir. «No mostrar este menú en esta app» lo silencia para apps que responden al clic derecho sin que el compositor lo note; se revierte desde el menú del lienzo. El interruptor general está en Ajustes. Necesita `wl-clipboard`.
+En el lienzo, el portapapeles añade una fila cuando contiene algo que se puede abrir (enlace, correo, ruta, color o una cuenta). El interruptor general está en Ajustes. Necesita `wl-clipboard`.
 
 ## Iconos del escritorio
 
@@ -264,7 +263,7 @@ Theme.qml          paleta Hermes (p.*), tipografía, radios; sigue Settings.data
 services/          singletons: Settings, Compositor (IPC de driftwm), Time, Net, Brightness,
                    SysStats, Weather, Media, Notifs, AiUsage, Updates, Session, Wallpapers, Capture
 spotlight/         Spotlight
-contextmenu/       menú contextual de reserva
+contextmenu/       menú contextual del escritorio
 displays/          ajustes de pantallas
 desktop/           iconos del escritorio (Desktop, DesktopIcon, DesktopMenu), su imán (magnet.js) e icons/ (carpeta y documento, los mismos que dibuja Rabbit)
 capture/           overlay de capturas y grabación (CaptureOverlay)

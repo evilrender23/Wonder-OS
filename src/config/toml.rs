@@ -444,8 +444,6 @@ pub(super) struct MouseFileConfig {
     pub decoration_fit_snapped: Option<bool>,
     /// See [`super::Config::context_menu`].
     pub context_menu: Option<String>,
-    /// See [`super::Config::context_menu_delay`].
-    pub context_menu_delay: Option<u64>,
     #[serde(rename = "on-window")]
     pub on_window: Option<HashMap<String, String>>,
     #[serde(rename = "on-canvas")]

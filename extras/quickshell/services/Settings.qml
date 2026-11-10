@@ -120,8 +120,7 @@ Singleton {
             // over the compositor's frost ([effects.glass] bends and lights it).
             property bool glass: true
             property real glassOpacity: 0.6              // 0.3 (clear) – 1 (solid)
-            property bool contextMenu: true              // fallback right-click menu
-            property var contextMenuIgnoredApps: []      // app_ids that never get it
+            property bool contextMenu: true              // desktop and title-bar right-click menu
             property bool desktopIcons: true             // the Desktop folder on the primary screen
             property bool desktopMagnet: false           // off: icons stay exactly where they are dropped; on: they pull into line with their neighbours
             property int desktopIconSize: 56

@@ -1,21 +1,21 @@
-//! `[mouse] context_menu`: the command runs for a plain right-click nobody
-//! answered, and never on top of a menu the app shows itself. Every scenario
-//! asserts from what the user sees: whether the command ran and with what, and
-//! that the app still received the click.
+//! `[mouse] context_menu`: the command runs for a plain right-click on empty
+//! canvas or a title bar, and never inside a window. Every scenario asserts
+//! from what the user sees: whether the command ran and with what, and that the
+//! app still received the click.
 
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
-use driftwm::config::{BTN_LEFT, BTN_RIGHT};
+use driftwm::config::BTN_RIGHT;
 use smithay::desktop::Window;
 use smithay::utils::{Logical, Point};
 
 use super::client::ClientId;
 use super::input_backend::{FakeDevice, pointer_to, press, release};
 use super::real::TempDir;
-use super::{Fixture, config, give_ssd, map_popup, map_window, window_by_app_id};
+use super::{Fixture, config, give_ssd, map_window, window_by_app_id};
 
-/// Long enough for the answer window (20 ms below) to lapse and `sh` to run.
+/// Long enough for `sh` to run.
 const QUIET: Duration = Duration::from_millis(400);
 
 struct Menu {
@@ -29,7 +29,7 @@ impl Menu {
         let dir = TempDir::new();
         let out = dir.path().join("menu");
         let toml = format!(
-            "[mouse]\ncontext_menu = \"echo $DRIFTWM_MENU_TARGET $DRIFTWM_MENU_APP_ID > '{0}.partial' && mv '{0}.partial' '{0}'\"\ncontext_menu_delay = 20\n{extra}",
+            "[mouse]\ncontext_menu = \"echo $DRIFTWM_MENU_TARGET $DRIFTWM_MENU_APP_ID > '{0}.partial' && mv '{0}.partial' '{0}'\"\n{extra}",
             out.display()
         );
         (Fixture::with_config(config(&toml)), Self { _dir: dir, out })
@@ -83,7 +83,7 @@ fn client_buttons(f: &mut Fixture, id: ClientId) -> Vec<(u32, u32)> {
 }
 
 #[test]
-fn silent_app_gets_the_fallback_menu_after_its_click() {
+fn right_click_inside_a_window_belongs_to_the_app() {
     let (mut f, menu) = Menu::fixture("");
     let (id, window) = mapped_window(&mut f);
     let at = center_of(&mut f, &window);
@@ -93,76 +93,13 @@ fn silent_app_gets_the_fallback_menu_after_its_click() {
     assert_eq!(
         client_buttons(&mut f, id),
         vec![(BTN_RIGHT, 1), (BTN_RIGHT, 0)],
-        "the app must see the whole click before anything else happens"
+        "the app must see the whole click"
     );
-    assert_eq!(menu.opened(&mut f).as_deref(), Some("window app"));
-}
-
-#[test]
-fn app_that_opens_its_own_popup_keeps_the_click() {
-    let (mut f, menu) = Menu::fixture("");
-    let (id, window) = mapped_window(&mut f);
-    let at = center_of(&mut f, &window);
-    let surface = f.client(id).state.windows[0].surface.clone();
-
-    let mouse = FakeDevice::mouse();
-    pointer_to(&mut f, &mouse, at);
-    press(&mut f, &mouse, BTN_RIGHT);
-    map_popup(&mut f, id, &surface);
-    release(&mut f, &mouse, BTN_RIGHT);
-
-    assert_eq!(menu.opened(&mut f), None);
-}
-
-#[test]
-fn app_that_opens_its_popup_on_release_keeps_the_click() {
-    let (mut f, menu) = Menu::fixture("");
-    let (id, window) = mapped_window(&mut f);
-    let at = center_of(&mut f, &window);
-    let surface = f.client(id).state.windows[0].surface.clone();
-
-    right_click(&mut f, at);
-    map_popup(&mut f, id, &surface);
-
-    assert_eq!(menu.opened(&mut f), None);
-}
-
-#[test]
-fn app_that_repaints_draws_its_own_menu() {
-    let (mut f, menu) = Menu::fixture("");
-    let (id, window) = mapped_window(&mut f);
-    let at = center_of(&mut f, &window);
-
-    right_click(&mut f, at);
-    let client_window = &f.client(id).state.windows[0];
-    client_window.attach_new_buffer();
-    client_window.commit();
-    f.double_roundtrip(id);
-
-    assert_eq!(menu.opened(&mut f), None);
-}
-
-#[test]
-fn another_window_repainting_does_not_answer_for_the_clicked_one() {
-    let (mut f, menu) = Menu::fixture("");
-    let (_, window) = mapped_window(&mut f);
-    let other = f.add_client();
-    map_window(&mut f, other, "other", (200, 200));
-    f.state()
-        .raise_and_focus(&window, smithay::utils::SERIAL_COUNTER.next_serial());
-    let at = center_of(&mut f, &window);
-    f.state().with_output_state(|os| {
-        os.camera_target = None;
-        os.zoom_target = None;
-    });
-
-    right_click(&mut f, at);
-    let client_window = &f.client(other).state.windows[0];
-    client_window.attach_new_buffer();
-    client_window.commit();
-    f.double_roundtrip(other);
-
-    assert_eq!(menu.opened(&mut f).as_deref(), Some("window app"));
+    assert_eq!(
+        menu.opened(&mut f),
+        None,
+        "an app that stays silent still keeps its right-click"
+    );
 }
 
 #[test]
@@ -199,20 +136,6 @@ fn right_drag_is_not_a_click() {
     press(&mut f, &mouse, BTN_RIGHT);
     pointer_to(&mut f, &mouse, Point::from((360.0, 300.0)));
     release(&mut f, &mouse, BTN_RIGHT);
-
-    assert_eq!(menu.opened(&mut f), None);
-}
-
-#[test]
-fn a_following_click_withdraws_the_pending_menu() {
-    let (mut f, menu) = Menu::fixture("");
-    let (_, window) = mapped_window(&mut f);
-    let at = center_of(&mut f, &window);
-    let mouse = FakeDevice::mouse();
-
-    right_click(&mut f, at);
-    press(&mut f, &mouse, BTN_LEFT);
-    release(&mut f, &mouse, BTN_LEFT);
 
     assert_eq!(menu.opened(&mut f), None);
 }

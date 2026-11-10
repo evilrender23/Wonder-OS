@@ -7,24 +7,24 @@ import "../services"
 import "../components"
 import ".."
 
-// The fallback context menu. The compositor runs `[mouse] context_menu` only
-// for a right-click the app under it left unanswered (or one on empty canvas
-// or a title bar), so this never covers a menu an app shows itself.
+// The desktop context menu. The compositor runs `[mouse] context_menu` only
+// for a right-click on empty canvas or on a title bar; inside a window the
+// right-click is the app's alone, so this never covers a menu an app shows.
 //
-// What it offers is rebuilt on every open from what was clicked: the window
-// and its state, the .desktop actions of its app, the text selected in it
-// (link, path, e-mail, sum, colour or plain words) and the clipboard.
+// What it offers is rebuilt on every open from what was clicked: on a title
+// bar the window, its state and the .desktop actions of its app; on the canvas
+// the desktop, navigation and whatever the clipboard holds that can be opened
+// (link, path, e-mail, sum or colour).
 // Esc, a click outside or picking a row closes it.
 Scope {
     id: root
 
     property bool open: false
     property var screen: null
-    property string target: "canvas"       // canvas | window | titlebar
+    property string target: "canvas"       // canvas | titlebar
     property int clickX: 0
     property int clickY: 0
     property var win: null                 // the clicked window's state entry
-    property string selection: ""
     property string clipboard: ""
     property var items: []
     property string armed: ""              // id of the row awaiting a confirming click
@@ -36,26 +36,27 @@ Scope {
 
     function show(target, x, y, output, windowId) {
         if (!Settings.data.contextMenu) return
+        // Anything else (a compositor older than this shell still reports
+        // clicks inside a window) is not ours to answer.
+        if (target !== "canvas" && target !== "titlebar") return
         const state = Compositor.state
         const id = Number(windowId) || 0
         const w = id && state ? (state.windows || []).find(w => w.id === id) || null : null
-        if (target !== "canvas" && !w) return
-        if (w && Settings.data.contextMenuIgnoredApps.includes(w.app_id)) return
+        if (target === "titlebar" && !w) return
 
         root.target = target
         root.win = w
         root.clickX = x
         root.clickY = y
         root.screen = Quickshell.screens.find(s => s.name === output) || Quickshell.screens[0]
-        root.selection = ""
         root.clipboard = ""
         root.armed = ""
         rebuild()
         root.open = true
-        // The selection is only meaningful for the content that was clicked.
-        if (target === "window") primary.running = true
-        else if (target === "canvas") desktopProbe.running = true
-        clip.running = true
+        if (target === "canvas") {
+            desktopProbe.running = true
+            clip.running = true
+        }
     }
 
     function close() { root.open = false }
@@ -66,7 +67,7 @@ Scope {
         item.run()
     }
 
-    // ── what the selected text is ───────────────────────────────────────
+    // ── what the clipboard text is ──────────────────────────────────────
     function ellipsis(s, n) {
         s = String(s).replace(/\s+/g, " ").trim()
         return s.length > n ? s.slice(0, n - 1) + "…" : s
@@ -99,11 +100,12 @@ Scope {
         } catch (e) { return "" }
     }
 
-    function selectionItems(text, fromClipboard) {
+    // Rows for a clipboard text that is something to open; none otherwise.
+    function clipboardItems(text) {
         const out = []
         const t = text.trim()
         if (!t) return out
-        const src = fromClipboard ? I18n.tr(" del portapapeles") : ""
+        const src = I18n.tr(" del portapapeles")
         const url = asUrl(t), mail = asEmail(t), path = asPath(t), color = asColor(t), sum = asSum(t)
         if (url)
             out.push({ icon: "globe", text: I18n.tr("Abrir enlace") + src, hint: ellipsis(url.replace(/^https?:\/\//, ""), 28), run: () => openUrl(url) })
@@ -120,11 +122,6 @@ Scope {
             out.push({ icon: "palette", swatch: color, text: I18n.tr("Copiar color %1").arg(color.toUpperCase()), run: () => copy(color.toUpperCase()) })
         else if (sum)
             out.push({ icon: "calculator", text: ellipsis(t, 22) + " = " + sum, hint: I18n.tr("Copiar"), run: () => copy(sum) })
-        if (fromClipboard) return out
-        if (!url && !mail && !path)
-            out.push({ icon: "search", text: I18n.tr("Buscar «%1»").arg(ellipsis(t, 26)),
-                run: () => openUrl("https://duckduckgo.com/?q=" + encodeURIComponent(t.slice(0, 500))) })
-        out.push({ icon: "check", text: I18n.tr("Copiar selección"), hint: t.length > 40 ? I18n.tr("%1 car.").arg(String(t.length)) : "", run: () => copy(text) })
         return out
     }
 
@@ -223,10 +220,6 @@ Scope {
             run: () => Settings.data.themeMode = Theme.dark ? "light" : "dark" })
         out.push({ icon: "settings", text: I18n.tr("Sistema…"),
             run: () => Quickshell.execDetached(["sh", "-c", "command -v wonderland-sistema >/dev/null && exec wonderland-sistema; exec systemsettings"]) })
-        const ignored = Settings.data.contextMenuIgnoredApps
-        if (ignored.length)
-            out.push({ icon: "rotate-cw", text: (ignored.length === 1 ? I18n.tr("Volver a mostrar este menú en %1 app") : I18n.tr("Volver a mostrar este menú en %1 apps")).arg(String(ignored.length)),
-                run: () => Settings.data.contextMenuIgnoredApps = [] })
         return out
     }
 
@@ -240,24 +233,15 @@ Scope {
         const out = []
         const w = root.win
         if (root.target === "canvas") {
-            section(out, selectionItems(root.clipboard, true))
+            section(out, clipboardItems(root.clipboard))
             section(out, desktopItems())
             section(out, canvasItems())
         } else {
             const app = appEntry(w)
             out.push({ title: ellipsis(app ? app.name : w.app_id || I18n.tr("Ventana"), 30), detail: ellipsis(w.title, 44),
                 iconSource: app ? Quickshell.iconPath(app.icon, true) : "" })
-            if (root.target === "window") {
-                section(out, selectionItems(root.selection, false))
-                section(out, selectionItems(root.clipboard, true))
-            }
             section(out, appItems(w))
             section(out, windowItems(w))
-            if (root.target === "window") {
-                out.push({ separator: true })
-                out.push({ icon: "eye-off", text: I18n.tr("No mostrar este menú en esta app"),
-                    run: () => Settings.data.contextMenuIgnoredApps = Settings.data.contextMenuIgnoredApps.concat([w.app_id]) })
-            }
         }
         out.forEach((item, i) => { if (!item.id) item.id = "i" + i })
         root.items = out
@@ -277,27 +261,12 @@ Scope {
     }
 
     Process {
-        id: primary
-        command: ["sh", "-c", `timeout 0.4 wl-paste --primary --no-newline --type text 2>/dev/null | head -c ${root.maxText}`]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (!root.open || !text.trim()) return
-                root.selection = text
-                root.rebuild()
-            }
-        }
-    }
-
-    Process {
         id: clip
         command: ["sh", "-c", `timeout 0.4 wl-paste --no-newline --type text 2>/dev/null | head -c ${root.maxText}`]
         stdout: StdioCollector {
             onStreamFinished: {
-                // Only worth a row when it is something to open, and not the
-                // same text the selection already offers.
-                const t = text.trim()
-                if (!root.open || !t || t === root.selection.trim()) return
-                if (!root.selectionItems(t, true).length) return
+                // Only worth a row when it is something to open.
+                if (!root.open || !root.clipboardItems(text).length) return
                 root.clipboard = text
                 root.rebuild()
             }

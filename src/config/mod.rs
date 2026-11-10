@@ -291,11 +291,9 @@ pub struct Config {
     /// that border is inert — resize only through explicit bindings (e.g.
     /// `alt+RMB`) or gestures.
     pub resize_on_border: bool,
-    /// Command run when a plain right-click went unanswered by the app under
-    /// it (or landed on empty canvas or an SSD title bar). `None` disables.
+    /// Command run for a plain right-click on empty canvas or an SSD title
+    /// bar, never inside a window. `None` disables.
     pub context_menu: Option<String>,
-    /// How long, in ms after the release, the app has to answer the click.
-    pub context_menu_delay: u64,
     /// When `true`, resizing a window by dragging its edge (SSD or CSD
     /// border) propagates to every window connected to it via snap
     /// adjacency. Keybinding and gesture resize are unaffected — their bound
@@ -636,7 +634,6 @@ impl Config {
             .mouse
             .context_menu
             .filter(|c| !c.trim().is_empty() && c.as_str() != "none");
-        let context_menu_delay = raw.mouse.context_menu_delay.unwrap_or(150).min(2000);
         let decoration_resize_snapped = raw.mouse.decoration_resize_snapped.unwrap_or(true);
         let decoration_fit_snapped = raw.mouse.decoration_fit_snapped.unwrap_or(true);
         let maximize_to_space = raw.spaces.maximize_to_space.unwrap_or(true);
@@ -1284,7 +1281,6 @@ impl Config {
             mouse: mouse_bindings,
             resize_on_border,
             context_menu,
-            context_menu_delay,
             decoration_resize_snapped,
             decoration_fit_snapped,
             maximize_to_space,

@@ -314,21 +314,6 @@ impl CompositorHandler for DriftWm {
             );
         }
 
-        // Read before the buffer handler below takes the pending buffer.
-        if self.pending_context_menu.is_some()
-            && with_states(surface, |states| {
-                matches!(
-                    states
-                        .cached_state
-                        .get::<SurfaceAttributes>()
-                        .current()
-                        .buffer,
-                    Some(BufferAssignment::NewBuffer(_))
-                )
-            })
-        {
-            self.context_menu_surface_repainted(surface);
-        }
         // Without this, bbox_from_surface_tree returns 0x0.
         smithay::backend::renderer::utils::on_commit_buffer_handler::<DriftWm>(surface);
 
