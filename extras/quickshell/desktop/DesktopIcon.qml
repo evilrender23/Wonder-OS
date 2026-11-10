@@ -33,7 +33,7 @@ Item {
 
     function fileUrl(path) { return "file://" + path.split("/").map(encodeURIComponent).join("/") }
 
-    // Folders and files of no known type are drawn as Wonderland Finder draws
+    // Folders and files of no known type are drawn as Rabbit draws
     // them (icons/ holds its artwork), so the desktop and its windows match.
     readonly property string source: {
         if (modelData.thumb && !thumbFailed) return fileUrl(modelData.thumb)

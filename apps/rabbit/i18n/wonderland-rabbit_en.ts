@@ -2,9 +2,9 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en" sourcelanguage="en">
 <context>
-    <name>FinderWindow</name>
+    <name>RabbitWindow</name>
     <message numerus="yes">
-        <location filename="../qml/FinderWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="223"/>
         <source>Delete %n item(s) immediately?</source>
         <translation>
             <numerusform>Delete %n item immediately?</numerusform>
@@ -12,7 +12,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/FinderWindow.qml" line="661"/>
+        <location filename="../qml/RabbitWindow.qml" line="661"/>
         <source>%n item(s)</source>
         <translation>
             <numerusform>%n item</numerusform>

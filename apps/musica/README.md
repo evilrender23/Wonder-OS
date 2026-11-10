@@ -1,7 +1,7 @@
 # Música
 
 The music player of Wonderlands OS: your own files, shown as a library. It is the desktop's default
-app for audio — a song opened from Finder plays here.
+app for audio — a song opened from Rabbit plays here.
 
 - **Biblioteca**: Añadido recientemente, Artistas, Álbumes and Canciones, read from the tags of the
   files (MP3, FLAC, Ogg Vorbis, Opus, M4A/AAC, WAV, AIFF, WMA, APE, WavPack, Musepack) with their

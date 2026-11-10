@@ -353,6 +353,21 @@ fi
 # --- Apps -----------------------------------------------------------------------
 
 if [[ $DO_APPS -eq 1 && ${#apps[@]} -gt 0 ]]; then
+    # Rabbit was called Finder: what an install of it left behind goes, so the
+    # menu doesn't list both and "Show in folder" starts the one that is there.
+    finder_files=(
+        "$PREFIX/bin/wonderland-finder"
+        "$PREFIX/share/applications/wonderland-finder.desktop"
+        "$PREFIX/share/dbus-1/services/org.wonderland.Finder.FileManager1.service"
+        "$PREFIX/share/icons/hicolor/scalable/apps/wonderland-finder.svg"
+    )
+    for f in "${finder_files[@]}"; do
+        if [[ -e $f ]]; then
+            as_root rm -f "${finder_files[@]}"
+            run rm -rf target/apps/finder
+            break
+        fi
+    done
     for d in "${apps[@]}"; do
         name="$(basename "$d")"
         step "App: $name"
@@ -391,19 +406,22 @@ if [[ $DO_APPS -eq 1 && ${#apps[@]} -gt 0 ]]; then
         if command -v gtk-update-icon-cache >/dev/null 2>&1; then
             sudo gtk-update-icon-cache -q -t "$PREFIX/share/icons/hicolor" 2>/dev/null || true
         fi
-        # Wonderland Finder is the desktop's file manager: folders open in it,
+        # Rabbit is the desktop's file manager: folders open in it,
         # unless the user already picked an app for them.
         mimeapps="${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list"
-        if [[ -f $PREFIX/share/applications/wonderland-finder.desktop ]] &&
+        if grep -qs 'wonderland-finder\.desktop' "$mimeapps"; then
+            sed -i 's/wonderland-finder\.desktop/wonderland-rabbit.desktop/g' "$mimeapps"
+        fi
+        if [[ -f $PREFIX/share/applications/wonderland-rabbit.desktop ]] &&
             command -v xdg-mime >/dev/null 2>&1 &&
             ! grep -qs '^inode/directory=' "$mimeapps"; then
             # xdg-mime neither creates the directory nor reports a failed write.
             mkdir -p "${mimeapps%/*}"
-            xdg-mime default wonderland-finder.desktop inode/directory 2>/dev/null || true
-            if grep -qs '^inode/directory=wonderland-finder.desktop' "$mimeapps"; then
-                ok "Wonderland Finder opens folders"
+            xdg-mime default wonderland-rabbit.desktop inode/directory 2>/dev/null || true
+            if grep -qs '^inode/directory=wonderland-rabbit.desktop' "$mimeapps"; then
+                ok "Rabbit opens folders"
             else
-                warn "could not make Wonderland Finder the app for folders; run: xdg-mime default wonderland-finder.desktop inode/directory"
+                warn "could not make Rabbit the app for folders; run: xdg-mime default wonderland-rabbit.desktop inode/directory"
             fi
         fi
         # Música is the desktop's music player: audio files open in it, each
@@ -483,6 +501,11 @@ if [[ $DO_DESKTOP -eq 1 ]]; then
     if ! run env DRIFTWM_KEEP_CONFIG="$keep_config" sh extras/install.sh; then
         warn "extras/install.sh failed; see the output above"
         failed+=("desktop")
+    fi
+    # A config.toml that stays may hold window rules for Rabbit under the name
+    # it had, Finder: they would stop matching its windows.
+    if [[ $keep_config -eq 1 ]] && grep -qs '"wonderland-finder"' "$cfg_dir/config.toml"; then
+        run sed -i 's/"wonderland-finder"/"wonderland-rabbit"/g' "$cfg_dir/config.toml"
     fi
 fi
 

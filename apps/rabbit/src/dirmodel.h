@@ -38,7 +38,7 @@ struct Entry {
 };
 
 /// One folder's contents, sorted and with its selection. `url` is a KIO URL,
-/// or one of the Finder's own places: recents:/, applications:/, tags:/<name>.
+/// or one of Rabbit's own places: recents:/, applications:/, tags:/<name>.
 /// A non-empty `search` lists matching names below `url` instead.
 class DirModel : public QAbstractListModel
 {

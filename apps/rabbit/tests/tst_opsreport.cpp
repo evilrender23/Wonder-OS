@@ -60,7 +60,7 @@ private Q_SLOTS:
         QVERIFY(!state.contains(QLatin1String("status")));
     }
 
-    void whatADeadFinderLeftIsCleared()
+    void whatADeadRabbitLeftIsCleared()
     {
         const QString path = m_dir.filePath(QStringLiteral("stale.json"));
         {

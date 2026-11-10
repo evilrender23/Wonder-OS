@@ -3,16 +3,16 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// What Wonderland Finder is copying, moving or deleting, for the bar's
-// progress indicator. The Finder writes its state to a file in the runtime
-// directory (apps/finder/src/opsreport.cpp) and rewrites it every second while
-// it works, so a state that stops being refreshed belongs to a Finder that died.
+// What Rabbit is copying, moving or deleting, for the bar's
+// progress indicator. Rabbit writes its state to a file in the runtime
+// directory (apps/rabbit/src/opsreport.cpp) and rewrites it every second while
+// it works, so a state that stops being refreshed belongs to a Rabbit that died.
 Singleton {
     id: root
 
     property bool busy: false
     property string kind: ""        // copy, move, trash, delete, other
-    property string status: ""      // "Copying…", in the Finder's language
+    property string status: ""      // "Copying…", in Rabbit's language
     property real progress: 0       // 0–1; negative: amount unknown
     property string detail: ""      // "1.2 GB of 4 GB"
     property real updated: 0
@@ -68,8 +68,8 @@ Singleton {
     // The file has to exist before it can be watched.
     Process {
         running: true
-        command: ["sh", "-c", 'mkdir -p "$1" && { [ -e "$1/finder-ops.json" ] || echo "{}" > "$1/finder-ops.json"; }', "sh", root.dir]
-        onExited: view.path = `${root.dir}/finder-ops.json`
+        command: ["sh", "-c", 'mkdir -p "$1" && { [ -e "$1/rabbit-ops.json" ] || echo "{}" > "$1/rabbit-ops.json"; }', "sh", root.dir]
+        onExited: view.path = `${root.dir}/rabbit-ops.json`
     }
 
     FileView {

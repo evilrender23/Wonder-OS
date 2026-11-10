@@ -174,13 +174,13 @@ private:
 };
 
 /// What only this file manager answers: the desktop asks for "Customize Folder" here.
-class FinderAdaptor : public QDBusAbstractAdaptor
+class RabbitAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "org.wonderland.Finder")
+    Q_CLASSINFO("D-Bus Interface", "org.wonderland.Rabbit")
 
 public:
-    explicit FinderAdaptor(App *app);
+    explicit RabbitAdaptor(App *app);
 
 public Q_SLOTS:
     void CustomizeFolder(const QString &uri);
@@ -193,7 +193,7 @@ private:
 class LookAdaptor : public QDBusAbstractAdaptor
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", "org.wonderland.Finder.QuickLook")
+    Q_CLASSINFO("D-Bus Interface", "org.wonderland.Rabbit.QuickLook")
 
 public:
     explicit LookAdaptor(App *app);

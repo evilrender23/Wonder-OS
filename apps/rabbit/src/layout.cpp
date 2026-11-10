@@ -45,7 +45,7 @@ static QList<FolderLayout *> &instances()
 
 QString FolderLayout::dataDirectory()
 {
-    QString base = qEnvironmentVariable("WONDERLAND_FINDER_DATA");
+    QString base = qEnvironmentVariable("WONDERLAND_RABBIT_DATA");
     if (base.isEmpty()) {
         base = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     }

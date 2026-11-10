@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Shapes
 
 /// The desktop's folder, in the usual blue or in a tint: the same drawing and the same shades
-/// the file manager paints (apps/finder, assets/icons/folder.svg).
+/// the file manager paints (apps/rabbit, assets/icons/folder.svg).
 Item {
     id: root
 

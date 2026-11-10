@@ -1,16 +1,16 @@
 [Desktop Entry]
 Type=Application
-Name=Finder
-Name[es]=Finder
+Name=Rabbit
+Name[es]=Rabbit
 GenericName=File Manager
 GenericName[es]=Gestor de archivos
 Comment=Browse and organise your files
 Comment[es]=Explora y organiza tus archivos
-Exec=wonderland-finder %U
-Icon=wonderland-finder
+Exec=wonderland-rabbit %U
+Icon=wonderland-rabbit
 Terminal=false
 StartupNotify=true
-StartupWMClass=wonderland-finder
+StartupWMClass=wonderland-rabbit
 MimeType=inode/directory;
 Categories=System;FileTools;FileManager;Qt;
-Keywords=files;folders;finder;archivos;carpetas;
+Keywords=files;folders;archivos;carpetas;conejo;

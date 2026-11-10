@@ -12,12 +12,12 @@ Wonder OS es una distribución Linux basada en CachyOS.
   [driftwm](https://github.com/malbiruk/driftwm). Ver [NOTICE.md](NOTICE.md).
 - **Apps** (`apps/`):
   - `calendario` — Calendario
-  - `finder` — Wonderland Finder, gestor de archivos
   - `fotos` — Fotos, biblioteca de imágenes y vídeos
   - `hojas` — Hojas
   - `musica` — Música, reproductor de música
   - `notas` — Notas
   - `peliculas` — Películas, reproductor de vídeo
+  - `rabbit` — Rabbit, gestor de archivos
   - `sistema` — Sistema, ajustes del sistema
   - `wondermirror` — Wonder Mirror, aplicaciones de Windows como ventanas del escritorio
   - `wonderterm` — terminal

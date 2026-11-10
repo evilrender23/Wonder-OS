@@ -260,7 +260,7 @@ ApplicationWindow {
         }
         FMenuItem {
             visible: songMenu.single
-            text: "Mostrar en el Finder"
+            text: "Mostrar en Rabbit"
             onTriggered: App.reveal(songMenu.paths[0])
         }
         FSeparator {

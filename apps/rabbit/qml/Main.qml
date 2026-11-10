@@ -5,7 +5,7 @@ QtObject {
     id: root
     property var windows: []
     property Component windowComponent: Component {
-        FinderWindow {}
+        RabbitWindow {}
     }
     property Connections requests: Connections {
         target: App

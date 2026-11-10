@@ -40,40 +40,40 @@ private Q_SLOTS:
         // Keeps the test out of the user's own mimeapps.list.
         QStandardPaths::setTestModeEnabled(true);
         QFile::remove(mimeApps());
-        writeApp(QStringLiteral("finder-test-a.desktop"));
-        writeApp(QStringLiteral("finder-test-b.desktop"));
+        writeApp(QStringLiteral("rabbit-test-a.desktop"));
+        writeApp(QStringLiteral("rabbit-test-b.desktop"));
         KSycoca::self()->ensureCacheValid();
     }
 
     void cleanupTestCase()
     {
         const QString dir = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
-        QFile::remove(dir + QStringLiteral("/finder-test-a.desktop"));
-        QFile::remove(dir + QStringLiteral("/finder-test-b.desktop"));
+        QFile::remove(dir + QStringLiteral("/rabbit-test-a.desktop"));
+        QFile::remove(dir + QStringLiteral("/rabbit-test-b.desktop"));
         QFile::remove(mimeApps());
     }
 
     void pickedAppBecomesTheDefault()
     {
         const QString mime = QStringLiteral("text/x-csrc");
-        QVERIFY(App::setDefaultApp(mime, QStringLiteral("finder-test-b.desktop")));
-        QTRY_COMPARE_WITH_TIMEOUT(preferred(mime), QStringLiteral("finder-test-b.desktop"), 10000);
+        QVERIFY(App::setDefaultApp(mime, QStringLiteral("rabbit-test-b.desktop")));
+        QTRY_COMPARE_WITH_TIMEOUT(preferred(mime), QStringLiteral("rabbit-test-b.desktop"), 10000);
 
-        QVERIFY(App::setDefaultApp(mime, QStringLiteral("finder-test-a.desktop")));
-        QTRY_COMPARE_WITH_TIMEOUT(preferred(mime), QStringLiteral("finder-test-a.desktop"), 10000);
+        QVERIFY(App::setDefaultApp(mime, QStringLiteral("rabbit-test-a.desktop")));
+        QTRY_COMPARE_WITH_TIMEOUT(preferred(mime), QStringLiteral("rabbit-test-a.desktop"), 10000);
 
         QFile file(mimeApps());
         QVERIFY(file.open(QIODevice::ReadOnly));
-        QVERIFY(file.readAll().contains("text/x-csrc=finder-test-a.desktop"));
+        QVERIFY(file.readAll().contains("text/x-csrc=rabbit-test-a.desktop"));
     }
 
     void unknownAppOrTypeChangesNothing()
     {
         const QString mime = QStringLiteral("text/x-csrc");
-        QVERIFY(App::setDefaultApp(mime, QStringLiteral("finder-test-a.desktop")));
-        QVERIFY(!App::setDefaultApp(mime, QStringLiteral("finder-test-missing.desktop")));
-        QVERIFY(!App::setDefaultApp(QString(), QStringLiteral("finder-test-b.desktop")));
-        QTRY_COMPARE_WITH_TIMEOUT(preferred(mime), QStringLiteral("finder-test-a.desktop"), 10000);
+        QVERIFY(App::setDefaultApp(mime, QStringLiteral("rabbit-test-a.desktop")));
+        QVERIFY(!App::setDefaultApp(mime, QStringLiteral("rabbit-test-missing.desktop")));
+        QVERIFY(!App::setDefaultApp(QString(), QStringLiteral("rabbit-test-b.desktop")));
+        QTRY_COMPARE_WITH_TIMEOUT(preferred(mime), QStringLiteral("rabbit-test-a.desktop"), 10000);
     }
 };
 

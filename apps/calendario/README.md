@@ -1,7 +1,7 @@
 # Calendario
 
 The calendar of Wonderlands OS: events and appointments, kept on this computer. It is the desktop's
-default app for `.ics` files — a calendar opened from Finder is added here.
+default app for `.ics` files — a calendar opened from Rabbit is added here.
 
 - **Día, Semana, Mes and Año**: a day or a week on a grid of hours, with the events that overlap
   side by side and the ones that last the whole day above; a month of boxes; a year of twelve small
@@ -15,7 +15,7 @@ default app for `.ics` files — a calendar opened from Finder is added here.
 - **Reminders**: a notification from the desktop, from the moment of the event to a week before.
   They are sent while Calendario is open — there is no service in the background.
 - **Search** (Ctrl+F) across titles, places and notes, without minding case or accents.
-- **iCalendar**: imports `.ics` files (dropped on the window, opened from Finder, or from the «…»
+- **iCalendar**: imports `.ics` files (dropped on the window, opened from Rabbit, or from the «…»
   menu) and exports one calendar or all the visible ones, to take them to another app.
 - One window: opening a file while Calendario runs adds it to the window already open.
 - Light and dark follow the desktop, as does glass under WonderlandWM.

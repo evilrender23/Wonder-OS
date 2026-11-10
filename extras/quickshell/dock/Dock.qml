@@ -20,16 +20,17 @@ import ".."
 Scope {
     id: root
 
-    // Wonderland Finder is the file manager; Dolphin only stands in where it isn't installed.
-    readonly property var defaultPins: ["hermes-desktop", "firefox", "wonderland-finder", "org.kde.dolphin",
+    // Rabbit is the file manager; Dolphin only stands in where it isn't installed.
+    // A dock that pinned it as Finder, its name before, keeps it.
+    readonly property var defaultPins: ["hermes-desktop", "firefox", "wonderland-rabbit", "org.kde.dolphin",
         "org.kde.konsole", "Alacritty", "org.kde.kate", "org.kde.systemsettings"]
     // Desktop entries load asynchronously and byId() doesn't notify:
     // depending on the application list re-runs these once they're in.
     readonly property var entries: DesktopEntries.applications.values
     readonly property var pinnedIds: Settings.data.dockPinsCustomized
-        ? (Settings.data.dockPinned || [])
+        ? (Settings.data.dockPinned || []).map(id => id === "wonderland-finder" ? "wonderland-rabbit" : id)
         : (entries.length, defaultPins.filter(id => DesktopEntries.byId(id)
-            && !(id === "org.kde.dolphin" && DesktopEntries.byId("wonderland-finder"))))
+            && !(id === "org.kde.dolphin" && DesktopEntries.byId("wonderland-rabbit"))))
 
     function setPins(ids) {
         Settings.data.dockPinned = ids

@@ -980,7 +980,7 @@ pub(crate) fn detect_file_manager(env: &HashMap<String, String>) -> String {
         return OPEN_HOME.to_string();
     }
     for cmd in [
-        "wonderland-finder",
+        "wonderland-rabbit",
         "nautilus",
         "dolphin",
         "thunar",

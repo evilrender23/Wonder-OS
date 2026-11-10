@@ -1,6 +1,6 @@
-# Wonderland Finder
+# Rabbit
 
-The file manager of Wonderlands OS: a Finder for WonderlandWM. Qt 6 / Qt Quick on top of KDE's
+The file manager of Wonderlands OS, named after the White Rabbit that leads Alice into Wonderland. Qt 6 / Qt Quick on top of KDE's
 KIO, so it opens whatever KIO opens (local disks, the Trash, `smb://`, `sftp://`, MTP…).
 
 ## Every folder remembers how it looks
@@ -13,7 +13,7 @@ As macOS does with `.DS_Store`, each folder keeps:
 
 Nothing is written inside your folders. A folder only carries an id in the extended attribute
 `user.wonderland.folder-id`; its layout lives in
-`~/.local/share/wonderland/wonderland-finder/folders/<id>.json`. So:
+`~/.local/share/wonderland/wonderland-rabbit/folders/<id>.json`. So:
 
 - a folder you **rename or move** keeps its layout;
 - a folder you **copy** starts with the original's layout and goes its own way from the first change;
@@ -32,14 +32,14 @@ undo · colour tags · drag and drop between windows and other apps · light and
 desktop · English and Spanish.
 
 While it copies, moves or deletes, the top bar shows the progress in its centre: the operation, a bar
-and how much is done ("1.2 GB of 4 GB"). Finder writes that state to
-`$XDG_RUNTIME_DIR/wonderland/finder-ops.json`, which the bar watches; operations shorter than a blink
+and how much is done ("1.2 GB of 4 GB"). Rabbit writes that state to
+`$XDG_RUNTIME_DIR/wonderland/rabbit-ops.json`, which the bar watches; operations shorter than a blink
 never show.
 
 **Customize Folder…** (right-click a folder) gives it a colour and a symbol or an emoji on its front,
 as Finder does on macOS. Every choice applies at once; **Reset** brings the plain folder back. The look
 is kept on the folder itself (the `user.wonderland.folder` attribute), so it follows the folder when it
-is moved or renamed, and the desktop icons draw it too: `wonderland-finder --customize FOLDER` opens
+is moved or renamed, and the desktop icons draw it too: `wonderland-rabbit --customize FOLDER` opens
 only that window, which is what the desktop's menu runs. The symbols are [Lucide](https://lucide.dev/)
 icons (ISC).
 
@@ -52,7 +52,7 @@ shows: images and GIFs, text and source code, PDFs (every page), songs and films
 with a bar to pause and seek), folders with their size, and for anything else its thumbnail or icon
 with what is known of it. Space or Esc puts it away, the arrows walk the folder, Return opens the
 item, and the button at the top opens it with its default app. The desktop's icons use the same
-preview (`wonderland-finder --look FILE…`, or `Toggle` on `org.wonderland.Finder.QuickLook`).
+preview (`wonderland-rabbit --look FILE…`, or `Toggle` on `org.wonderland.Rabbit.QuickLook`).
 PDFs need `qt6-webengine` (Qt PDF) and sound and video `qt6-multimedia`; without them those files
 show as their thumbnail.
 
@@ -65,17 +65,17 @@ Needs Qt ≥ 6.8 (base, declarative, svg, tools) and KDE Frameworks 6 (KIO, Soli
 CoreAddons). On Arch: `pacman -S cmake ninja qt6-base qt6-declarative qt6-svg qt6-tools kio solid kservice kconfig kcoreaddons`.
 
 ```sh
-cmake -S apps/finder -B apps/finder/build -G Ninja
-cmake --build apps/finder/build
-ctest --test-dir apps/finder/build --output-on-failure
-cmake --install apps/finder/build --prefix ~/.local
+cmake -S apps/rabbit -B apps/rabbit/build -G Ninja
+cmake --build apps/rabbit/build
+ctest --test-dir apps/rabbit/build --output-on-failure
+cmake --install apps/rabbit/build --prefix ~/.local
 ```
 
 ## Run
 
 ```sh
-wonderland-finder [folders or files to reveal…]
-wonderland-finder --view list --appearance dark ~/Downloads
+wonderland-rabbit [folders or files to reveal…]
+wonderland-rabbit --view list --appearance dark ~/Downloads
 ```
 
 One instance serves every window.
@@ -83,11 +83,11 @@ One instance serves every window.
 To make it the file manager of the session:
 
 ```sh
-xdg-mime default wonderland-finder.desktop inode/directory
+xdg-mime default wonderland-rabbit.desktop inode/directory
 ```
 
 "Show in folder" in other apps goes to whoever owns `org.freedesktop.FileManager1` on the session
-bus. The install adds a D-Bus service file so the session starts Wonderland Finder for it; installed
+bus. The install adds a D-Bus service file so the session starts Rabbit for it; installed
 under `~/.local` it takes precedence over Dolphin's. A file manager that is already running keeps
 the name until it quits.
 

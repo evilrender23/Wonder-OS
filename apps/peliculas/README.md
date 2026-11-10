@@ -10,7 +10,7 @@ FFmpeg reproduce: MP4, MKV, WebM, MOV, AVI, MPEG-TS… y también sonido suelto
 
 ## Qué hace
 
-- **Abrir**: desde el Finder (es la app para vídeos), arrastrando a la ventana,
+- **Abrir**: desde Rabbit (es la app para vídeos), arrastrando a la ventana,
   con «Abrir archivo…» / «Abrir carpeta…» o desde la terminal. Un solo archivo
   trae consigo a sus vecinos de carpeta, en orden natural («Capítulo 2» antes
   que «Capítulo 10»), para poder pasar al siguiente.

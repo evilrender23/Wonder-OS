@@ -10,7 +10,7 @@ the compositor reloads the file on its own, so a change shows the moment it is m
   modifiers and the key, or record the keystroke; then an action or a command to run), edit,
   switch a built-in one off, restore it. A combination already in use says what it does now.
 - Mouse, trackpad-gesture and touch bindings, and `[env]`, as editable tables.
-- **Carpetas**: the colour of the desktop's folders, on the Desktop and in Wonderland Finder. One
+- **Carpetas**: the colour of the desktop's folders, on the Desktop and in Rabbit. One
   of the usual colours or any `#rrggbb`; a click shows it on the folder of the page and «Aplicar»
   puts it in use. Folders given a colour of their own («Personalizar carpeta…») keep it. This one
   is not a compositor setting: it is kept in `~/.config/wonderland/appearance.json`

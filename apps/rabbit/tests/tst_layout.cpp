@@ -45,7 +45,7 @@ private Q_SLOTS:
     void initTestCase()
     {
         QVERIFY(m_data.isValid() && m_root.isValid());
-        qputenv("WONDERLAND_FINDER_DATA", m_data.path().toUtf8());
+        qputenv("WONDERLAND_RABBIT_DATA", m_data.path().toUtf8());
     }
 
     void flowsInRows()

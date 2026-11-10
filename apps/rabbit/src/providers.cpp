@@ -16,7 +16,7 @@
 #include <QSvgRenderer>
 #include <QUrl>
 
-static const QString resources = QStringLiteral(":/qt/qml/WonderlandFinder/");
+static const QString resources = QStringLiteral(":/qt/qml/WonderlandRabbit/");
 
 static int extentOf(const QSize &requested, int fallback)
 {

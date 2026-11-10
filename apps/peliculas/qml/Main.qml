@@ -273,7 +273,7 @@ ApplicationWindow {
         FMenuItem { text: "Tamaño de la imagen…"; enabled: win.player.hasVideo; onTriggered: fillMenu.popup() }
         FSeparator {}
         FMenuItem { text: "Guardar captura"; enabled: win.player.hasVideo; onTriggered: win.snapshot() }
-        FMenuItem { text: "Mostrar en el Finder"; onTriggered: App.reveal(win.player.path) }
+        FMenuItem { text: "Mostrar en Rabbit"; onTriggered: App.reveal(win.player.path) }
         FSeparator {}
         FMenuItem { text: "Abrir…"; onTriggered: fileDialog.open() }
         FMenuItem { text: "Cerrar la película"; onTriggered: win.player.close() }

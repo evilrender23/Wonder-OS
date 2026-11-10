@@ -975,7 +975,7 @@ Directions: up, down, left, right, up-left, up-right, down-left, down-right
 | --- | --- | --- |
 | `"mod+return"` | `exec-terminal` | $TERMINAL, else first of: wonderterm, foot, alacritty, ptyxis, kitty, wezterm, gnome-terminal, konsole |
 | `"mod+d"` | `exec-launcher` | $LAUNCHER, else first of: fuzzel, wofi, rofi, bemenu-run, wmenu-run, tofi-drun, mew-run |
-| `"mod+e"` | `exec-file-manager` | $FILE_MANAGER, else the default app for folders (xdg-open), else first of: wonderland-finder, nautilus, dolphin, thunar, nemo, pcmanfm |
+| `"mod+e"` | `exec-file-manager` | $FILE_MANAGER, else the default app for folders (xdg-open), else first of: wonderland-rabbit, nautilus, dolphin, thunar, nemo, pcmanfm |
 | `"mod+q"` | `close-window` |  |
 | `"mod+shift+q"` | `suspend-window` |  |
 | `"mod+h"` | `minimize-window` |  |

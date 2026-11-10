@@ -4,14 +4,14 @@ import QtQuick.Window
 
 /// Quick Look: Space on a file shows it in a window of its own, sized to what
 /// it shows, and Space again puts it away. One window serves the whole app and
-/// the desktop's icons; opened from a Finder window it follows that window's
+/// the desktop's icons; opened from a Rabbit window it follows that window's
 /// selection, so the arrows walk the folder.
 Window {
     id: look
 
     property var urls: []
     property int index: 0
-    /// The Finder window it was opened from, if any.
+    /// Rabbit window it was opened from, if any.
     property QtObject source: null
     readonly property url current: index < urls.length ? urls[index] : ""
     property var info: ({})

@@ -244,14 +244,14 @@
     </message>
 </context>
 <context>
-    <name>FinderWindow</name>
+    <name>RabbitWindow</name>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="139"/>
+        <location filename="../qml/RabbitWindow.qml" line="139"/>
         <source>Items in the Trash can’t be opened. Put them back first.</source>
         <translation>Los ítems de la papelera no se pueden abrir. Restáuralos primero.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/FinderWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="223"/>
         <source>Delete %n item(s) immediately?</source>
         <translation>
             <numerusform>¿Eliminar %n ítem inmediatamente?</numerusform>
@@ -259,64 +259,64 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="223"/>
         <source>This can’t be undone.</source>
         <translation>Esta acción no se puede deshacer.</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="223"/>
+        <location filename="../qml/RabbitWindow.qml" line="223"/>
         <source>Delete</source>
         <translation>Eliminar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="228"/>
+        <location filename="../qml/RabbitWindow.qml" line="228"/>
         <source>Empty the Trash?</source>
         <translation>¿Vaciar la papelera?</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="228"/>
+        <location filename="../qml/RabbitWindow.qml" line="228"/>
         <source>Everything in it is deleted for good.</source>
         <translation>Todo su contenido se eliminará definitivamente.</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="228"/>
-        <location filename="../qml/FinderWindow.qml" line="782"/>
-        <location filename="../qml/FinderWindow.qml" line="898"/>
+        <location filename="../qml/RabbitWindow.qml" line="228"/>
+        <location filename="../qml/RabbitWindow.qml" line="782"/>
+        <location filename="../qml/RabbitWindow.qml" line="898"/>
         <source>Empty Trash</source>
         <translation>Vaciar papelera</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="446"/>
+        <location filename="../qml/RabbitWindow.qml" line="446"/>
         <source>Searching “%1”</source>
         <translation>Buscando en «%1»</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="503"/>
+        <location filename="../qml/RabbitWindow.qml" line="503"/>
         <source>Search</source>
         <translation>Buscar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="581"/>
+        <location filename="../qml/RabbitWindow.qml" line="581"/>
         <source>No Results</source>
         <translation>Sin resultados</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="581"/>
+        <location filename="../qml/RabbitWindow.qml" line="581"/>
         <source>The Trash is empty</source>
         <translation>La papelera está vacía</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="581"/>
+        <location filename="../qml/RabbitWindow.qml" line="581"/>
         <source>This folder is empty</source>
         <translation>Esta carpeta está vacía</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="661"/>
+        <location filename="../qml/RabbitWindow.qml" line="661"/>
         <source>%1 of %2 selected</source>
         <translation>%1 de %2 seleccionados</translation>
     </message>
     <message numerus="yes">
-        <location filename="../qml/FinderWindow.qml" line="661"/>
+        <location filename="../qml/RabbitWindow.qml" line="661"/>
         <source>%n item(s)</source>
         <translation>
             <numerusform>%n ítem</numerusform>
@@ -324,225 +324,225 @@
         </translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="745"/>
+        <location filename="../qml/RabbitWindow.qml" line="745"/>
         <source>Open</source>
         <translation>Abrir</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="751"/>
+        <location filename="../qml/RabbitWindow.qml" line="751"/>
         <source>Open With</source>
         <translation>Abrir con</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="766"/>
+        <location filename="../qml/RabbitWindow.qml" line="766"/>
         <source>Open in New Window</source>
         <translation>Abrir en una ventana nueva</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="771"/>
+        <location filename="../qml/RabbitWindow.qml" line="771"/>
         <source>Put Back</source>
         <translation>Restaurar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="777"/>
+        <location filename="../qml/RabbitWindow.qml" line="777"/>
         <source>Delete Immediately…</source>
         <translation>Eliminar inmediatamente…</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="777"/>
+        <location filename="../qml/RabbitWindow.qml" line="777"/>
         <source>Move to Trash</source>
         <translation>Trasladar a la papelera</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="789"/>
-        <location filename="../qml/FinderWindow.qml" line="905"/>
+        <location filename="../qml/RabbitWindow.qml" line="789"/>
+        <location filename="../qml/RabbitWindow.qml" line="905"/>
         <source>Get Info</source>
         <translation>Obtener información</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="793"/>
+        <location filename="../qml/RabbitWindow.qml" line="793"/>
         <source>Rename</source>
         <translation>Renombrar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="798"/>
+        <location filename="../qml/RabbitWindow.qml" line="798"/>
         <source>Compress</source>
         <translation>Comprimir</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="803"/>
+        <location filename="../qml/RabbitWindow.qml" line="803"/>
         <source>Extract Here</source>
         <translation>Extraer aquí</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="808"/>
+        <location filename="../qml/RabbitWindow.qml" line="808"/>
         <source>Duplicate</source>
         <translation>Duplicar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="813"/>
+        <location filename="../qml/RabbitWindow.qml" line="813"/>
         <source>Make Alias</source>
         <translation>Crear alias</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="818"/>
+        <location filename="../qml/RabbitWindow.qml" line="818"/>
         <source>Quick Look</source>
         <translation>Vista rápida</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="824"/>
+        <location filename="../qml/RabbitWindow.qml" line="824"/>
         <source>Copy</source>
         <translation>Copiar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="828"/>
+        <location filename="../qml/RabbitWindow.qml" line="828"/>
         <source>Cut</source>
         <translation>Cortar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="833"/>
+        <location filename="../qml/RabbitWindow.qml" line="833"/>
         <source>Copy Path</source>
         <translation>Copiar ruta</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="875"/>
+        <location filename="../qml/RabbitWindow.qml" line="875"/>
         <source>Customize Folder…</source>
         <translation>Personalizar carpeta…</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="885"/>
+        <location filename="../qml/RabbitWindow.qml" line="885"/>
         <source>Add to Sidebar</source>
         <translation>Añadir a la barra lateral</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="893"/>
+        <location filename="../qml/RabbitWindow.qml" line="893"/>
         <source>New Folder</source>
         <translation>Nueva carpeta</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="910"/>
+        <location filename="../qml/RabbitWindow.qml" line="910"/>
         <source>Paste</source>
         <translation>Pegar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="915"/>
+        <location filename="../qml/RabbitWindow.qml" line="915"/>
         <source>Undo</source>
         <translation>Deshacer</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="925"/>
+        <location filename="../qml/RabbitWindow.qml" line="925"/>
         <source>Clean Up</source>
         <translation>Alinear</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="930"/>
+        <location filename="../qml/RabbitWindow.qml" line="930"/>
         <source>Clean Up By</source>
         <translation>Alinear por</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="933"/>
+        <location filename="../qml/RabbitWindow.qml" line="933"/>
         <source>Name</source>
         <translation>Nombre</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="937"/>
-        <location filename="../qml/FinderWindow.qml" line="1141"/>
+        <location filename="../qml/RabbitWindow.qml" line="937"/>
+        <location filename="../qml/RabbitWindow.qml" line="1141"/>
         <source>Kind</source>
         <translation>Clase</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="941"/>
+        <location filename="../qml/RabbitWindow.qml" line="941"/>
         <source>Date Modified</source>
         <translation>Fecha de modificación</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="945"/>
-        <location filename="../qml/FinderWindow.qml" line="1142"/>
+        <location filename="../qml/RabbitWindow.qml" line="945"/>
+        <location filename="../qml/RabbitWindow.qml" line="1142"/>
         <source>Size</source>
         <translation>Tamaño</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="950"/>
+        <location filename="../qml/RabbitWindow.qml" line="950"/>
         <source>Reset Icon Positions</source>
         <translation>Restablecer la posición de los iconos</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="956"/>
+        <location filename="../qml/RabbitWindow.qml" line="956"/>
         <source>Show Hidden Files</source>
         <translation>Mostrar archivos ocultos</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="962"/>
+        <location filename="../qml/RabbitWindow.qml" line="962"/>
         <source>Show Path Bar</source>
         <translation>Mostrar la barra de ruta</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="968"/>
+        <location filename="../qml/RabbitWindow.qml" line="968"/>
         <source>Open in Terminal</source>
         <translation>Abrir en el terminal</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1046"/>
+        <location filename="../qml/RabbitWindow.qml" line="1046"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1072"/>
+        <location filename="../qml/RabbitWindow.qml" line="1072"/>
         <source>Go to the folder:</source>
         <translation>Ir a la carpeta:</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1093"/>
+        <location filename="../qml/RabbitWindow.qml" line="1093"/>
         <source>The folder can’t be found.</source>
         <translation>No se encuentra la carpeta.</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1128"/>
+        <location filename="../qml/RabbitWindow.qml" line="1128"/>
         <source>Calculating size…</source>
         <translation>Calculando tamaño…</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1143"/>
+        <location filename="../qml/RabbitWindow.qml" line="1143"/>
         <source>Where</source>
         <translation>Ubicación</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1144"/>
+        <location filename="../qml/RabbitWindow.qml" line="1144"/>
         <source>Created</source>
         <translation>Creación</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1145"/>
+        <location filename="../qml/RabbitWindow.qml" line="1145"/>
         <source>Modified</source>
         <translation>Modificación</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1146"/>
+        <location filename="../qml/RabbitWindow.qml" line="1146"/>
         <source>Last opened</source>
         <translation>Última apertura</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1147"/>
+        <location filename="../qml/RabbitWindow.qml" line="1147"/>
         <source>Dimensions</source>
         <translation>Dimensiones</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1148"/>
+        <location filename="../qml/RabbitWindow.qml" line="1148"/>
         <source>Original</source>
         <translation>Original</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1149"/>
+        <location filename="../qml/RabbitWindow.qml" line="1149"/>
         <source>Owner</source>
         <translation>Propietario</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1150"/>
+        <location filename="../qml/RabbitWindow.qml" line="1150"/>
         <source>Group</source>
         <translation>Grupo</translation>
     </message>
     <message>
-        <location filename="../qml/FinderWindow.qml" line="1151"/>
+        <location filename="../qml/RabbitWindow.qml" line="1151"/>
         <source>Everyone</source>
         <translation>Todos</translation>
     </message>

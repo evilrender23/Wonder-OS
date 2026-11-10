@@ -3,15 +3,15 @@ import ".."
 import "../services"
 import "../components"
 
-// Progress of what Wonderland Finder is copying, moving or deleting, in the
+// Progress of what Rabbit is copying, moving or deleting, in the
 // middle of the bar. Takes no room while nothing runs.
 Item {
     id: root
 
-    readonly property bool shown: FinderOps.active
-    readonly property bool unknown: FinderOps.progress < 0
-    readonly property string amount: FinderOps.detail !== "" ? FinderOps.detail
-        : unknown ? "" : `${Math.round(Math.min(1, FinderOps.progress) * 100)} %`
+    readonly property bool shown: RabbitOps.active
+    readonly property bool unknown: RabbitOps.progress < 0
+    readonly property string amount: RabbitOps.detail !== "" ? RabbitOps.detail
+        : unknown ? "" : `${Math.round(Math.min(1, RabbitOps.progress) * 100)} %`
 
     implicitWidth: shown ? row.implicitWidth + 16 : 0
     implicitHeight: Theme.pillHeight
@@ -32,15 +32,15 @@ Item {
 
         Icon {
             anchors.verticalCenter: parent.verticalCenter
-            name: FinderOps.kind === "trash" || FinderOps.kind === "delete" ? "trash-2"
-                : FinderOps.kind === "move" ? "folder-open" : "copy"
+            name: RabbitOps.kind === "trash" || RabbitOps.kind === "delete" ? "trash-2"
+                : RabbitOps.kind === "move" ? "folder-open" : "copy"
             size: 14
         }
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.min(implicitWidth, 200)
-            text: FinderOps.status
+            text: RabbitOps.status
             color: Theme.p.text
             elide: Text.ElideRight
             font.pixelSize: Theme.fontSize
@@ -59,7 +59,7 @@ Item {
 
             Rectangle {
                 visible: !root.unknown
-                width: Math.max(height, track.width * Math.max(0, Math.min(1, FinderOps.progress)))
+                width: Math.max(height, track.width * Math.max(0, Math.min(1, RabbitOps.progress)))
                 height: parent.height
                 radius: 2
                 color: Theme.p.accent

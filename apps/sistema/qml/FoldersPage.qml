@@ -81,7 +81,7 @@ ScrollView {
             Text {
                 Layout.leftMargin: 4
                 Layout.fillWidth: true
-                text: "El color de las carpetas en el Escritorio y en el Finder. Las que tienen un color propio («Personalizar carpeta…») lo conservan."
+                text: "El color de las carpetas en el Escritorio y en Rabbit. Las que tienen un color propio («Personalizar carpeta…») lo conservan."
                 color: Theme.dim
                 font.pixelSize: Theme.small
                 wrapMode: Text.WordWrap

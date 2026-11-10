@@ -32,7 +32,7 @@ OpsReport::~OpsReport()
 
 QString OpsReport::defaultPath()
 {
-    return QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) + QStringLiteral("/wonderland/finder-ops.json");
+    return QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) + QStringLiteral("/wonderland/rabbit-ops.json");
 }
 
 void OpsReport::set(bool busy, const QString &kind, const QString &status, double progress, const QString &detail)

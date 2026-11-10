@@ -6,7 +6,7 @@
     wonderland-desktop open [NAME...]   open entries (no name: the folder itself)
     wonderland-desktop reveal NAME      show the entry in the file manager
     wonderland-desktop customize NAME   "Customize Folder" (colour, symbol or
-                                        emoji) for a folder, in Wonderland Finder
+                                        emoji) for a folder, in Rabbit
     wonderland-desktop look NAME...     Quick Look: preview the entries, or put
                                         the preview away if it shows them
     wonderland-desktop look-update NAME...  show the entries in an open preview
@@ -163,7 +163,7 @@ def folder_tint():
 def folder_picture(path, tint="", asked=None):
     """The picture of a folder that isn't the plain blue one ("" for that one).
 
-    Wonderland Finder keeps the look on the folder itself, as an attribute, and
+    Rabbit keeps the look on the folder itself, as an attribute, and
     paints it into the cache under the hash of that attribute (and of the tint,
     when there is one) before setting it. A picture missing all the same (a
     cleared cache, a new tint) is asked for, once per listing: `asked` holds
@@ -184,11 +184,11 @@ def folder_picture(path, tint="", asked=None):
         if picture in asked:
             return ""
         asked.add(picture)
-    finder = shutil.which("wonderland-finder")
-    if not finder:
+    rabbit = shutil.which("wonderland-rabbit")
+    if not rabbit:
         return ""
     try:
-        subprocess.run([finder, "--folder-icon", path], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+        subprocess.run([rabbit, "--folder-icon", path], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL, timeout=10, env={**os.environ, "QT_QPA_PLATFORM": "offscreen"})
     except (OSError, subprocess.SubprocessError):
         return ""
@@ -330,12 +330,12 @@ def open_entries(directory, names):
 
 
 def quick_look(directory, names, update):
-    """Hands the entries to the Finder's Quick Look, the one preview there is."""
-    finder = shutil.which("wonderland-finder") or os.path.expanduser("~/.local/bin/wonderland-finder")
-    if not os.access(finder, os.X_OK):
-        raise OSError("Quick Look needs wonderland-finder (apps/finder)")
+    """Hands the entries to Rabbit's Quick Look, the one preview there is."""
+    rabbit = shutil.which("wonderland-rabbit") or os.path.expanduser("~/.local/bin/wonderland-rabbit")
+    if not os.access(rabbit, os.X_OK):
+        raise OSError("Quick Look needs wonderland-rabbit (apps/rabbit)")
     paths = [entry_path(directory, name) for name in names]
-    detach([finder, "--look-update" if update else "--look", "--"] + paths)
+    detach([rabbit, "--look-update" if update else "--look", "--"] + paths)
 
 
 def reveal(directory, name):
@@ -348,9 +348,9 @@ def reveal(directory, name):
 
 def customize(directory, name):
     path = entry_path(directory, name)
-    finder = shutil.which("wonderland-finder")
-    if finder and os.path.isdir(path):
-        detach([finder, "--customize", path])
+    rabbit = shutil.which("wonderland-rabbit")
+    if rabbit and os.path.isdir(path):
+        detach([rabbit, "--customize", path])
 
 
 def rename(directory, old, new):

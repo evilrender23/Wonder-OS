@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(wonderland-finder VERSION 0.1.0 LANGUAGES CXX)
+project(wonderland-rabbit VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -25,6 +25,7 @@ set(core_sources
     src/dirmodel.cpp src/dirmodel.h
     src/fileops.cpp src/fileops.h
     src/opsreport.cpp src/opsreport.h
+    src/legacy.cpp src/legacy.h
     src/places.cpp src/places.h
     src/layout.cpp src/layout.h
     src/app.cpp src/app.h
@@ -36,7 +37,7 @@ set(core_libs
     KF6::KIOCore KF6::KIOGui KF6::KIOWidgets KF6::Solid KF6::Service KF6::ConfigCore KF6::CoreAddons
 )
 
-qt_add_executable(wonderland-finder
+qt_add_executable(wonderland-rabbit
     src/main.cpp
     src/providers.cpp src/providers.h
 )
@@ -58,36 +59,36 @@ foreach(f IN LISTS icon_files)
 endforeach()
 set_source_files_properties(qml/Theme.qml qml/Prefs.qml qml/DragState.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-qt_add_qml_module(wonderland-finder
-    URI WonderlandFinder
+qt_add_qml_module(wonderland-rabbit
+    URI WonderlandRabbit
     VERSION 1.0
     QML_FILES ${qml_files}
     RESOURCES ${symbol_files} ${icon_files}
     SOURCES ${core_sources}
 )
-target_include_directories(wonderland-finder PRIVATE src)
-target_compile_definitions(wonderland-finder PRIVATE FINDER_VERSION="${PROJECT_VERSION}")
-target_link_libraries(wonderland-finder PRIVATE ${core_libs} Qt6::QuickControls2)
+target_include_directories(wonderland-rabbit PRIVATE src)
+target_compile_definitions(wonderland-rabbit PRIVATE RABBIT_VERSION="${PROJECT_VERSION}")
+target_link_libraries(wonderland-rabbit PRIVATE ${core_libs} Qt6::QuickControls2)
 
-qt_add_translations(wonderland-finder
-    TS_FILES i18n/wonderland-finder_es.ts
+qt_add_translations(wonderland-rabbit
+    TS_FILES i18n/wonderland-rabbit_es.ts
     # English only needs its plurals ("1 item", "2 items").
-    PLURALS_TS_FILE i18n/wonderland-finder_en.ts
+    PLURALS_TS_FILE i18n/wonderland-rabbit_en.ts
     RESOURCE_PREFIX /i18n
 )
 
-install(TARGETS wonderland-finder RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES wonderland-finder.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+install(TARGETS wonderland-rabbit RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES wonderland-rabbit.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 # Lets the session start us when an app asks to "Show in folder" (org.freedesktop.FileManager1).
-configure_file(org.wonderland.Finder.FileManager1.service.in org.wonderland.Finder.FileManager1.service @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.wonderland.Finder.FileManager1.service DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services)
-install(FILES assets/wonderland-finder.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
+configure_file(org.wonderland.Rabbit.FileManager1.service.in org.wonderland.Rabbit.FileManager1.service @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.wonderland.Rabbit.FileManager1.service DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services)
+install(FILES assets/wonderland-rabbit.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
 
-option(FINDER_BUILD_TESTS "Build the Finder tests" ON)
-if(FINDER_BUILD_TESTS)
+option(RABBIT_BUILD_TESTS "Build Rabbit tests" ON)
+if(RABBIT_BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS Test)
     enable_testing()
-    foreach(t format layout dirmodel places openwith dragnotice look folderlook opsreport)
+    foreach(t format layout dirmodel places openwith dragnotice look folderlook opsreport legacy)
         qt_add_executable(tst_${t} tests/tst_${t}.cpp ${core_sources})
         target_include_directories(tst_${t} PRIVATE src)
         target_link_libraries(tst_${t} PRIVATE ${core_libs} Qt6::Test)

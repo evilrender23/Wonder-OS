@@ -139,8 +139,8 @@ void App::refreshDark()
     if (m_appearance != Appearance::Auto) {
         dark = m_appearance == Appearance::Dark;
     }
-    if (qEnvironmentVariableIsSet("WONDERLAND_FINDER_GLASS")) {
-        glass = qEnvironmentVariableIntValue("WONDERLAND_FINDER_GLASS") != 0;
+    if (qEnvironmentVariableIsSet("WONDERLAND_RABBIT_GLASS")) {
+        glass = qEnvironmentVariableIntValue("WONDERLAND_RABBIT_GLASS") != 0;
     }
     if (dark != m_dark || glass != m_glass) {
         m_dark = dark;
@@ -513,13 +513,13 @@ bool App::setFolderLook(const QUrl &url, const QString &color, const QString &sy
     return url.isLocalFile() && FolderLooks::self()->setLook(QDir::cleanPath(url.toLocalFile()), FolderLook{color, symbol, emoji});
 }
 
-FinderAdaptor::FinderAdaptor(App *app)
+RabbitAdaptor::RabbitAdaptor(App *app)
     : QDBusAbstractAdaptor(app)
     , m_app(app)
 {
 }
 
-void FinderAdaptor::CustomizeFolder(const QString &uri)
+void RabbitAdaptor::CustomizeFolder(const QString &uri)
 {
     m_app->customizeFolder(QUrl(uri));
 }

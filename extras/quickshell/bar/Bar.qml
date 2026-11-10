@@ -84,7 +84,7 @@ PanelWindow {
 
     // Centred when there's room; otherwise slides away from whichever side
     // section it would overlap (narrow outputs, long media titles).
-    // The Finder's file operations come first there, while one runs.
+    // Rabbit's file operations come first there, while one runs.
     Row {
         anchors.verticalCenter: parent.verticalCenter
         x: Math.round(Math.max(left.x + left.width + 12,

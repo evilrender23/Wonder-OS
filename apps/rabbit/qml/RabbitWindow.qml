@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls.Basic
 
 ApplicationWindow {
-    id: finder
+    id: rabbit
 
     property url startUrl
     property var startSelect: []
@@ -56,22 +56,22 @@ ApplicationWindow {
 
     DirModel {
         id: dir
-        url: finder.location
-        search: finder.searchText
+        url: rabbit.location
+        search: rabbit.searchText
         showHidden: Prefs.showHidden
-        sortKey: finder.sortOverride >= 0 ? finder.sortOverride : (finder.view === "list" ? finder.listSortKey : finder.arrangeSortKey)
+        sortKey: rabbit.sortOverride >= 0 ? rabbit.sortOverride : (rabbit.view === "list" ? rabbit.listSortKey : rabbit.arrangeSortKey)
         // Sorted by date or size, icons lead with the newest and the largest, as lists do.
-        ascending: finder.view === "list" ? finder.listAscending : ![DirModel.ByModified, DirModel.BySize].includes(sortKey)
+        ascending: rabbit.view === "list" ? rabbit.listAscending : ![DirModel.ByModified, DirModel.BySize].includes(sortKey)
         onRevealed: row => {
-            if (String(finder.pendingRename) !== "" && finder.same(dir.get(row).url, finder.pendingRename)) {
-                finder.pendingRename = ""
-                finder.pane.renamingRow = row
+            if (String(rabbit.pendingRename) !== "" && rabbit.same(dir.get(row).url, rabbit.pendingRename)) {
+                rabbit.pendingRename = ""
+                rabbit.pane.renamingRow = row
             }
         }
     }
     FolderLayout {
         id: layout
-        url: finder.canArrange ? finder.location : ""
+        url: rabbit.canArrange ? rabbit.location : ""
     }
 
     Component.onCompleted: {
@@ -240,7 +240,7 @@ ApplicationWindow {
     }
     function quickLook() {
         if (dir.selectedCount)
-            App.quickLook(dir.selectedUrls(), finder)
+            App.quickLook(dir.selectedUrls(), rabbit)
     }
     function showInfo(url) {
         infoPopup.info = App.info(url)
@@ -311,7 +311,7 @@ ApplicationWindow {
     Timer {
         id: typeTimer
         interval: 900
-        onTriggered: finder.typeBuffer = ""
+        onTriggered: rabbit.typeBuffer = ""
     }
 
     Item {
@@ -333,25 +333,25 @@ ApplicationWindow {
     Connections {
         target: App.ops
         function onCreated(urls) {
-            if (urls.length && finder.same(App.parentUrl(urls[0]), finder.location))
+            if (urls.length && rabbit.same(App.parentUrl(urls[0]), rabbit.location))
                 dir.selectUrls(urls)
         }
         function onFolderCreated(url) {
-            if (!finder.active || !finder.same(App.parentUrl(url), finder.location))
+            if (!rabbit.active || !rabbit.same(App.parentUrl(url), rabbit.location))
                 return
-            finder.pane.placeAtMenu(finder.namesOf([url])[0])
-            finder.pendingRename = url
+            rabbit.pane.placeAtMenu(rabbit.namesOf([url])[0])
+            rabbit.pendingRename = url
             dir.selectUrls([url])
         }
     }
     Connections {
         target: App
         function onFailed(message) {
-            if (finder.active || finder.first)
-                finder.toast(message)
+            if (rabbit.active || rabbit.first)
+                rabbit.toast(message)
         }
         function onFolderSized(url, text) {
-            if (infoPopup.opened && finder.same(url, infoPopup.info.url))
+            if (infoPopup.opened && rabbit.same(url, infoPopup.info.url))
                 infoPopup.folderSize = text
         }
     }
@@ -359,36 +359,36 @@ ApplicationWindow {
     // --- Shortcuts --------------------------------------------------------
 
     component Key: Shortcut {
-        enabled: !finder.typing
+        enabled: !rabbit.typing
     }
-    Key { sequences: ["Ctrl+N"]; onActivated: App.requestWindow(finder.location) }
-    Key { sequences: ["Ctrl+Shift+N"]; onActivated: finder.newFolder() }
-    Shortcut { sequences: ["Ctrl+W"]; onActivated: finder.close() }
+    Key { sequences: ["Ctrl+N"]; onActivated: App.requestWindow(rabbit.location) }
+    Key { sequences: ["Ctrl+Shift+N"]; onActivated: rabbit.newFolder() }
+    Shortcut { sequences: ["Ctrl+W"]; onActivated: rabbit.close() }
     Key { sequences: ["Ctrl+C"]; onActivated: if (dir.selectedCount) App.ops.copyToClipboard(dir.selectedUrls()) }
-    Key { sequences: ["Ctrl+X"]; onActivated: if (dir.selectedCount && finder.writable) App.ops.cutToClipboard(dir.selectedUrls()) }
-    Key { sequences: ["Ctrl+V"]; onActivated: if (finder.writable) App.ops.paste(finder.location) }
+    Key { sequences: ["Ctrl+X"]; onActivated: if (dir.selectedCount && rabbit.writable) App.ops.cutToClipboard(dir.selectedUrls()) }
+    Key { sequences: ["Ctrl+V"]; onActivated: if (rabbit.writable) App.ops.paste(rabbit.location) }
     Key { sequences: ["Ctrl+A"]; onActivated: dir.selectAll() }
     Key { sequences: ["Ctrl+Z"]; onActivated: App.ops.undo() }
-    Key { sequences: ["Ctrl+I"]; onActivated: finder.infoForSelection() }
-    Key { sequences: ["Ctrl+D"]; onActivated: if (dir.selectedCount && finder.writable) App.ops.duplicate(dir.selectedUrls()) }
+    Key { sequences: ["Ctrl+I"]; onActivated: rabbit.infoForSelection() }
+    Key { sequences: ["Ctrl+D"]; onActivated: if (dir.selectedCount && rabbit.writable) App.ops.duplicate(dir.selectedUrls()) }
     Shortcut { sequences: ["Ctrl+F"]; onActivated: searchField.forceActiveFocus() }
     Shortcut { sequences: ["Ctrl+L", "Ctrl+Shift+G"]; onActivated: goPopup.open() }
-    Shortcut { sequences: ["Ctrl+1"]; onActivated: finder.setView("icons") }
-    Shortcut { sequences: ["Ctrl+2"]; onActivated: finder.setView("list") }
-    Shortcut { sequences: ["Ctrl+3"]; onActivated: finder.setView("gallery") }
+    Shortcut { sequences: ["Ctrl+1"]; onActivated: rabbit.setView("icons") }
+    Shortcut { sequences: ["Ctrl+2"]; onActivated: rabbit.setView("list") }
+    Shortcut { sequences: ["Ctrl+3"]; onActivated: rabbit.setView("gallery") }
     Shortcut { sequences: ["Ctrl+H", "Ctrl+Shift+."]; onActivated: Prefs.showHidden = !Prefs.showHidden }
-    Shortcut { sequences: ["Alt+Left", "Ctrl+["]; onActivated: finder.back() }
-    Shortcut { sequences: ["Alt+Right", "Ctrl+]"]; onActivated: finder.forward() }
+    Shortcut { sequences: ["Alt+Left", "Ctrl+["]; onActivated: rabbit.back() }
+    Shortcut { sequences: ["Alt+Right", "Ctrl+]"]; onActivated: rabbit.forward() }
     Shortcut { sequences: ["F5", "Ctrl+R"]; onActivated: dir.refresh() }
-    Shortcut { sequences: ["Ctrl++", "Ctrl+="]; onActivated: finder.setIconSize(finder.iconSize + 16) }
-    Shortcut { sequences: ["Ctrl+-"]; onActivated: finder.setIconSize(finder.iconSize - 16) }
-    Shortcut { sequences: ["Ctrl+Shift+Backspace"]; onActivated: if (!App.trashEmpty) finder.confirmEmptyTrash() }
+    Shortcut { sequences: ["Ctrl++", "Ctrl+="]; onActivated: rabbit.setIconSize(rabbit.iconSize + 16) }
+    Shortcut { sequences: ["Ctrl+-"]; onActivated: rabbit.setIconSize(rabbit.iconSize - 16) }
+    Shortcut { sequences: ["Ctrl+Shift+Backspace"]; onActivated: if (!App.trashEmpty) rabbit.confirmEmptyTrash() }
 
     // --- The window -------------------------------------------------------
 
     Sidebar {
         id: sidebar
-        win: finder
+        win: rabbit
         visible: Prefs.sidebar
         width: visible ? 196 : 0
         anchors.left: parent.left
@@ -428,13 +428,13 @@ ApplicationWindow {
                 }
                 TButton {
                     symbol: "chevron-left"
-                    active: finder.backStack.length > 0
-                    onClicked: finder.back()
+                    active: rabbit.backStack.length > 0
+                    onClicked: rabbit.back()
                 }
                 TButton {
                     symbol: "chevron-right"
-                    active: finder.forwardStack.length > 0
-                    onClicked: finder.forward()
+                    active: rabbit.forwardStack.length > 0
+                    onClicked: rabbit.forward()
                 }
             }
             Text {
@@ -443,7 +443,7 @@ ApplicationWindow {
                 anchors.right: rightTools.left
                 anchors.rightMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                text: dir.search !== "" ? qsTr("Searching “%1”").arg(finder.title) : finder.title
+                text: dir.search !== "" ? qsTr("Searching “%1”").arg(rabbit.title) : rabbit.title
                 elide: Text.ElideMiddle
                 color: Theme.text
                 font.pixelSize: 15
@@ -473,9 +473,9 @@ ApplicationWindow {
                             TButton {
                                 required property var modelData
                                 symbol: modelData.symbol
-                                checked: finder.view === modelData.view
+                                checked: rabbit.view === modelData.view
                                 active: dir.search === ""
-                                onClicked: finder.setView(modelData.view)
+                                onClicked: rabbit.setView(modelData.view)
                             }
                         }
                     }
@@ -483,13 +483,13 @@ ApplicationWindow {
                 TButton {
                     anchors.verticalCenter: parent.verticalCenter
                     symbol: "arrow-up-down"
-                    active: finder.view === "icons" && finder.canArrange
+                    active: rabbit.view === "icons" && rabbit.canArrange
                     onClicked: arrangePopup.popup(this, 0, height + 4)
                 }
                 TButton {
                     anchors.verticalCenter: parent.verticalCenter
                     symbol: "circle-ellipsis"
-                    onClicked: dir.selectedCount ? finder.itemMenu() : finder.backgroundMenu()
+                    onClicked: dir.selectedCount ? rabbit.itemMenu() : rabbit.backgroundMenu()
                 }
                 TextField {
                     id: searchField
@@ -520,13 +520,13 @@ ApplicationWindow {
                     onTextChanged: searchTimer.restart()
                     Keys.onEscapePressed: {
                         text = ""
-                        finder.pane.forceActiveFocus()
+                        rabbit.pane.forceActiveFocus()
                     }
-                    Keys.onDownPressed: finder.pane.forceActiveFocus()
+                    Keys.onDownPressed: rabbit.pane.forceActiveFocus()
                     Timer {
                         id: searchTimer
                         interval: 250
-                        onTriggered: finder.searchText = searchField.text.trim()
+                        onTriggered: rabbit.searchText = searchField.text.trim()
                     }
                 }
             }
@@ -545,30 +545,30 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             focus: true
-            sourceComponent: finder.view === "icons" ? iconPane : (finder.view === "gallery" ? galleryPane : listPane)
+            sourceComponent: rabbit.view === "icons" ? iconPane : (rabbit.view === "gallery" ? galleryPane : listPane)
             onLoaded: item.forceActiveFocus()
         }
         Component {
             id: iconPane
             IconView {
-                win: finder
-                dir: finder.model
-                layout: finder.folderLayout
-                iconSize: finder.iconSize
+                win: rabbit
+                dir: rabbit.model
+                layout: rabbit.folderLayout
+                iconSize: rabbit.iconSize
             }
         }
         Component {
             id: listPane
             ListPane {
-                win: finder
-                dir: finder.model
+                win: rabbit
+                dir: rabbit.model
             }
         }
         Component {
             id: galleryPane
             GalleryPane {
-                win: finder
-                dir: finder.model
+                win: rabbit
+                dir: rabbit.model
             }
         }
 
@@ -578,7 +578,7 @@ ApplicationWindow {
             spacing: 6
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: dir.error !== "" ? dir.error : (dir.search !== "" ? qsTr("No Results") : (finder.inTrash ? qsTr("The Trash is empty") : qsTr("This folder is empty")))
+                text: dir.error !== "" ? dir.error : (dir.search !== "" ? qsTr("No Results") : (rabbit.inTrash ? qsTr("The Trash is empty") : qsTr("This folder is empty")))
                 color: Theme.faint
                 font.pixelSize: 18
             }
@@ -586,7 +586,7 @@ ApplicationWindow {
 
         Rectangle {
             id: pathBar
-            visible: Prefs.pathBar && !finder.virtualPlace
+            visible: Prefs.pathBar && !rabbit.virtualPlace
             anchors.bottom: statusBar.top
             width: parent.width
             height: visible ? 24 : 0
@@ -603,7 +603,7 @@ ApplicationWindow {
                 spacing: 2
                 Repeater {
                     id: crumbs
-                    model: App.crumbs(finder.location)
+                    model: App.crumbs(rabbit.location)
                     Row {
                         id: crumb
                         required property var modelData
@@ -631,7 +631,7 @@ ApplicationWindow {
                             MouseArea {
                                 anchors.fill: parent
                                 anchors.margins: -4
-                                onClicked: finder.go(crumb.modelData.url)
+                                onClicked: rabbit.go(crumb.modelData.url)
                             }
                         }
                     }
@@ -659,7 +659,7 @@ ApplicationWindow {
                     if (App.ops.busy)
                         return App.ops.status
                     const items = dir.selectedCount > 0 ? qsTr("%1 of %2 selected").arg(dir.selectedCount).arg(dir.count) : qsTr("%n item(s)", "", dir.count)
-                    const free = finder.scheme === "file" ? App.freeSpace(finder.location) : ""
+                    const free = rabbit.scheme === "file" ? App.freeSpace(rabbit.location) : ""
                     return free !== "" ? items + ", " + free : items
                 }
             }
@@ -673,7 +673,7 @@ ApplicationWindow {
             }
             Slider {
                 id: sizeSlider
-                visible: finder.view === "icons"
+                visible: rabbit.view === "icons"
                 anchors.right: parent.right
                 anchors.rightMargin: 12
                 anchors.verticalCenter: parent.verticalCenter
@@ -683,8 +683,8 @@ ApplicationWindow {
                 to: 192
                 stepSize: 16
                 snapMode: Slider.SnapAlways
-                value: finder.iconSize
-                onMoved: finder.setIconSize(value)
+                value: rabbit.iconSize
+                onMoved: rabbit.setIconSize(value)
                 background: Rectangle {
                     y: sizeSlider.height / 2 - 1
                     width: sizeSlider.width
@@ -735,28 +735,28 @@ ApplicationWindow {
 
     ArrangeMenu {
         id: arrangePopup
-        win: finder
-        layout: finder.folderLayout
+        win: rabbit
+        layout: rabbit.folderLayout
     }
 
     FMenu {
         id: itemMenuPopup
         FMenuItem {
             text: qsTr("Open")
-            visible: !finder.inTrash
-            onTriggered: finder.openSelection()
+            visible: !rabbit.inTrash
+            onTriggered: rabbit.openSelection()
         }
         FMenu {
             id: openWithMenu
             title: qsTr("Open With")
-            enabled: finder.openWithApps.length > 0
+            enabled: rabbit.openWithApps.length > 0
             Instantiator {
-                model: finder.openWithApps
+                model: rabbit.openWithApps
                 delegate: FMenuItem {
                     required property var modelData
                     text: modelData.name
                     checked: modelData.isDefault
-                    onTriggered: App.openWith(finder.menuUrls, modelData.id, finder.menuItem.mime)
+                    onTriggered: App.openWith(rabbit.menuUrls, modelData.id, rabbit.menuItem.mime)
                 }
                 onObjectAdded: (index, object) => openWithMenu.insertItem(index, object)
                 onObjectRemoved: (index, object) => openWithMenu.removeItem(object)
@@ -764,82 +764,82 @@ ApplicationWindow {
         }
         FMenuItem {
             text: qsTr("Open in New Window")
-            visible: finder.menuItem !== null && finder.menuItem.isDir && !finder.inTrash
-            onTriggered: App.requestWindow(finder.menuItem.url)
+            visible: rabbit.menuItem !== null && rabbit.menuItem.isDir && !rabbit.inTrash
+            onTriggered: App.requestWindow(rabbit.menuItem.url)
         }
         FMenuItem {
             text: qsTr("Put Back")
-            visible: finder.inTrash
-            onTriggered: App.ops.restore(finder.menuUrls)
+            visible: rabbit.inTrash
+            onTriggered: App.ops.restore(rabbit.menuUrls)
         }
         FSeparator {}
         FMenuItem {
-            text: finder.inTrash ? qsTr("Delete Immediately…") : qsTr("Move to Trash")
-            enabled: !finder.virtualPlace
-            onTriggered: finder.trashSelection()
+            text: rabbit.inTrash ? qsTr("Delete Immediately…") : qsTr("Move to Trash")
+            enabled: !rabbit.virtualPlace
+            onTriggered: rabbit.trashSelection()
         }
         FMenuItem {
             text: qsTr("Empty Trash")
-            visible: finder.inTrash
+            visible: rabbit.inTrash
             enabled: !App.trashEmpty
-            onTriggered: finder.confirmEmptyTrash()
+            onTriggered: rabbit.confirmEmptyTrash()
         }
         FSeparator {}
         FMenuItem {
             text: qsTr("Get Info")
-            onTriggered: finder.infoForSelection()
+            onTriggered: rabbit.infoForSelection()
         }
         FMenuItem {
             text: qsTr("Rename")
-            visible: finder.menuItem !== null && finder.writable
-            onTriggered: finder.rename()
+            visible: rabbit.menuItem !== null && rabbit.writable
+            onTriggered: rabbit.rename()
         }
         FMenuItem {
             text: qsTr("Compress")
-            visible: finder.writable
-            onTriggered: App.ops.compress(finder.menuUrls)
+            visible: rabbit.writable
+            onTriggered: App.ops.compress(rabbit.menuUrls)
         }
         FMenuItem {
             text: qsTr("Extract Here")
-            visible: finder.menuItem !== null && finder.writable && App.ops.isArchive(finder.menuItem.mime)
-            onTriggered: App.ops.extract(finder.menuItem.url)
+            visible: rabbit.menuItem !== null && rabbit.writable && App.ops.isArchive(rabbit.menuItem.mime)
+            onTriggered: App.ops.extract(rabbit.menuItem.url)
         }
         FMenuItem {
             text: qsTr("Duplicate")
-            visible: finder.writable
-            onTriggered: App.ops.duplicate(finder.menuUrls)
+            visible: rabbit.writable
+            onTriggered: App.ops.duplicate(rabbit.menuUrls)
         }
         FMenuItem {
             text: qsTr("Make Alias")
-            visible: finder.writable
-            onTriggered: App.ops.makeAlias(finder.menuUrls)
+            visible: rabbit.writable
+            onTriggered: App.ops.makeAlias(rabbit.menuUrls)
         }
         FMenuItem {
             text: qsTr("Quick Look")
-            visible: finder.menuItem !== null
-            onTriggered: finder.quickLook()
+            visible: rabbit.menuItem !== null
+            onTriggered: rabbit.quickLook()
         }
         FSeparator {}
         FMenuItem {
             text: qsTr("Copy")
-            onTriggered: App.ops.copyToClipboard(finder.menuUrls)
+            onTriggered: App.ops.copyToClipboard(rabbit.menuUrls)
         }
         FMenuItem {
             text: qsTr("Cut")
-            visible: finder.writable
-            onTriggered: App.ops.cutToClipboard(finder.menuUrls)
+            visible: rabbit.writable
+            onTriggered: App.ops.cutToClipboard(rabbit.menuUrls)
         }
         FMenuItem {
             text: qsTr("Copy Path")
-            visible: finder.menuItem !== null && finder.menuItem.path !== ""
-            onTriggered: App.ops.copyText(finder.menuItem.path)
+            visible: rabbit.menuItem !== null && rabbit.menuItem.path !== ""
+            onTriggered: App.ops.copyText(rabbit.menuItem.path)
         }
         FSeparator {
             visible: tagRow.visible
         }
         Item {
             id: tagRow
-            visible: !finder.inTrash && finder.scheme !== "applications"
+            visible: !rabbit.inTrash && rabbit.scheme !== "applications"
             implicitHeight: visible ? 30 : 0
             implicitWidth: 200
             Row {
@@ -852,7 +852,7 @@ ApplicationWindow {
                         id: dot
                         required property string modelData
                         // Read when the menu opens: the answer depends on what is selected.
-                        readonly property bool on: itemMenuPopup.opened && App.allTagged(finder.menuUrls, modelData)
+                        readonly property bool on: itemMenuPopup.opened && App.allTagged(rabbit.menuUrls, modelData)
                         width: 16
                         height: 16
                         radius: 8
@@ -863,7 +863,7 @@ ApplicationWindow {
                             anchors.fill: parent
                             anchors.margins: -3
                             onClicked: {
-                                App.setTag(finder.menuUrls, dot.modelData, !dot.on)
+                                App.setTag(rabbit.menuUrls, dot.modelData, !dot.on)
                                 itemMenuPopup.close()
                             }
                         }
@@ -873,17 +873,17 @@ ApplicationWindow {
         }
         FMenuItem {
             text: qsTr("Customize Folder…")
-            visible: finder.menuItem !== null && finder.menuItem.isDir && finder.menuItem.path !== "" && !finder.inTrash
-            onTriggered: App.customizeFolder(finder.menuItem.url)
+            visible: rabbit.menuItem !== null && rabbit.menuItem.isDir && rabbit.menuItem.path !== "" && !rabbit.inTrash
+            onTriggered: App.customizeFolder(rabbit.menuItem.url)
         }
         FSeparator {
             visible: favourite.visible
         }
         FMenuItem {
             id: favourite
-            visible: finder.menuItem !== null && finder.menuItem.isDir && finder.writable && itemMenuPopup.opened && !App.places.isFavorite(finder.menuItem.url)
+            visible: rabbit.menuItem !== null && rabbit.menuItem.isDir && rabbit.writable && itemMenuPopup.opened && !App.places.isFavorite(rabbit.menuItem.url)
             text: qsTr("Add to Sidebar")
-            onTriggered: App.places.addFavorite(finder.menuItem.url)
+            onTriggered: App.places.addFavorite(rabbit.menuItem.url)
         }
     }
 
@@ -891,25 +891,25 @@ ApplicationWindow {
         id: backgroundMenuPopup
         FMenuItem {
             text: qsTr("New Folder")
-            enabled: finder.writable
-            onTriggered: finder.newFolder()
+            enabled: rabbit.writable
+            onTriggered: rabbit.newFolder()
         }
         FMenuItem {
             text: qsTr("Empty Trash")
-            visible: finder.inTrash
+            visible: rabbit.inTrash
             enabled: !App.trashEmpty
-            onTriggered: finder.confirmEmptyTrash()
+            onTriggered: rabbit.confirmEmptyTrash()
         }
         FSeparator {}
         FMenuItem {
             text: qsTr("Get Info")
-            enabled: !finder.virtualPlace
-            onTriggered: finder.showInfo(finder.location)
+            enabled: !rabbit.virtualPlace
+            onTriggered: rabbit.showInfo(rabbit.location)
         }
         FMenuItem {
             text: qsTr("Paste")
-            enabled: finder.writable && App.ops.canPaste
-            onTriggered: App.ops.paste(finder.location)
+            enabled: rabbit.writable && App.ops.canPaste
+            onTriggered: App.ops.paste(rabbit.location)
         }
         FMenuItem {
             text: App.ops.undoText !== "" ? App.ops.undoText : qsTr("Undo")
@@ -918,37 +918,37 @@ ApplicationWindow {
         }
         FSeparator {}
         ArrangeMenu {
-            win: finder
-            layout: finder.folderLayout
+            win: rabbit
+            layout: rabbit.folderLayout
         }
         FMenuItem {
             text: qsTr("Clean Up")
-            enabled: finder.view === "icons" && finder.canArrange && ["", "grid"].includes(layout.arrange)
-            onTriggered: finder.pane.cleanUp()
+            enabled: rabbit.view === "icons" && rabbit.canArrange && ["", "grid"].includes(layout.arrange)
+            onTriggered: rabbit.pane.cleanUp()
         }
         FMenu {
             title: qsTr("Clean Up By")
-            enabled: finder.view === "icons" && finder.canArrange && ["", "grid"].includes(layout.arrange)
+            enabled: rabbit.view === "icons" && rabbit.canArrange && ["", "grid"].includes(layout.arrange)
             FMenuItem {
                 text: qsTr("Name")
-                onTriggered: finder.pane.cleanUpBy(DirModel.ByName)
+                onTriggered: rabbit.pane.cleanUpBy(DirModel.ByName)
             }
             FMenuItem {
                 text: qsTr("Kind")
-                onTriggered: finder.pane.cleanUpBy(DirModel.ByKind)
+                onTriggered: rabbit.pane.cleanUpBy(DirModel.ByKind)
             }
             FMenuItem {
                 text: qsTr("Date Modified")
-                onTriggered: finder.pane.cleanUpBy(DirModel.ByModified)
+                onTriggered: rabbit.pane.cleanUpBy(DirModel.ByModified)
             }
             FMenuItem {
                 text: qsTr("Size")
-                onTriggered: finder.pane.cleanUpBy(DirModel.BySize)
+                onTriggered: rabbit.pane.cleanUpBy(DirModel.BySize)
             }
         }
         FMenuItem {
             text: qsTr("Reset Icon Positions")
-            enabled: finder.view === "icons" && layout.arranged
+            enabled: rabbit.view === "icons" && layout.arranged
             onTriggered: layout.reset()
         }
         FSeparator {}
@@ -966,8 +966,8 @@ ApplicationWindow {
         }
         FMenuItem {
             text: qsTr("Open in Terminal")
-            enabled: finder.scheme === "file"
-            onTriggered: App.openTerminal(finder.location)
+            enabled: rabbit.scheme === "file"
+            onTriggered: App.openTerminal(rabbit.location)
         }
     }
 
@@ -985,7 +985,7 @@ ApplicationWindow {
             color: Theme.menu
             border.color: Theme.border
         }
-        onClosed: if (finder.pane) finder.pane.forceActiveFocus()
+        onClosed: if (rabbit.pane) rabbit.pane.forceActiveFocus()
     }
     component PanelButton: Rectangle {
         id: panelButton
@@ -1062,7 +1062,7 @@ ApplicationWindow {
         id: goPopup
         width: 420
         onOpened: {
-            goField.text = App.displayPath(finder.location)
+            goField.text = App.displayPath(rabbit.location)
             goField.selectAll()
             goField.forceActiveFocus()
         }
@@ -1087,12 +1087,12 @@ ApplicationWindow {
                     border.width: 2
                 }
                 onAccepted: {
-                    const url = App.folderFromInput(text, finder.location)
+                    const url = App.folderFromInput(text, rabbit.location)
                     goPopup.close()
                     if (String(url) === "")
-                        finder.toast(qsTr("The folder can’t be found."))
+                        rabbit.toast(qsTr("The folder can’t be found."))
                     else
-                        finder.go(url)
+                        rabbit.go(url)
                 }
             }
         }
@@ -1182,8 +1182,8 @@ ApplicationWindow {
         onTriggered: {
             if (dir.loading)
                 return
-            if (finder.testQueue.length) {
-                finder.perform(finder.testQueue.shift())
+            if (rabbit.testQueue.length) {
+                rabbit.perform(rabbit.testQueue.shift())
                 return
             }
             stop()
@@ -1195,7 +1195,7 @@ ApplicationWindow {
         interval: 900
         onTriggered: {
             layout.flush()
-            App.saveShot(finder)
+            App.saveShot(rabbit)
         }
     }
     function perform(action) {

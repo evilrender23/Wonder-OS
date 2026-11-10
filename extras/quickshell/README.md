@@ -42,7 +42,7 @@ Requiere Quickshell ≥ 0.3. `extras/install.sh` lo instala todo en `~/.config/d
 
 Por defecto, la barra muestra todos los widgets salvo `zoom`, `windows` y `keyboard`. Puedes añadirlos desde Ajustes.
 
-**Progreso de archivos.** Mientras Wonderland Finder copia, mueve o borra, el centro de la barra muestra la operación, una barra de progreso y cuánto lleva («1,7 GB de 4 GB»). No es un widget del diseño: aparece solo, delante de lo que haya en la sección central, y desaparece al terminar. Las operaciones de menos de un tercio de segundo no llegan a mostrarse. El estado lo publica el Finder en `$XDG_RUNTIME_DIR/wonderland/finder-ops.json` (`services/FinderOps.qml` lo sigue; `bar/FileProgress.qml` lo dibuja).
+**Progreso de archivos.** Mientras Rabbit copia, mueve o borra, el centro de la barra muestra la operación, una barra de progreso y cuánto lleva («1,7 GB de 4 GB»). No es un widget del diseño: aparece solo, delante de lo que haya en la sección central, y desaparece al terminar. Las operaciones de menos de un tercio de segundo no llegan a mostrarse. El estado lo publica el Rabbit en `$XDG_RUNTIME_DIR/wonderland/rabbit-ops.json` (`services/RabbitOps.qml` lo sigue; `bar/FileProgress.qml` lo dibuja).
 
 
 ## Menús de la app
@@ -143,7 +143,7 @@ La carpeta Escritorio (`xdg-user-dir DESKTOP`) como iconos en el monitor princip
 
 - **Colocación libre** (por defecto): el icono se queda exactamente donde lo sueltas, sin encajes ni recolocaciones, también encima de otro.
 - **Imán** (opcional, apagado por defecto; se activa en Ajustes o con clic derecho): al arrastrar, los iconos cercanos y los márgenes de la pantalla atraen al que llevas, hacia su fila o columna o a una celda de distancia. La atracción crece de forma continua al acercarse, una línea guía marca la alineación y, si sueltas dentro del radio de captura, el icono encaja; fuera de él se queda exactamente donde estaba. Con **Mayús** pulsada el arrastre es libre. Los iconos pueden quedar tan juntos como quieras; solo el que cae justo encima de otro se aparta lo mínimo para no taparlo.
-- Clic selecciona, **Ctrl+clic** añade o quita de la selección y el arrastre mueve la selección entera. Doble clic o Enter abre; **Espacio** abre la vista rápida del Finder (`apps/finder`) con lo seleccionado, y otro Espacio la cierra; F2 renombra; Supr envía a la papelera; Ctrl+A selecciona todo.
+- Clic selecciona, **Ctrl+clic** añade o quita de la selección y el arrastre mueve la selección entera. Doble clic o Enter abre; **Espacio** abre la vista rápida de Rabbit (`apps/rabbit`) con lo seleccionado, y otro Espacio la cierra; F2 renombra; Supr envía a la papelera; Ctrl+A selecciona todo.
 - Clic derecho sobre un icono: abrir, mostrar en el gestor de archivos, renombrar, papelera, nueva carpeta, **Ordenar iconos** (cada uno a la celda libre más cercana de una rejilla que empieza arriba a la derecha) y activar o desactivar el imán.
 - Los archivos nuevos ocupan la primera celda libre desde la esquina superior derecha. Las imágenes se muestran con su miniatura y los `.desktop` con su nombre e icono.
 
@@ -265,7 +265,7 @@ services/          singletons: Settings, Compositor (IPC de driftwm), Time, Net,
 spotlight/         Spotlight
 contextmenu/       menú contextual de reserva
 displays/          ajustes de pantallas
-desktop/           iconos del escritorio (Desktop, DesktopIcon, DesktopMenu), su imán (magnet.js) e icons/ (carpeta y documento, los mismos que dibuja Wonderland Finder)
+desktop/           iconos del escritorio (Desktop, DesktopIcon, DesktopMenu), su imán (magnet.js) e icons/ (carpeta y documento, los mismos que dibuja Rabbit)
 capture/           overlay de capturas y grabación (CaptureOverlay)
 wallpapers/        panel de fondos de pantalla (WallpaperPanel, ColorEditor)
 bar/               Bar, BarSection (arrastrar y soltar), WidgetHost, widgets/*Widget.qml

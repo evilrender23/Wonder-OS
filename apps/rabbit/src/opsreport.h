@@ -8,7 +8,7 @@
 /// draw their progress: a small JSON file in the runtime directory that the
 /// bar watches. Rewritten at most every `interval` while the numbers move, and
 /// once a second regardless, which is how the bar tells a live operation from
-/// one whose Finder died.
+/// one whose Rabbit died.
 class OpsReport : public QObject
 {
     Q_OBJECT
@@ -17,7 +17,7 @@ public:
     explicit OpsReport(const QString &path, QObject *parent = nullptr);
     ~OpsReport() override;
 
-    /// $XDG_RUNTIME_DIR/wonderland/finder-ops.json
+    /// $XDG_RUNTIME_DIR/wonderland/rabbit-ops.json
     static QString defaultPath();
 
     /// `kind` is copy, move, trash, delete or other; `progress` is 0–1, or

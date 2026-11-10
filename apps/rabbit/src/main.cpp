@@ -1,6 +1,7 @@
 #include "app.h"
 #include "fileops.h"
 #include "folderlook.h"
+#include "legacy.h"
 #include "opsreport.h"
 #include "providers.h"
 
@@ -15,13 +16,14 @@
 #include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
+#include <QStandardPaths>
 #include <QTextStream>
 #include <QTranslator>
 
-static const QString service = QStringLiteral("org.wonderland.Finder");
+static const QString service = QStringLiteral("org.wonderland.Rabbit");
 static const QString fileManagerPath = QStringLiteral("/org/freedesktop/FileManager1");
 static const QString fileManagerInterface = QStringLiteral("org.freedesktop.FileManager1");
-static const QString lookInterface = QStringLiteral("org.wonderland.Finder.QuickLook");
+static const QString lookInterface = QStringLiteral("org.wonderland.Rabbit.QuickLook");
 
 static QUrl urlFromArgument(const QString &argument)
 {
@@ -32,14 +34,16 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QCoreApplication::setOrganizationName(QStringLiteral("wonderland"));
-    QCoreApplication::setApplicationName(QStringLiteral("wonderland-finder"));
-    QCoreApplication::setApplicationVersion(QStringLiteral(FINDER_VERSION));
-    QGuiApplication::setApplicationDisplayName(QStringLiteral("Finder"));
-    QGuiApplication::setDesktopFileName(QStringLiteral("wonderland-finder"));
-    QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/WonderlandFinder/icons/app.svg")));
+    QCoreApplication::setApplicationName(QStringLiteral("wonderland-rabbit"));
+    QCoreApplication::setApplicationVersion(QStringLiteral(RABBIT_VERSION));
+    Legacy::adopt(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation),
+                  QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation));
+    QGuiApplication::setApplicationDisplayName(QStringLiteral("Rabbit"));
+    QGuiApplication::setDesktopFileName(QStringLiteral("wonderland-rabbit"));
+    QGuiApplication::setWindowIcon(QIcon(QStringLiteral(":/qt/qml/WonderlandRabbit/icons/app.svg")));
 
     QTranslator translator;
-    if (translator.load(QLocale(), QStringLiteral("wonderland-finder"), QStringLiteral("_"), QStringLiteral(":/i18n"))) {
+    if (translator.load(QLocale(), QStringLiteral("wonderland-rabbit"), QStringLiteral("_"), QStringLiteral(":/i18n"))) {
         QCoreApplication::installTranslator(&translator);
     }
 
@@ -136,13 +140,13 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    App finder(nullptr);
-    finder.setStartView(parser.value(viewOption));
+    App rabbit(nullptr);
+    rabbit.setStartView(parser.value(viewOption));
     const QString appearance = parser.value(appearanceOption);
     if (appearance == QLatin1String("light")) {
-        finder.setAppearance(App::Appearance::Light);
+        rabbit.setAppearance(App::Appearance::Light);
     } else if (appearance == QLatin1String("dark")) {
-        finder.setAppearance(App::Appearance::Dark);
+        rabbit.setAppearance(App::Appearance::Dark);
     }
     if (testing) {
         QSize size(1000, 620);
@@ -150,16 +154,16 @@ int main(int argc, char *argv[])
         if (parts.size() == 2 && parts.at(0).toInt() > 0 && parts.at(1).toInt() > 0) {
             size = QSize(parts.at(0).toInt(), parts.at(1).toInt());
         }
-        finder.setTest(QFileInfo(parser.value(shotOption)).absoluteFilePath(), parser.value(doOption).split(QLatin1Char(';'), Qt::SkipEmptyParts), size);
-        finder.setTestLook(look);
+        rabbit.setTest(QFileInfo(parser.value(shotOption)).absoluteFilePath(), parser.value(doOption).split(QLatin1Char(';'), Qt::SkipEmptyParts), size);
+        rabbit.setTestLook(look);
     } else {
-        finder.ops()->reportTo(OpsReport::defaultPath());
+        rabbit.ops()->reportTo(OpsReport::defaultPath());
     }
     if (!testing && bus.isConnected()) {
-        new FileManagerAdaptor(&finder);
-        new FinderAdaptor(&finder);
-        new LookAdaptor(&finder);
-        bus.registerObject(fileManagerPath, &finder);
+        new FileManagerAdaptor(&rabbit);
+        new RabbitAdaptor(&rabbit);
+        new LookAdaptor(&rabbit);
+        bus.registerObject(fileManagerPath, &rabbit);
         // Other apps' "Show in folder" looks for this name; a running Dolphin may hold it already.
         // Queued: if that Dolphin quits, the name comes to us.
         bus.interface()->registerService(QStringLiteral("org.freedesktop.FileManager1"), QDBusConnectionInterface::QueueService, QDBusConnectionInterface::DontAllowReplacement);
@@ -179,15 +183,15 @@ int main(int argc, char *argv[])
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] {
         QCoreApplication::exit(2);
     }, Qt::QueuedConnection);
-    engine.loadFromModule("WonderlandFinder", "Main");
+    engine.loadFromModule("WonderlandRabbit", "Main");
 
     if (customize) {
         // Only the small window: asked for from the desktop, there is no folder to show.
         if (testing && !folders.isEmpty()) {
-            finder.setTestCustomize(folders.constFirst());
+            rabbit.setTestCustomize(folders.constFirst());
         }
         for (const QUrl &url : std::as_const(folders)) {
-            finder.customizeFolder(url);
+            rabbit.customizeFolder(url);
         }
         if (folders.isEmpty()) {
             return 0;
@@ -195,22 +199,22 @@ int main(int argc, char *argv[])
         return app.exec();
     }
     for (const QUrl &url : std::as_const(folders)) {
-        finder.requestWindow(url);
+        rabbit.requestWindow(url);
     }
     QHash<QUrl, QList<QUrl>> byFolder;
     for (const QUrl &url : std::as_const(reveal)) {
         byFolder[url.adjusted(QUrl::RemoveFilename | QUrl::StripTrailingSlash)] << url;
     }
     for (auto it = byFolder.begin(); it != byFolder.end(); ++it) {
-        finder.requestWindow(it.key(), it.value());
+        rabbit.requestWindow(it.key(), it.value());
     }
     if (looking) {
         // Only the preview: the app ends when it is closed, unless a window was asked for meanwhile.
         if (!testing) {
-            finder.quickLook(look);
+            rabbit.quickLook(look);
         }
     } else if (folders.isEmpty() && reveal.isEmpty() && !parser.isSet(serviceOption)) {
-        finder.requestWindow(finder.homeUrl());
+        rabbit.requestWindow(rabbit.homeUrl());
     }
     return app.exec();
 }

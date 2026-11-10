@@ -32,9 +32,9 @@ Quickshell 0.3; run it by hand with `qs -p ~/.config/driftwm/quickshell`.
   (`wonderland-desktop` for the desktop icons, `wonderland-capture` for the
   capture overlay, …) (installed). A folder on
   the desktop is customized (colour, symbol or emoji) from its right-click
-  menu, in Wonderland Finder's "Customize Folder" window; the others take
+  menu, in Rabbit's "Customize Folder" window; the others take
   the folder tint chosen in Sistema («Carpetas»,
-  `~/.config/wonderland/appearance.json`), painted by Wonderland Finder too
+  `~/.config/wonderland/appearance.json`), painted by Rabbit too
 - `scripts/wonderland-icons` — the default app icons: fetches
   [WhiteSur](https://github.com/vinceliuice/WhiteSur-icon-theme) (macOS style,
   GPL-3.0, downloaded at install time, not shipped here) into
