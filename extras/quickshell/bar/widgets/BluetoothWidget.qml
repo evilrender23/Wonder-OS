@@ -96,7 +96,7 @@ Pill {
         IconButton {
             text: "Bluetooth settings"
             icon: "settings"
-            onClicked: { panel.close(); Quickshell.execDetached(["sh", "-c", "blueman-manager || ${TERMINAL:-wonderterm} -e bluetoothctl"]) }
+            onClicked: { panel.close(); Quickshell.execDetached(["sh", "-c", "command -v wonderland-bluetooth >/dev/null && exec wonderland-bluetooth; blueman-manager || ${TERMINAL:-wonderterm} -e bluetoothctl"]) }
         }
     }
 }

@@ -18,6 +18,7 @@ Wonder OS es una distribución Linux basada en CachyOS.
 - **WonderlandWM** (`src/`): el compositor Wayland de la distro, un fork de
   [driftwm](https://github.com/malbiruk/driftwm). Ver [NOTICE.md](NOTICE.md).
 - **Apps** (`apps/`):
+  - `bluetooth` — Bluetooth, gestor de dispositivos Bluetooth
   - `calendario` — Calendario
   - `fotos` — Fotos, biblioteca de imágenes y vídeos
   - `hojas` — Hojas

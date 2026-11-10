@@ -30,6 +30,8 @@ PKGS_APPS=(cmake ninja qt6-base qt6-declarative qt6-svg qt6-multimedia qt6-multi
     taglib xdg-utils)
 # Fotos: video playback, EXIF, more image formats, and ffmpeg for video thumbnails.
 PKGS_APPS+=(qt6-imageformats exiv2 ffmpeg)
+# Bluetooth: the daemon and the Qt binding the manager talks to it through.
+PKGS_APPS+=(bluez bluez-qt)
 PKGS_DESKTOP=(quickshell jq curl libnotify networkmanager pacman-contrib
     polkit-kde-agent plasma-integration breeze-icons grim slurp wf-recorder adwaita-fonts
     python-gobject)
