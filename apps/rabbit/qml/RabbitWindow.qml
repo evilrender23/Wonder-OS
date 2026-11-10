@@ -1252,6 +1252,10 @@ ApplicationWindow {
             itemMenu()
             openWithMenu.popup(itemMenuPopup.x + itemMenuPopup.width, itemMenuPopup.y + 26)
             break
+        case "open":
+            // What a double click on the item does.
+            openRow(dir.rowForFileName(parts[1]))
+            break
         case "openwith":
             menuUrls = dir.selectedUrls()
             menuItem = dir.get(dir.selectedRows()[0])

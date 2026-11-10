@@ -53,6 +53,16 @@ private Q_SLOTS:
         QFile::remove(mimeApps());
     }
 
+    void programsRunAndScriptsDoNot()
+    {
+        QVERIFY(App::runsOnOpen(QStringLiteral("application/x-executable")));
+        QVERIFY(App::runsOnOpen(QStringLiteral("application/x-sharedlib")));
+        QVERIFY(App::runsOnOpen(QStringLiteral("application/vnd.appimage")));
+        QVERIFY(!App::runsOnOpen(QStringLiteral("application/x-shellscript")));
+        QVERIFY(!App::runsOnOpen(QStringLiteral("text/x-python")));
+        QVERIFY(!App::runsOnOpen(QStringLiteral("text/plain")));
+    }
+
     void pickedAppBecomesTheDefault()
     {
         const QString mime = QStringLiteral("text/x-csrc");

@@ -68,6 +68,8 @@ public:
 
     /// Opens a file with its default application, or launches a .desktop application.
     Q_INVOKABLE void open(const QUrl &url, const QString &mime, bool isApp);
+    /// Whether opening a file of this type runs it: programs do, scripts open in their editor.
+    static bool runsOnOpen(const QString &mime);
     /// Applications that open a type, the default one first and flagged `isDefault`.
     Q_INVOKABLE QVariantList appsFor(const QString &mime) const;
     /// Opens `urls` with the chosen application and makes it the default for `mime`.

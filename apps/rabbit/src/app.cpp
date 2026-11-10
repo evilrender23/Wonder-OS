@@ -17,6 +17,7 @@
 #include <KRecentDocument>
 #include <KService>
 
+#include <QMimeDatabase>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -166,6 +167,8 @@ void App::open(const QUrl &url, const QString &mime, bool isApp)
         job = new KIO::ApplicationLauncherJob(service);
     } else {
         auto *open = mime.isEmpty() ? new KIO::OpenUrlJob(url) : new KIO::OpenUrlJob(url, mime);
+        // Without this KIO refuses every program with “launching executables is not allowed”.
+        open->setRunExecutables(runsOnOpen(mime.isEmpty() ? QMimeDatabase().mimeTypeForUrl(url).name() : mime));
         job = open;
         if (url.isLocalFile()) {
             KRecentDocument::add(url);
@@ -178,6 +181,13 @@ void App::open(const QUrl &url, const QString &mime, bool isApp)
         }
     });
     job->start();
+}
+
+bool App::runsOnOpen(const QString &mime)
+{
+    // A script still opens in its editor: running one unasked is how a download bites.
+    const QMimeType type = QMimeDatabase().mimeTypeForName(mime);
+    return !type.inherits(QStringLiteral("text/plain"));
 }
 
 QVariantList App::appsFor(const QString &mime) const
