@@ -8,7 +8,8 @@
 // `startup` marks the keys the compositor only reads when it starts.
 //
 // A page with `shortcuts` or `folders` instead of groups is drawn by a component of its own;
-// «Carpetas» is not in config.toml at all (see src/appearance.h).
+// «Carpetas» is not in config.toml at all (see src/appearance.h). Their `keywords` are what the
+// search (Search.js) finds them by, besides the title.
 
 function s(key, type, label, desc, extra) {
     return Object.assign({ path: key.split("."), type: type, label: label, desc: desc || "" }, extra || {})
@@ -92,7 +93,7 @@ const pages = [
             }
         ]
     },
-    { id: "atajos", title: "Atajos de teclado", icon: "⌘", shortcuts: true },
+    { id: "atajos", title: "Atajos de teclado", icon: "⌘", shortcuts: true, keywords: "keybindings combinación" },
     {
         id: "raton", title: "Ratón y panel táctil", icon: "⌖",
         groups: [
@@ -290,7 +291,7 @@ const pages = [
             }
         ]
     },
-    { id: "carpetas", title: "Carpetas", icon: "▰", folders: true },
+    { id: "carpetas", title: "Carpetas", icon: "▰", folders: true, keywords: "color carpeta tinte escritorio rabbit folder_tint" },
     {
         id: "fondo", title: "Fondo", icon: "▨",
         groups: [

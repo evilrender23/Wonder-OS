@@ -7,11 +7,27 @@ ScrollView {
     id: root
 
     required property var page
+    /// The group a search result led to (-1: none): it is scrolled into view and its name stands out.
+    property int startGroup: -1
+
+    function reveal() {
+        const item = startGroup >= 0 ? groups.itemAt(startGroup) : null
+        if (!item)
+            return
+        column.ensurePolished()
+        const flick = root.contentItem
+        flick.contentY = Math.max(0, Math.min(item.y - 12, column.implicitHeight - flick.height))
+    }
+
+    onStartGroupChanged: Qt.callLater(reveal)
+    Component.onCompleted: Qt.callLater(reveal)
 
     contentWidth: availableWidth
     clip: true
 
     ColumnLayout {
+        id: column
+
         width: root.availableWidth
         spacing: 0
 
@@ -26,12 +42,15 @@ ScrollView {
         }
 
         Repeater {
+            id: groups
+
             model: root.page.groups
 
             ColumnLayout {
                 id: group
 
                 required property var modelData
+                required property int index
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 24
@@ -42,7 +61,7 @@ ScrollView {
                 Text {
                     Layout.leftMargin: 4
                     text: group.modelData.title
-                    color: Theme.text
+                    color: group.index === root.startGroup ? Theme.accent : Theme.text
                     font.pixelSize: Theme.body
                     font.weight: Font.DemiBold
                 }

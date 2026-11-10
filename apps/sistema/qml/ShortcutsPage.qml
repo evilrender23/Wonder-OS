@@ -3,10 +3,14 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "Actions.js" as Actions
 import "Bindings.js" as Bindings
+import "Search.js" as Search
 
 /// Every keyboard shortcut of the desktop: the built-in ones and the user's own.
 Item {
     id: root
+
+    /// What to search for on arrival, when the sidebar's search led here.
+    property string startQuery: ""
 
     readonly property var table: ["keybindings"]
     readonly property string modKey: {
@@ -19,14 +23,12 @@ Item {
         return Bindings.rows(App.fallbackEntries(table), Config.entries(table), norm, off.indexOf("keys") >= 0)
     }
     readonly property var shown: {
-        const needle = search.text.trim().toLowerCase()
+        const needle = Search.words(search.text)
         const order = ["Tuyos", "Abrir", "Ventana", "Navegar", "Sistema", "Otros"]
         const found = rows.map(r => Object.assign({}, r, {
             what: Actions.describe(r.value),
             section: r.state === "custom" ? "Tuyos" : Actions.group(r.value)
-        })).filter(r => needle === "" || r.what.toLowerCase().indexOf(needle) >= 0
-            || r.value.toLowerCase().indexOf(needle) >= 0 || r.key.toLowerCase().indexOf(needle) >= 0
-            || Bindings.caps(r.key, modKey).join(" ").toLowerCase().indexOf(needle) >= 0)
+        })).filter(r => Search.has(Search.fold([r.what, r.value, r.key, Bindings.caps(r.key, modKey).join(" ")].join(" ")), needle))
           .sort((a, b) => order.indexOf(a.section) - order.indexOf(b.section)
               || a.what.localeCompare(b.what) || a.key.localeCompare(b.key))
         // A heading is a row of the model: ListView sections need a role, which a JS array lacks.
@@ -65,6 +67,7 @@ Item {
 
                 implicitWidth: 220
                 placeholderText: "Buscar"
+                text: root.startQuery
             }
             TButton {
                 text: "＋ Nuevo atajo"

@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
     const QCommandLineOption shotOption(QStringLiteral("shot"), QStringLiteral("Guardar una imagen de la ventana en este archivo y salir (para pruebas)."), QStringLiteral("png"));
     const QCommandLineOption lookFileOption(QStringLiteral("look-file"), QStringLiteral("El appearance.json que se edita (por defecto, el del escritorio)."), QStringLiteral("archivo"));
     const QCommandLineOption pickTintOption(QStringLiteral("pick-tint"), QStringLiteral("Con --page carpetas: dejar este color elegido sin aplicarlo (para pruebas)."), QStringLiteral("#rrggbb"));
-    parser.addOptions({configOption, pageOption, appearanceOption, shotOption, lookFileOption, pickTintOption});
+    const QCommandLineOption searchOption(QStringLiteral("search"), QStringLiteral("Abrir con esta búsqueda hecha."), QStringLiteral("texto"));
+    parser.addOptions({configOption, pageOption, searchOption, appearanceOption, shotOption, lookFileOption, pickTintOption});
     parser.process(app);
 
     App sistema;
@@ -66,6 +67,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("Appearance"), &look);
     engine.rootContext()->setContextProperty(QStringLiteral("startPage"), parser.value(pageOption));
     engine.rootContext()->setContextProperty(QStringLiteral("startTint"), parser.value(pickTintOption));
+    engine.rootContext()->setContextProperty(QStringLiteral("startSearch"), parser.value(searchOption));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] {
         QCoreApplication::exit(2);
     }, Qt::QueuedConnection);

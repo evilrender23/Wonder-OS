@@ -7,6 +7,18 @@ ApplicationWindow {
     id: window
 
     property int current: Math.max(0, Schema.pages.findIndex(p => p.id === startPage))
+    /// What the sidebar's search holds; while there is something, its results take the place of the page.
+    readonly property string query: search.text.trim()
+    /// Where a search result leads: the group to bring into view and the text to look the shortcuts up by.
+    property int pendingGroup: -1
+    property string pendingQuery: ""
+
+    function open(page, group, shortcuts) {
+        pendingGroup = group
+        pendingQuery = shortcuts
+        current = page
+        search.clear()
+    }
 
     width: 1020
     height: 700
@@ -33,6 +45,13 @@ ApplicationWindow {
         sequences: [StandardKey.Undo]
         enabled: Config.canUndo
         onActivated: Config.undo()
+    }
+    Shortcut {
+        sequences: [StandardKey.Find]
+        onActivated: {
+            search.forceActiveFocus()
+            search.selectAll()
+        }
     }
     Shortcut {
         sequence: StandardKey.Quit
@@ -63,6 +82,35 @@ ApplicationWindow {
                     font.weight: Font.DemiBold
                 }
 
+                TField {
+                    id: search
+
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: 8
+                    rightPadding: 28
+                    placeholderText: "Buscar"
+                    text: startSearch
+                    Keys.onEscapePressed: clear()
+
+                    Text {
+                        anchors.right: parent.right
+                        anchors.rightMargin: 9
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: search.text !== ""
+                        text: "✕"
+                        color: clearHover.hovered ? Theme.text : Theme.dim
+                        font.pixelSize: Theme.small
+
+                        HoverHandler {
+                            id: clearHover
+                            cursorShape: Qt.ArrowCursor
+                        }
+                        TapHandler {
+                            onTapped: search.clear()
+                        }
+                    }
+                }
+
                 Repeater {
                     model: Schema.pages
 
@@ -72,16 +120,19 @@ ApplicationWindow {
                         required property var modelData
                         required property int index
 
+                        /// No page is the current one while the results of a search are up.
+                        readonly property bool selected: window.current === index && window.query === ""
+
                         Layout.fillWidth: true
                         implicitHeight: 34
                         radius: 8
-                        color: window.current === index ? Theme.accent : (entryHover.hovered ? Theme.hover : "transparent")
+                        color: selected ? Theme.accent : (entryHover.hovered ? Theme.hover : "transparent")
 
                         HoverHandler {
                             id: entryHover
                         }
                         TapHandler {
-                            onTapped: window.current = entry.index
+                            onTapped: window.open(entry.index, -1, "")
                         }
                         Row {
                             anchors.verticalCenter: parent.verticalCenter
@@ -92,12 +143,12 @@ ApplicationWindow {
                                 width: 18
                                 horizontalAlignment: Text.AlignHCenter
                                 text: entry.modelData.icon
-                                color: window.current === entry.index ? "#ffffff" : Theme.dim
+                                color: entry.selected ? "#ffffff" : Theme.dim
                                 font.pixelSize: Theme.body
                             }
                             Text {
                                 text: entry.modelData.title
-                                color: window.current === entry.index ? "#ffffff" : Theme.text
+                                color: entry.selected ? "#ffffff" : Theme.text
                                 font.pixelSize: Theme.body
                             }
                         }
@@ -171,15 +222,25 @@ ApplicationWindow {
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                sourceComponent: page.shortcuts ? shortcutsPage : (page.folders ? foldersPage : settingsPage)
+                sourceComponent: window.query !== "" ? searchPage : (page.shortcuts ? shortcutsPage : (page.folders ? foldersPage : settingsPage))
             }
         }
     }
 
     Component {
+        id: searchPage
+
+        SearchPage {
+            query: window.query
+            onOpened: (page, group, shortcuts) => window.open(page, group, shortcuts)
+        }
+    }
+    Component {
         id: shortcutsPage
 
-        ShortcutsPage {}
+        ShortcutsPage {
+            startQuery: window.pendingQuery
+        }
     }
     Component {
         id: foldersPage
@@ -193,6 +254,7 @@ ApplicationWindow {
 
         SettingsPage {
             page: pageLoader.page
+            startGroup: window.pendingGroup
         }
     }
 }

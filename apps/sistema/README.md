@@ -6,6 +6,10 @@ the compositor reloads the file on its own, so a change shows the moment it is m
 - **Every setting of the compositor**, by page: General, Teclado, Ratón y panel táctil, Lienzo y
   zoom, Ventanas, Efectos, Fondo, Pantallas, Gestos y ratón, Avanzado. A control shows the
   compositor's default until you change it; ↺ puts the default back.
+- **Buscar**: the field at the top of the sidebar (Ctrl+F) finds a setting by its name, its
+  description, an option or its `config.toml` key, whatever the case or the accents («raton»
+  finds «Ratón»). The settings found can be changed right there; the heading above them, and the
+  pages, tables and keyboard shortcuts that match, lead to where they live.
 - **Atajos de teclado**: every keyboard shortcut, built-in and yours. Create one (pick the
   modifiers and the key, or record the keystroke; then an action or a command to run), edit,
   switch a built-in one off, restore it. A combination already in use says what it does now.
@@ -44,6 +48,7 @@ Once installed, «Ajustes del sistema…» in the desktop menu opens it.
 ```sh
 wonderland-sistema
 wonderland-sistema --page atajos
+wonderland-sistema --search "panel táctil"
 wonderland-sistema --config /tmp/copy.toml --appearance dark   # try it on a copy
 ```
 
