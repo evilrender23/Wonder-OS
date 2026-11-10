@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6aa0ff"/>
+      <stop offset="1" stop-color="#2459d6"/>
+    </linearGradient>
+    <linearGradient id="sheet" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef2fb"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="108" height="108" rx="26" fill="url(#tile)"/>
+  <path d="M41 28h34l18 18v48a7 7 0 0 1-7 7H41a7 7 0 0 1-7-7V35a7 7 0 0 1 7-7z" fill="url(#sheet)"/>
+  <path d="M75 28l18 18H80a5 5 0 0 1-5-5z" fill="#c9d8f7"/>
+  <g fill="none" stroke="#2f6fed" stroke-width="5" stroke-linecap="round">
+    <path d="M45 60h38"/>
+    <path d="M45 73h38" opacity="0.55"/>
+    <path d="M45 86h24" opacity="0.55"/>
+  </g>
+  <path d="M45 45h17" fill="none" stroke="#2f6fed" stroke-width="6" stroke-linecap="round"/>
+</svg>

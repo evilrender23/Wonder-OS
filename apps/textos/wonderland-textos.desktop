@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Textos
+Name[en]=Texts
+GenericName=Procesador de textos
+GenericName[en]=Word Processor
+Comment=Escribe cartas, informes y documentos
+Comment[en]=Write letters, reports and documents
+Exec=wonderland-textos %F
+Icon=wonderland-textos
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-textos
+MimeType=application/vnd.oasis.opendocument.text;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/rtf;text/rtf;text/plain;text/markdown;
+Categories=Office;WordProcessor;Qt;
+Keywords=documento;carta;informe;escribir;procesador;writer;word;odt;docx;rtf;markdown;
