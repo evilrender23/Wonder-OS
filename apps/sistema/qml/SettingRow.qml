@@ -216,7 +216,7 @@ Item {
             function sync() {
                 const options = root.setting.options
                 for (let i = 0; i < options.length; i++) {
-                    if (options[i][0] === String(shown)) {
+                    if (options[i][0] === String(shown ?? "")) {
                         currentIndex = i
                         return
                     }
@@ -232,7 +232,9 @@ Item {
             onShownChanged: sync()
             Component.onCompleted: sync()
             onActivated: index => {
-                if (!root.commit(root.setting.options[index][0]))
+                // An option with no value is "not set": the key leaves config.toml.
+                const next = root.setting.options[index][0]
+                if (!(next === "" ? !root.modified || Config.unset(root.setting.path) : root.commit(next)))
                     sync()
             }
         }

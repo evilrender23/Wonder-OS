@@ -525,6 +525,18 @@
         <translation>General</translation>
     </message>
     <message>
+        <source>Idioma</source>
+        <translation>Language</translation>
+    </message>
+    <message>
+        <source>El idioma (language) del escritorio y de sus apps.</source>
+        <translation>The language (idioma) of the desktop and its apps.</translation>
+    </message>
+    <message>
+        <source>El del sistema</source>
+        <translation>System default</translation>
+    </message>
+    <message>
         <source>Foco y ventanas nuevas</source>
         <translation>Focus and new windows</translation>
     </message>

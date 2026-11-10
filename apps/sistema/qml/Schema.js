@@ -46,6 +46,14 @@ const pages = [
         id: "general", title: qsTr("General"), icon: "◐",
         groups: [
             {
+                title: qsTr("Idioma"),
+                items: [
+                    // LC_MESSAGES and not LANG: dates, numbers and paper keep following the system.
+                    s("env.LC_MESSAGES", "choice", qsTr("Idioma"), qsTr("El idioma (language) del escritorio y de sus apps."),
+                      { startup: true, options: [["", qsTr("El del sistema")], ["es_ES.UTF-8", "Español"], ["en_US.UTF-8", "English"]] })
+                ]
+            },
+            {
                 title: qsTr("Foco y ventanas nuevas"),
                 items: [
                     s("mod_key", "choice", qsTr("Tecla modificadora"), qsTr("La tecla «Mod» de los atajos del escritorio. Para Mod3 hay que asignarle antes una tecla en la distribución de teclado."),
