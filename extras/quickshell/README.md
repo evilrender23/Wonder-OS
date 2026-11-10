@@ -107,6 +107,7 @@ Debajo de cada app abierta hay un punto: azul si tiene el foco y apagado si toda
 - **Clic:** lleva la cámara a la ventana de la app. Si ya tiene el foco, pasa a su siguiente ventana; si todas están minimizadas, restaura la última; si todas están suspendidas, relanza una; si no está abierta, la lanza.
 - **Clic central:** abre una ventana nueva.
 - **Clic derecho:** lista de sus ventanas, «Nueva ventana», «Mantener en el Dock» / «Quitar del Dock», «Minimizar» y «Cerrar». En una miniatura: «Restaurar» y «Cerrar».
+- **Arrastrar:** mueve una app fijada a otro sitio; las demás se apartan para hacerle hueco y el orden se guarda al soltar. Arrastrar una app abierta hasta las fijadas la fija en ese punto, y sacar una fijada del Dock hacia arriba la quita («Quitar del Dock» sobre el icono).
 
 Las ventanas se agrupan por su `.desktop` (`DesktopEntries.heuristicLookup`). Si eso no encuentra nada, como en `com.nousresearch.hermes` ↔ `hermes-desktop`, compara el último tramo del app_id con el nombre de la app.
 

@@ -15,8 +15,10 @@ import ".."
 // A dot marks running apps (accent when focused), a launch bounces. Click: focus the app's window (flying the
 // camera there; again cycles its windows; a suspended one relaunches) or
 // launch it. Middle click: new window. Right click: its windows, New
-// window, Keep in Dock, Quit. Settings live in bar.json (dock* keys) and
-// the settings panel.
+// window, Keep in Dock, Quit. Dragging an app along the dock reorders the
+// pinned ones (the others slide out of the way), dragging a running app in
+// among them pins it there, and dragging a pinned one up and off the dock
+// unpins it. Settings live in bar.json (dock* keys) and the settings panel.
 Scope {
     id: root
 
@@ -38,6 +40,14 @@ Scope {
     }
     function pin(key) { if (!pinnedIds.includes(key)) setPins(pinnedIds.concat([key])) }
     function unpin(key) { setPins(pinnedIds.filter(k => k !== key)) }
+    // Puts an app at `pos` among the pinned ones on show, pinning it if it
+    // wasn't. Pins of apps that aren't installed keep their place at the end.
+    function movePin(key, pos) {
+        const shown = apps.pinned.map(a => a.key).filter(k => k !== key)
+        const hidden = pinnedIds.filter(id => id !== key && !shown.includes(id))
+        shown.splice(Math.max(0, Math.min(pos, shown.length)), 0, key)
+        setPins(shown.concat(hidden))
+    }
 
     // Pinned apps in order, then running ones grouped by desktop entry
     // (heuristicLookup maps an app_id to its .desktop, StartupWMClass
@@ -159,7 +169,38 @@ Scope {
             readonly property real barHeight: size + 2 * pad
             readonly property bool autohide: Settings.data.dockAutohide
             readonly property bool hovered: dockHover.hovered || menu.visible
-            readonly property bool shown: !autohide || hovered || peek.running
+            readonly property bool shown: !autohide || hovered || peek.running || dragIndex >= 0
+
+            // ── drag to reorder ───────────────────────────────────────
+            // The model stays as it is while an icon is dragged (changing it
+            // would rebuild every tile under the pointer): the dragged tile
+            // follows the pointer and the ones between it and where it would
+            // land slide one place over. The new order is saved on release.
+            readonly property real step: size + gap
+            readonly property int pinnedCount: root.apps.pinned.length
+            property int dragIndex: -1      // row index of the dragged tile
+            property int dragTo: -1         // row index it would land on
+            property real dragDx: 0
+            property bool dragRemove: false // lifted off the dock: unpin on release
+
+            function dragMove(slot, dx, dy) {
+                const pinned = slot.modelData.pinned
+                const at = Math.round((slot.x + dx) / step)
+                dragDx = dx
+                dragRemove = pinned && dy < -size * 0.9
+                if (dragRemove) dragTo = dragIndex
+                else if (pinned) dragTo = Math.max(1, Math.min(at, pinnedCount))
+                // A running app only lands once it's past the separator.
+                else dragTo = at <= pinnedCount + 1 ? Math.max(1, at) : dragIndex
+            }
+            function dragEnd(it) {
+                const from = dragIndex, to = dragTo, remove = dragRemove
+                dragCancel()
+                if (from < 0) return
+                if (remove) root.unpin(it.key)
+                else if (to !== from) root.movePin(it.key, to - 1)
+            }
+            function dragCancel() { dragIndex = -1; dragTo = -1; dragDx = 0; dragRemove = false }
 
             WlrLayershell.namespace: "wonderland-dock"
             WlrLayershell.layer: WlrLayer.Top
@@ -235,6 +276,21 @@ Scope {
                             readonly property bool focused: running && modelData.windows.some(w => w.is_focused)
                             readonly property bool asleep: running && modelData.windows.every(w => w.suspended)
                             property real lift: 0
+                            // Apps with a desktop entry can be pinned, so they can be dragged.
+                            readonly property bool draggable: modelData.kind === "app" && !!modelData.entry
+                            readonly property bool dragged: win.dragIndex === index
+                            readonly property real shiftX: dragged ? win.dragDx
+                                : win.dragIndex < 0 ? 0
+                                : win.dragIndex < index && index <= win.dragTo ? -win.step
+                                : win.dragTo <= index && index < win.dragIndex ? win.step : 0
+
+                            z: dragged ? 10 : 0
+                            transform: Translate {
+                                x: slot.shiftX
+                                Behavior on x { enabled: !slot.dragged; NumberAnimation { duration: 170; easing.type: Easing.OutCubic } }
+                            }
+                            // Compositor updates rebuild the tiles: a drag can't outlive its tile.
+                            Component.onDestruction: if (dragged) win.dragCancel()
 
                             width: isSep ? 13 : win.size
                             height: win.size
@@ -308,13 +364,14 @@ Scope {
                                 width: parent.width
                                 height: width
                                 anchors.bottom: parent.bottom
-                                anchors.bottomMargin: slot.lift
+                                anchors.bottomMargin: slot.lift + (slot.dragged ? 6 : 0)
                                 visible: !slot.isSep && slot.modelData.kind !== "launchpad" && slot.modelData.kind !== "minimized"
                                 source: visible ? root.iconSource(slot.modelData) : ""
                                 sourceSize: Qt.size(win.size * 2, win.size * 2)
                                 smooth: true
                                 mipmap: true
-                                opacity: slot.asleep ? 0.55 : 1
+                                opacity: slot.dragged && win.dragRemove ? 0.35 : slot.asleep ? 0.55 : 1
+                                Behavior on opacity { NumberAnimation { duration: 120 } }
                             }
 
                             Rectangle {
@@ -334,7 +391,30 @@ Scope {
                                 enabled: !slot.isSep
                                 hoverEnabled: true
                                 acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+                                cursorShape: slot.dragged ? Qt.ClosedHandCursor : Qt.ArrowCursor
+                                // Row coordinates: the tile moves under the pointer, the row doesn't.
+                                property point pressAt
+                                property bool wasDrag: false
+                                onPressed: event => {
+                                    wasDrag = false
+                                    pressAt = mapToItem(row, event.x, event.y)
+                                }
+                                onPositionChanged: event => {
+                                    if (!slot.draggable || !(event.buttons & Qt.LeftButton)) return
+                                    const p = mapToItem(row, event.x, event.y)
+                                    const dx = p.x - pressAt.x, dy = p.y - pressAt.y
+                                    if (!slot.dragged) {
+                                        // A click that wobbles a few pixels is still a click.
+                                        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+                                        wasDrag = true
+                                        win.dragIndex = slot.index
+                                    }
+                                    win.dragMove(slot, dx, dy)
+                                }
+                                onReleased: if (slot.dragged) win.dragEnd(slot.modelData)
+                                onCanceled: if (slot.dragged) win.dragCancel()
                                 onClicked: event => {
+                                    if (wasDrag) { wasDrag = false; return }
                                     const it = slot.modelData
                                     if (event.button === Qt.RightButton) {
                                         if (it.kind === "launchpad") Popups.spotlightRequested()
@@ -349,7 +429,8 @@ Scope {
 
                             // Name above the icon while hovered (macOS label).
                             Rectangle {
-                                visible: mouse.containsMouse && !menu.visible && !slot.isSep
+                                visible: !slot.isSep && !menu.visible
+                                    && (win.dragIndex < 0 ? mouse.containsMouse : slot.dragged && win.dragRemove)
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.bottom: parent.top
                                 anchors.bottomMargin: 10
@@ -362,7 +443,7 @@ Scope {
                                 Text {
                                     id: label
                                     anchors.centerIn: parent
-                                    text: slot.isSep ? "" : root.title(slot.modelData)
+                                    text: slot.isSep ? "" : slot.dragged && win.dragRemove ? "Quitar del Dock" : root.title(slot.modelData)
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 12
                                     color: Theme.p.text
