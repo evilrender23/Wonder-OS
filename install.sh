@@ -35,6 +35,8 @@ PKGS_APPS+=(bluez bluez-qt)
 PKGS_DESKTOP=(quickshell jq curl libnotify networkmanager pacman-contrib
     polkit-kde-agent plasma-integration breeze-icons grim slurp wf-recorder adwaita-fonts
     python-gobject)
+# The password store behind org.freedesktop.secrets (resources/wonderland-secrets).
+PKGS_DESKTOP+=(kwallet)
 
 usage() {
     cat <<EOF

@@ -18,6 +18,7 @@ cd "$(dirname "$0")/../.."
 BIN=target/release/driftwm
 
 files="/usr/local/bin/driftwm /usr/local/bin/wonderlandwm /usr/local/bin/driftwm-session
+/usr/local/bin/wonderland-secrets /usr/local/share/dbus-1/services/org.freedesktop.secrets.service
 /usr/share/wayland-sessions/wonderlandwm.desktop
 /usr/share/xdg-desktop-portal/driftwm-portals.conf
 /usr/lib/systemd/user/driftwm.service /usr/lib/systemd/user/driftwm-shutdown.target"
@@ -47,6 +48,10 @@ install -Dm755 "$BIN" /usr/local/bin/driftwm
 ln -sf driftwm /usr/local/bin/wonderlandwm
 install -Dm755 resources/driftwm-session /usr/local/bin/driftwm-session
 install -Dm644 resources/driftwm-portals.conf /usr/share/xdg-desktop-portal/driftwm-portals.conf
+# The password store apps look for on D-Bus. In /usr/local so it neither clashes
+# with the file gnome-keyring packages nor loses to it.
+install -Dm755 resources/wonderland-secrets /usr/local/bin/wonderland-secrets
+install -Dm644 resources/org.freedesktop.secrets.service /usr/local/share/dbus-1/services/org.freedesktop.secrets.service
 install -Dm644 resources/driftwm.service /usr/lib/systemd/user/driftwm.service
 install -Dm644 resources/driftwm-shutdown.target /usr/lib/systemd/user/driftwm-shutdown.target
 
