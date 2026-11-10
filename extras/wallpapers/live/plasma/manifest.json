@@ -1,0 +1,26 @@
+{
+  "name": "Plasma",
+  "component": "Plasma",
+  "description": "Un túnel de plasma volumétrico que gira en espiral con pliegues de luz.",
+  "tags": ["plasma", "volumétrico", "espiral", "oscuro"],
+  "params": [
+    {"key": "color", "label": "Color", "type": "color", "default": "#a6a3b8"},
+    {"key": "direction", "label": "Dirección", "type": "enum", "options": [
+      {"value": "forward", "label": "Hacia delante"},
+      {"value": "reverse", "label": "Hacia atrás"},
+      {"value": "pingpong", "label": "Vaivén"}
+    ], "default": "forward"},
+    {"key": "scale", "label": "Zoom", "type": "float", "min": 0.1, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "twist", "label": "Giro de la espiral", "type": "float", "min": -3.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "wave", "label": "Ondulación", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "softness", "label": "Suavidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "shine", "label": "Destellos", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.04},
+    {"key": "fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "heavy": true,
+  "notes": "El volumen se calcula a resolución completa en el mismo pase (sin el ajuste de calidad), por eso es pesado en GPUs integradas. Sin giro 3D ni brillo del cursor ni intro. En modo claro se usa fondo blanco salvo que el fondo elegido ya sea claro."
+}

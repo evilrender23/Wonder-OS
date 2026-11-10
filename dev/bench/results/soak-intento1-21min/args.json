@@ -1,0 +1,14 @@
+{
+ "hours": "8.0",
+ "out": "dev/bench/results/soak-8h",
+ "gpu": "amd",
+ "dri_prime": "1",
+ "seed": "20261109",
+ "max_windows": "60",
+ "quiesce_min": "15",
+ "settle": "20",
+ "max_growth": "5.0",
+ "config": "/mnt/datos2/Hermes/apps/escritorio/wonderlandwm-fase1/dev/bench/bench.toml",
+ "driftwm": "/home/oz/.hermes/cache/scratch/soak-bin/driftwm-fase1-63691ac",
+ "ld_path": "/home/oz/.hermes/cache/scratch/driftwm-deps/prefix/lib"
+}

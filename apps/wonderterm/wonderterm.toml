@@ -1,0 +1,36 @@
+# wonderterm: ~/.config/wonderterm/config.toml
+# Every value below is the default; delete what you don't change.
+
+# "auto" follows the WonderlandWM shell's light/dark switch.
+theme = "auto"              # auto | dark | light
+
+[font]
+family = ""                 # "" = first of Adwaita Mono, JetBrains Mono, MesloLGS Nerd Font Mono, monospace
+size = 13.0
+line_height = 1.2
+
+[window]
+opacity = 0.94              # background only; text and coloured cells stay solid
+padding = 10.0
+columns = 120
+rows = 30
+status_bar = true
+
+[cursor]
+shape = "block"             # block | beam | underline (programs can still change it)
+animation = "smear"         # smear | glide | none
+duration_ms = 150.0         # a jump across the screen
+typing_duration_ms = 50.0   # a step of one or two cells on the same line
+trail = 0.65                # smear only: 0 = no stretch, 1 = the tail leaves last
+vfx = "ripple"              # none | ripple | sparkle, played where a jump lands
+glow = true
+blink = true
+blink_interval_ms = 600.0
+
+[terminal]
+shell = ""                  # "" = your login shell
+args = []
+term = "xterm-256color"
+scrollback = 10000
+scroll_lines = 3.0
+clipboard_keys = true       # ctrl+c / ctrl+x copy and cut a selection, ctrl+v pastes; false = only the ctrl+shift forms

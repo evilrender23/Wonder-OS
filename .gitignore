@@ -1,0 +1,19 @@
+/target
+/vendor
+/.cargo
+/log
+__pycache__
+.venv
+.ruff_cache
+*.tar.gz
+*.tar.xz
+# nix build output symlink
+result
+# WonderlandWM bench artifacts
+/target-tracy
+/dev/bench/client/target
+/dev/bench/results/**/*.tracy
+/dev/bench/results/discarded
+# App build output
+/apps/*/target
+/apps/*/build

@@ -1,0 +1,32 @@
+{
+  "name": "Escaneo de rejilla",
+  "component": "GridScan",
+  "description": "Sala de rejilla en perspectiva que un láser recorre como un escáner LiDAR.",
+  "tags": ["rejilla", "3d", "tecnológico", "oscuro"],
+  "params": [
+    {"key": "lines_color", "label": "Color de las líneas", "type": "color", "default": "#4d4757"},
+    {"key": "scan_color", "label": "Color del escaneo", "type": "color", "default": "#7dd3fc"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "cells", "label": "Celdas (suelo a techo)", "type": "int", "min": 2, "max": 40, "step": 1, "default": 8},
+    {"key": "line_thickness", "label": "Grosor de línea (px)", "type": "float", "min": 0.5, "max": 4.0, "step": 0.1, "default": 1.0},
+    {"key": "line_style", "label": "Estilo de línea", "type": "enum", "default": "solid",
+     "options": [{"value": "solid", "label": "Continua"}, {"value": "dashed", "label": "Discontinua"},
+                 {"value": "dotted", "label": "Punteada"}]},
+    {"key": "depth", "label": "Profundidad de la sala", "type": "float", "min": 0.5, "max": 12.0, "step": 0.1, "default": 3.0},
+    {"key": "depth_fade", "label": "Desvanecido con la distancia", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "view_sway", "label": "Balanceo de la vista", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "shading", "label": "Sombreado", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.7},
+    {"key": "reflection", "label": "Reflejo del suelo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.35},
+    {"key": "points", "label": "Puntos LiDAR", "type": "bool", "default": true},
+    {"key": "scan_direction", "label": "Dirección del escaneo", "type": "enum", "default": "forward",
+     "options": [{"value": "forward", "label": "Hacia el fondo"}, {"value": "backward", "label": "Hacia fuera"},
+                 {"value": "pingpong", "label": "Alterna"}]},
+    {"key": "scan_duration", "label": "Duración del escaneo (s)", "type": "float", "min": 0.3, "max": 20.0, "step": 0.1, "default": 2.4},
+    {"key": "scan_delay", "label": "Pausa entre escaneos (s)", "type": "float", "min": 0.0, "max": 30.0, "step": 0.1, "default": 1.6},
+    {"key": "scan_width", "label": "Grosor del láser", "type": "float", "min": 0.2, "max": 5.0, "step": 0.1, "default": 1.0},
+    {"key": "trail", "label": "Estela", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 1.5, "step": 0.05, "default": 0.6},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "Escena de un solo pase como el original; el bloom difuminado se aproxima reevaluando la iluminación con líneas y láser ensanchados, y la vista solo hace su balanceo en reposo. Sin pings al hacer clic, foco del cursor, webcam, giroscopio ni escaneo de intro; en modo claro un fondo oscuro se sustituye por papel claro."
+}

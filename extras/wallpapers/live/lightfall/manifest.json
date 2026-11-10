@@ -1,0 +1,173 @@
+{
+  "name": "Lluvia de luz",
+  "component": "Lightfall",
+  "description": "Estelas de luz que caen por un túnel con una suave claridad en lo alto.",
+  "tags": [
+    "luz",
+    "estelas",
+    "túnel",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "color_count",
+      "label": "Número de colores",
+      "type": "int",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "key": "color_1",
+      "label": "Color 1",
+      "type": "color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "color_2",
+      "label": "Color 2",
+      "type": "color",
+      "default": "#7cc4ff"
+    },
+    {
+      "key": "color_3",
+      "label": "Color 3",
+      "type": "color",
+      "default": "#ff9ffc"
+    },
+    {
+      "key": "color_4",
+      "label": "Color 4",
+      "type": "color",
+      "default": "#ffd27c"
+    },
+    {
+      "key": "top_color",
+      "label": "Color de la luz superior",
+      "type": "color",
+      "default": "#94a3b8"
+    },
+    {
+      "key": "streak_count",
+      "label": "Capas de estelas",
+      "type": "int",
+      "min": 1,
+      "max": 16,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "key": "streak_width",
+      "label": "Grosor de las estelas",
+      "type": "float",
+      "min": 0.1,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.8
+    },
+    {
+      "key": "streak_length",
+      "label": "Longitud de las colas",
+      "type": "float",
+      "min": 0.1,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "density",
+      "label": "Densidad",
+      "type": "float",
+      "min": 0.05,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.6
+    },
+    {
+      "key": "twinkle",
+      "label": "Parpadeo",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.3
+    },
+    {
+      "key": "glow",
+      "label": "Brillo",
+      "type": "float",
+      "min": 0.1,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "background_glow",
+      "label": "Luz superior",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "default": 0.1
+    },
+    {
+      "key": "head_glow",
+      "label": "Brillo de las puntas",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.6
+    },
+    {
+      "key": "depth",
+      "label": "Atenuación en profundidad",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "bloom",
+      "label": "Resplandor",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.35
+    },
+    {
+      "key": "zoom",
+      "label": "Zoom",
+      "type": "float",
+      "min": 0.5,
+      "max": 8.0,
+      "step": 0.1,
+      "default": 3.0
+    },
+    {
+      "key": "fade",
+      "label": "Desvanecer bordes",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "El bloom de 4 niveles se sustituye por un halo analítico alrededor de cada estela; hasta 4 colores en vez de 8. Sin lente ni luz del cursor, sin warp al mantener pulsado y sin intro."
+}

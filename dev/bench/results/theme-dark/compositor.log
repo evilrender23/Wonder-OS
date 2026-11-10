@@ -1,0 +1,31 @@
+[2m2026-11-09T17:33:37.960193Z[0m [32m INFO[0m [2mdriftwm::config[0m[2m:[0m Loaded config from dev/bench/results/theme-dark/config.toml
+MESA-EGL: warning: pci id for fd 9: 10de:2684, driver (null)
+pci id for fd 10: 10de:2684, driver (null)
+pci id for fd 12: 10de:2684, driver (null)
+MESA-EGL: warning: egl: failed to create dri2 screen
+pci id for fd 10: 10de:2684, driver (null)
+pci id for fd 12: 10de:2684, driver (null)
+MESA-EGL: warning: egl: failed to create dri2 screen
+[2m2026-11-09T17:33:38.005205Z[0m [32m INFO[0m [2mdriftwm::state::output[0m[2m:[0m output winit: auto layout position (0, 0)
+[2m2026-11-09T17:33:38.005315Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m Listening on WAYLAND_DISPLAY=wayland-2
+[2m2026-11-09T17:33:38.005344Z[0m [32m INFO[0m [2mdriftwm::ipc[0m[2m:[0m IPC socket started at /run/user/1000/driftwm/ipc-wayland-2.sock
+[2m2026-11-09T17:33:38.010040Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m Starting event loop — launch apps with: WAYLAND_DISPLAY=wayland-2 <app>
+[2m2026-11-09T17:33:38.010297Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:39.059570Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m New client connected
+[2m2026-11-09T17:33:39.059790Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:33:39.059857Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:33:39.059874Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:33:39.059893Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:33:39.059907Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:33:39.060703Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m New client connected
+[2m2026-11-09T17:33:39.128997Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m New client connected
+[2m2026-11-09T17:33:39.133810Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:33:39.234245Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:43.887724Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:44.708519Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:44.730133Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:45.525872Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:46.329972Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:47.139602Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:33:47.172517Z[0m [32m INFO[0m [2mdriftwm::signals[0m[2m:[0m received SIGTERM — stopping compositor
+[2m2026-11-09T17:33:47.172605Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface

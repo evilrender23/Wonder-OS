@@ -1,0 +1,48 @@
+# WonderUpdate configuration: ~/.config/wonderupdate/wonderupdate.conf
+# Create it with `wonderupdate --gen-config`. Uncomment a line to enable it;
+# the values shown are the defaults.
+
+# Don't colorize the output.
+#NoColor
+
+# Show package names only, without the version change.
+#NoVersion
+
+# Leave the AUR, Flatpak or the Wonderland desktop out of checks and updates.
+#NoAUR
+#NoFlatpak
+#NoWonderland
+
+# Don't send a desktop notification when a check finds something new.
+#NoNotification
+
+# Don't show the Arch News before updating.
+#NoNews
+
+# How many Arch News `wonderupdate --news` lists, and how long to wait for them.
+#NewsNum = 5
+#NewsTimeout = 10
+#NewsFeed = https://archlinux.org/feeds/news/
+
+# Seconds each source (repositories, AUR, Flatpak, Wonderland) gets to answer.
+#UpdateCheckTimeout = 30
+
+# The AUR helper (paru or yay) and the privilege command (sudo, sudo-rs, doas
+# or run0). By default the first one installed is used.
+#AURHelper = paru
+#PrivilegeElevationCommand = sudo
+
+# Versions of each package kept in the pacman cache when cleaning it:
+# of installed packages, and of packages that are no longer installed.
+#KeepOldPackages = 3
+#KeepUninstalledPackages = 0
+
+# The program pacdiff uses to merge pacnew files (default: vim -d).
+#DiffProg = vimdiff
+
+# The WonderlandWM checkout the desktop is updated from. By default the one it
+# was installed from, or ~/.local/src/wonderlandwm.
+#WonderlandSource = ~/.local/src/wonderlandwm
+
+# The terminal the "Update now" button opens (default: $TERMINAL, wonderterm, ...).
+#Terminal = wonderterm

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=WonderUpdate
+GenericName=System Updater
+GenericName[es]=Actualizador del sistema
+Comment=Update WonderlandOS: packages, AUR, Flatpak and the desktop
+Comment[es]=Actualiza WonderlandOS: paquetes, AUR, Flatpak y el escritorio
+Exec=wonderupdate --terminal
+Icon=wonderupdate
+Terminal=false
+Categories=System;PackageManager;
+Keywords=update;upgrade;pacman;aur;flatpak;actualizar;

@@ -1,0 +1,21 @@
+{
+  "name": "Seda",
+  "component": "Silk",
+  "description": "Tela de seda con pliegues que fluyen y brillo satinado.",
+  "tags": ["tela", "suave", "oscuro"],
+  "params": [
+    {"key": "color", "label": "Color", "type": "color", "default": "#7b7481"},
+    {"key": "sheen_color", "label": "Color del brillo", "type": "color", "default": "#ffffff"},
+    {"key": "scale", "label": "Tamaño de los pliegues", "type": "float", "min": 0.3, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "rotation", "label": "Rotación", "type": "float", "min": -3.1416, "max": 3.1416, "step": 0.05, "default": 0.0},
+    {"key": "noise", "label": "Grano", "type": "float", "min": 0.0, "max": 4.0, "step": 0.1, "default": 1.5},
+    {"key": "sheen", "label": "Brillo satinado", "type": "float", "min": 0.0, "max": 1.5, "step": 0.05, "default": 0.5},
+    {"key": "depth", "label": "Profundidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 1.5, "step": 0.05, "default": 0.3},
+    {"key": "ripple", "label": "Ondulación fina", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "wave", "label": "Vaivén", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "variation", "label": "Variación", "type": "float", "min": 0.0, "max": 100.0, "step": 1.0, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "Sin interacción con el ratón ni intro; el bloom es una aproximación de un solo paso."
+}

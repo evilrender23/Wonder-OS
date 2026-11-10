@@ -1,0 +1,30 @@
+{
+  "name": "Rejilla de puntos",
+  "component": "DotGrid",
+  "description": "Rejilla de puntos elástica que se ilumina y ondula al paso de un cursor fantasma y de ondas de choque.",
+  "tags": ["puntos", "rejilla", "minimalista", "oscuro"],
+  "params": [
+    {"key": "base_color", "label": "Color en reposo", "type": "color", "default": "#3a3446"},
+    {"key": "active_color", "label": "Color activo", "type": "color", "default": "#ffffff"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "shape", "label": "Forma", "type": "enum", "default": "circle",
+     "options": [{"value": "circle", "label": "Círculo"}, {"value": "square", "label": "Cuadrado"}]},
+    {"key": "dot_size", "label": "Tamaño del punto (px)", "type": "float", "min": 1.0, "max": 20.0, "step": 0.5, "default": 5.0},
+    {"key": "gap", "label": "Separación (px)", "type": "float", "min": 2.0, "max": 60.0, "step": 1.0, "default": 18.0},
+    {"key": "ghost", "label": "Cursor fantasma", "type": "bool", "default": true,
+     "description": "Un cursor invisible recorre la rejilla empujando e iluminando los puntos."},
+    {"key": "proximity", "label": "Radio del cursor (px)", "type": "float", "min": 20.0, "max": 400.0, "step": 5.0, "default": 140.0},
+    {"key": "strength", "label": "Fuerza del empuje", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "shock_interval", "label": "Ondas de choque cada (s)", "type": "float", "min": 0.0, "max": 15.0, "step": 0.5, "default": 3.5,
+     "description": "0 desactiva las ondas automáticas."},
+    {"key": "shock_radius", "label": "Alcance de la onda (px)", "type": "float", "min": 50.0, "max": 1200.0, "step": 10.0, "default": 320.0},
+    {"key": "shock_strength", "label": "Fuerza de la onda", "type": "float", "min": 0.0, "max": 15.0, "step": 0.5, "default": 5.0},
+    {"key": "bounce", "label": "Rebote", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "return_duration", "label": "Tiempo de vuelta (s)", "type": "float", "min": 0.2, "max": 3.0, "step": 0.05, "default": 0.8},
+    {"key": "swell", "label": "Crecimiento al iluminarse", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.8},
+    {"key": "stretch", "label": "Estiramiento", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.5},
+    {"key": "glow", "label": "Halo", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.5},
+    {"key": "fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0}
+  ],
+  "notes": "Sin puntero ni clics, un cursor fantasma y ondas de choque automáticas mueven la rejilla; los muelles se evalúan de forma analítica por punto, sin acoplamiento entre vecinos (se omite «tension»), y no hay intro."
+}

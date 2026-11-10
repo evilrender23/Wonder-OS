@@ -1,0 +1,42 @@
+{
+  "name": "Degradado ASCII",
+  "component": "GradientASCII",
+  "description": "Luz en degradado que se deshace en caracteres ASCII parpadeantes sobre la oscuridad.",
+  "tags": ["ascii", "texto", "degradado", "retro", "oscuro"],
+  "params": [
+    {"key": "color_1", "label": "Color 1 (borde de la sombra)", "type": "color", "default": "#1e3fd8"},
+    {"key": "color_2", "label": "Color 2", "type": "color", "default": "#f6f8ff"},
+    {"key": "color_3", "label": "Color 3", "type": "color", "default": "#a5d8ff"},
+    {"key": "color_4", "label": "Color 4 (lo más lejano)", "type": "color", "default": "#38bdf8"},
+    {"key": "colors", "label": "Colores usados", "type": "int", "min": 2, "max": 4, "step": 1, "default": 4},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "shape", "label": "Forma de la luz", "type": "enum", "default": "horizon",
+     "options": [
+       {"value": "horizon", "label": "Horizonte"},
+       {"value": "pinch", "label": "Banda estrecha"},
+       {"value": "rise", "label": "Amanecer desde abajo"},
+       {"value": "eclipse", "label": "Eclipse"}
+     ]},
+    {"key": "characters", "label": "Caracteres", "type": "enum", "default": "default",
+     "options": [
+       {"value": "default", "label": "« =+xX0S8#@»"},
+       {"value": "classic", "label": "« .:-=+*#%@»"},
+       {"value": "binary", "label": "« 01» (binario)"}
+     ]},
+    {"key": "cell_size", "label": "Tamaño de carácter", "type": "float", "min": 8.0, "max": 64.0, "step": 1.0, "default": 18.0},
+    {"key": "density", "label": "Densidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.8},
+    {"key": "glyph_opacity", "label": "Opacidad de los caracteres", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.85},
+    {"key": "gradient_opacity", "label": "Opacidad del degradado", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.9},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 1.5, "step": 0.05, "default": 0.2},
+    {"key": "depth_of_field", "label": "Desenfoque", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "flicker", "label": "Parpadeo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.2},
+    {"key": "softness", "label": "Suavidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "scale", "label": "Escala", "type": "float", "min": 0.4, "max": 2.5, "step": 0.05, "default": 1.0},
+    {"key": "flow", "label": "Ondulación", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.5},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.4, "step": 0.01, "default": 0.08},
+    {"key": "variation", "label": "Variación", "type": "float", "min": 0.0, "max": 100.0, "step": 1.0, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false,
+     "description": "Degradado como aguada y caracteres en tinta; si el fondo elegido es oscuro se usa papel claro."}
+  ],
+  "notes": "Sin atlas de fuente: los caracteres se dibujan con trazos analíticos (tres juegos de caracteres en lugar de texto libre). El halo desenfocado es una mezcla bilineal de la tinta media de las celdas vecinas. Sin revuelto del cursor, ondas de clic ni intro de descifrado."
+}

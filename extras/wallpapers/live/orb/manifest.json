@@ -1,0 +1,26 @@
+{
+  "name": "Orbe",
+  "component": "Orb",
+  "description": "Anillo luminoso que respira, con colores que giran y una luz que lo orbita.",
+  "tags": ["orbe", "brillo", "oscuro", "centrado"],
+  "params": [
+    {"key": "color_1", "label": "Color 1 del anillo", "type": "color", "default": "#9c43fe"},
+    {"key": "color_2", "label": "Color 2 del anillo", "type": "color", "default": "#4cc2e9"},
+    {"key": "color_3", "label": "Color profundo del resplandor", "type": "color", "default": "#101499"},
+    {"key": "hue", "label": "Desplazar tono", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": 0.0},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#000000",
+     "description": "Con un fondo claro el orbe pasa a un estilo suave y relleno."},
+    {"key": "size", "label": "Tamaño", "type": "float", "min": 0.2, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.1, "max": 5.0, "step": 0.05, "default": 1.0},
+    {"key": "bleed", "label": "Sangrado hacia dentro", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "wobble", "label": "Respiración", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "highlight", "label": "Luz orbital", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "trail", "label": "Estela de la luz", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "tilt_x", "label": "Inclinación vertical", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0},
+    {"key": "tilt_y", "label": "Inclinación lateral", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0},
+    {"key": "force_hover", "label": "Siempre activo", "type": "bool", "default": false,
+     "description": "Mantiene el estado de «hover»: el orbe gira despacio y se aviva."},
+    {"key": "hover_intensity", "label": "Intensidad activa", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0}
+  ],
+  "notes": "Sin cursor: no hay alcance hacia el puntero, ni pulso al hacer clic, ni intro. «Siempre activo» equivale a forceHoverState (giro lento y brillo extra)."
+}

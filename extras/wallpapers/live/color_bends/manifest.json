@@ -1,0 +1,140 @@
+{
+  "name": "Curvas de color",
+  "component": "ColorBends",
+  "description": "Bandas de color luminosas que se curvan y ondulan como seda líquida.",
+  "tags": [
+    "gradiente",
+    "ondas",
+    "colorido",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "colors",
+      "label": "Número de colores (0 = espectro RGB)",
+      "type": "int",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "key": "color_1",
+      "label": "Color 1",
+      "type": "color",
+      "default": "#ff5c7a"
+    },
+    {
+      "key": "color_2",
+      "label": "Color 2",
+      "type": "color",
+      "default": "#8a5cff"
+    },
+    {
+      "key": "color_3",
+      "label": "Color 3",
+      "type": "color",
+      "default": "#00ffd1"
+    },
+    {
+      "key": "color_4",
+      "label": "Color 4",
+      "type": "color",
+      "default": "#ffd25c"
+    },
+    {
+      "key": "rotation",
+      "label": "Rotación (grados)",
+      "type": "float",
+      "min": 0.0,
+      "max": 360.0,
+      "step": 1.0,
+      "default": 90.0
+    },
+    {
+      "key": "auto_rotate",
+      "label": "Giro automático (grados/s)",
+      "type": "float",
+      "min": -30.0,
+      "max": 30.0,
+      "step": 0.5,
+      "default": 0.0
+    },
+    {
+      "key": "scale",
+      "label": "Escala",
+      "type": "float",
+      "min": 0.3,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "frequency",
+      "label": "Frecuencia",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "warp_strength",
+      "label": "Deformación",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.25,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "iterations",
+      "label": "Pasadas de deformación",
+      "type": "int",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "key": "intensity",
+      "label": "Intensidad",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.5
+    },
+    {
+      "key": "band_width",
+      "label": "Anchura de banda",
+      "type": "float",
+      "min": 1.0,
+      "max": 12.0,
+      "step": 0.1,
+      "default": 6.0
+    },
+    {
+      "key": "noise",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.0,
+      "max": 0.5,
+      "step": 0.01,
+      "default": 0.15
+    },
+    {
+      "key": "transparent",
+      "label": "Fondo transparente",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "background",
+      "label": "Color de fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "Sin interacción con el ratón: el puntero queda fijo en el centro (influencia 1, sin paralaje). Es el shader original en un solo paso; la paleta admite hasta 4 colores en vez de 8 y la deformación y las pasadas se limitan porque por encima el original queda casi negro."
+}

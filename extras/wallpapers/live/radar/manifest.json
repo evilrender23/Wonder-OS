@@ -1,0 +1,33 @@
+{
+  "name": "Radar",
+  "component": "Radar",
+  "description": "Pantalla de radar con haz giratorio, estela, ecos de contactos y ruido de fondo.",
+  "tags": ["radar", "técnico", "verde", "oscuro"],
+  "params": [
+    {"key": "color", "label": "Color", "type": "color", "default": "#3ef09a"},
+    {"key": "mode", "label": "Modo", "type": "enum", "default": "sweep", "options": [
+      {"value": "sweep", "label": "Haz giratorio"},
+      {"value": "pulse", "label": "Pulsos de sonar"}
+    ]},
+    {"key": "counterclockwise", "label": "Girar en sentido antihorario", "type": "bool", "default": false},
+    {"key": "trail", "label": "Estela", "type": "float", "min": 0.02, "max": 1.0, "step": 0.01, "default": 0.35},
+    {"key": "scale", "label": "Tamaño", "type": "float", "min": 0.2, "max": 2.0, "step": 0.05, "default": 0.9},
+    {"key": "ring_count", "label": "Anillos de distancia", "type": "int", "min": 1, "max": 24, "step": 1, "default": 6},
+    {"key": "spoke_count", "label": "Líneas de rumbo", "type": "int", "min": 0, "max": 72, "step": 1, "default": 12},
+    {"key": "ticks", "label": "Escala de rumbo", "type": "bool", "default": true},
+    {"key": "targets", "label": "Contactos", "type": "int", "min": 0, "max": 16, "step": 1, "default": 6},
+    {"key": "clutter", "label": "Ecos de ruido", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.35},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.2, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "grid_opacity", "label": "Opacidad de la cuadrícula", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "line_width", "label": "Grosor de línea (px)", "type": "float", "min": 0.25, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "tilt", "label": "Inclinación (grados)", "type": "float", "min": 0.0, "max": 80.0, "step": 1.0, "default": 0.0},
+    {"key": "center_x", "label": "Centro horizontal", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "center_y", "label": "Centro vertical (0 arriba)", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.3, "step": 0.01, "default": 0.03},
+    {"key": "fade", "label": "Difuminar bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "Los contactos siguen trayectorias rectas pseudoaleatorias calculadas en el shader en lugar de la simulación en CPU, y el bloom de varias pasadas se aproxima con halos gaussianos analíticos. Sin interacción con el ratón ni intro; el sentido de giro pasa a ser un ajuste."
+}

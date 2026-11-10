@@ -1,0 +1,23 @@
+[2m2026-11-09T16:51:19.309745Z[0m [32m INFO[0m [2mdriftwm::config[0m[2m:[0m Loaded config from /mnt/datos2/Hermes/apps/escritorio/driftwm-next/dev/bench/bench.toml
+[2m2026-11-09T16:51:19.365571Z[0m [33m WARN[0m [2msmithay::backend::egl::error[0m[2m:[0m Erroneous EGL call didn't set EGLError
+[2m2026-11-09T16:51:19.434792Z[0m [32m INFO[0m [2mdriftwm::state::output[0m[2m:[0m output winit: auto layout position (0, 0)
+[2m2026-11-09T16:51:19.434898Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m Listening on WAYLAND_DISPLAY=wayland-2
+[2m2026-11-09T16:51:19.434921Z[0m [32m INFO[0m [2mdriftwm::ipc[0m[2m:[0m IPC socket started at /run/user/1000/driftwm/ipc-wayland-2.sock
+[2m2026-11-09T16:51:19.439950Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m Starting event loop — launch apps with: WAYLAND_DISPLAY=wayland-2 <app>
+[2m2026-11-09T16:51:19.440344Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: EGL_BAD_SURFACE error: In internal function: Additional INFO may be available
+
+[2m2026-11-09T16:51:20.506643Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m New client connected
+[2m2026-11-09T16:51:20.506881Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.506939Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.506951Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.506964Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.506977Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.506990Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.507012Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.507027Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.507039Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:20.507053Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T16:51:22.816749Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: EGL_BAD_SURFACE error: In internal function: Additional INFO may be available
+
+[2m2026-11-09T16:51:27.753297Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: EGL_BAD_SURFACE error: In internal function: Additional INFO may be available
+

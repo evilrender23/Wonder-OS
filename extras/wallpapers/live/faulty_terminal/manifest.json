@@ -1,0 +1,200 @@
+{
+  "name": "Terminal averiado",
+  "component": "FaultyTerminal",
+  "description": "Pantalla de fósforo de un terminal viejo: bloques de luz que parpadean, se desplazan y se tuercen.",
+  "tags": [
+    "retro",
+    "terminal",
+    "crt",
+    "glitch",
+    "oscuro"
+  ],
+  "extensions": [
+    "GL_OES_standard_derivatives"
+  ],
+  "params": [
+    {
+      "key": "tint",
+      "label": "Color del fósforo",
+      "type": "color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    },
+    {
+      "key": "glyphs",
+      "label": "Glifos",
+      "type": "enum",
+      "options": [
+        {
+          "value": "blocks",
+          "label": "Bloques"
+        },
+        {
+          "value": "dots",
+          "label": "Puntos LED"
+        },
+        {
+          "value": "characters",
+          "label": "Caracteres"
+        }
+      ],
+      "default": "blocks"
+    },
+    {
+      "key": "scale",
+      "label": "Escala",
+      "type": "float",
+      "min": 0.3,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "grid_x",
+      "label": "Densidad horizontal",
+      "type": "float",
+      "min": 0.5,
+      "max": 5.0,
+      "step": 0.1,
+      "default": 2.0
+    },
+    {
+      "key": "grid_y",
+      "label": "Densidad vertical",
+      "type": "float",
+      "min": 0.5,
+      "max": 5.0,
+      "step": 0.1,
+      "default": 1.0
+    },
+    {
+      "key": "digit_size",
+      "label": "Separación de los glifos",
+      "type": "float",
+      "min": 1.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.5
+    },
+    {
+      "key": "brightness",
+      "label": "Brillo",
+      "type": "float",
+      "min": 0.2,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "glow",
+      "label": "Resplandor del fósforo",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "persistence",
+      "label": "Persistencia",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "center_light",
+      "label": "Luz central",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.2
+    },
+    {
+      "key": "scanline",
+      "label": "Halo y barrido",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.3
+    },
+    {
+      "key": "glitch",
+      "label": "Desplazamiento de las bandas",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "flicker",
+      "label": "Frecuencia de los fallos",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "noise_amp",
+      "label": "Intensidad del patrón",
+      "type": "float",
+      "min": 0.3,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "chromatic",
+      "label": "Aberración cromática (px)",
+      "type": "float",
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.5,
+      "default": 0.0
+    },
+    {
+      "key": "curvature",
+      "label": "Curvatura del cristal",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.2
+    },
+    {
+      "key": "vignette",
+      "label": "Viñeta",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.25
+    },
+    {
+      "key": "variation",
+      "label": "Variación",
+      "type": "float",
+      "min": 0.0,
+      "max": 100.0,
+      "step": 1.0,
+      "default": 0.0
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    }
+  ],
+  "notes": "El paso de celdas con persistencia de fósforo se calcula en línea para las 9 celdas vecinas; la estela al apagarse se aproxima con un umbral suave. Se conserva la luz que el cursor deja en reposo en el centro («Luz central»); sin cursor, clics ni intro, y el resplandor sigue al desplazamiento del fallo. En modo claro la tinta se imprime sobre un papel claro derivado del fondo."
+}

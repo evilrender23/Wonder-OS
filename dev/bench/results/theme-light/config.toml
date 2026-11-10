@@ -1,0 +1,63 @@
+
+autostart = []
+# Hermes Light — WonderlandWM theme.
+# Colors come from Hermes Agent Desktop's default "nous" theme, light mode
+# (app.asar → dist/assets/storage-*.js theme table and main-*.css :root
+# tokens, composited to opaque values over the app chrome). Merge these
+# sections into your config.toml; install.sh copies the shaders into place.
+
+[decorations]
+bg_color = "#f3f7ff"            # --ui-bg-sidebar: Hermes header/sidebar surface
+fg_color = "#242528"            # --ui-text-primary over chrome
+corner_radius = 6               # Hermes uses small, crisp radii (--radius-scalar .2)
+shadow = true
+title_bar_height = 34
+font = "Noto Sans"              # what system-ui resolves to for the app on this desktop
+font_size = 10
+font_weight = "medium"
+title_align = "left"            # Hermes headers are left-aligned
+border_width = 1
+border_color = "#c3d1f0"        # --ui-stroke-secondary: blue-tinted 1px hairline
+border_color_focused = "#0053fd" # Nous blue marks the focused window
+
+[background]
+type = "shader"
+path = "/mnt/datos2/Hermes/apps/escritorio/wonderlandwm/extras/themes/hermes/hermes-light.glsl"
+# Dots keep their screen size and fade by level as you zoom out. Measured on a
+# Radeon 610M at 1280x800: about +0.8-1.2 ms of GPU per frame while the camera
+# moves, compared with the built-in dot grid.
+# Static alternative: same GPU cost as the built-in grid once baked, but
+# +100-300 MB of VRAM for the chunk cache, and one bake stalled a frame 1.5 s.
+# path = "/mnt/datos2/Hermes/apps/escritorio/wonderlandwm/extras/themes/hermes/hermes-light-static.glsl"
+# cache_shader = true
+
+[output.outline]
+color = "#0053fd"
+thickness = 1
+opacity = 0.45
+
+# Terminals and other apps that draw no title bar of their own get the Hermes
+# header instead of a bare frame.
+[[window_rules]]
+app_id = "Alacritty"
+decoration = "server"
+
+[[window_rules]]
+app_id = "foot"
+decoration = "server"
+
+[[window_rules]]
+app_id = "kitty"
+decoration = "server"
+
+[session]
+suspend_on_close = false
+restore_windows = false
+restore_camera = false
+restore_bookmarks = false
+[xwayland]
+enabled = false
+
+[[window_rules]]
+app_id = "drift-bench"
+decoration = "server"

@@ -1,0 +1,81 @@
+#!/usr/bin/env -S python3 -I
+"""What the login screen offers, as JSON: the people who can log in and the
+Wayland sessions that are installed.
+
+  {"users":    [{"name", "fullName", "avatar"}],
+   "sessions": [{"id", "name", "exec", "desktopNames"}]}
+
+Users are the regular accounts (UID_MIN..UID_MAX of /etc/login.defs with a
+login shell). The avatar is the AccountsService icon: the greeter runs as its
+own user and cannot read anybody's home.
+"""
+
+import configparser
+import json
+import os
+import pwd
+import sys
+from pathlib import Path
+
+ROOT = Path(os.environ.get("WONDERLAND_GREETER_ROOT", "/"))
+SESSION_DIRS = ["usr/local/share/wayland-sessions", "usr/share/wayland-sessions"]
+NOLOGIN = ("nologin", "false")
+
+
+def uid_range():
+    lo, hi = 1000, 60000
+    try:
+        for line in (ROOT / "etc/login.defs").read_text().splitlines():
+            parts = line.split()
+            if len(parts) == 2 and parts[1].isdigit():
+                if parts[0] == "UID_MIN":
+                    lo = int(parts[1])
+                elif parts[0] == "UID_MAX":
+                    hi = int(parts[1])
+    except OSError:
+        pass
+    return lo, hi
+
+
+def users():
+    lo, hi = uid_range()
+    out = []
+    for p in sorted(pwd.getpwall(), key=lambda p: p.pw_uid):
+        if not lo <= p.pw_uid <= hi or p.pw_shell.rsplit("/", 1)[-1] in NOLOGIN:
+            continue
+        icon = ROOT / "var/lib/AccountsService/icons" / p.pw_name
+        out.append({
+            "name": p.pw_name,
+            "fullName": p.pw_gecos.split(",")[0],
+            "avatar": str(icon) if os.access(icon, os.R_OK) else "",
+        })
+    return out
+
+
+def sessions():
+    out, seen = [], set()
+    for d in SESSION_DIRS:
+        for f in sorted((ROOT / d).glob("*.desktop")):
+            if f.stem in seen:
+                continue
+            cp = configparser.RawConfigParser(strict=False)
+            cp.optionxform = str
+            try:
+                cp.read(f, encoding="utf-8")
+                e = cp["Desktop Entry"]
+            except (configparser.Error, KeyError, UnicodeDecodeError):
+                continue
+            if e.get("Hidden") == "true" or e.get("NoDisplay") == "true" or not e.get("Exec"):
+                continue
+            seen.add(f.stem)
+            out.append({
+                "id": f.stem,
+                "name": e.get("Name", f.stem),
+                "exec": e["Exec"],
+                "desktopNames": e.get("DesktopNames", "").strip(";").replace(";", ":"),
+            })
+    return out
+
+
+if __name__ == "__main__":
+    json.dump({"users": users(), "sessions": sessions()}, sys.stdout, ensure_ascii=False)

@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""Try the login screen in a window, against a fake greetd.
+
+    try-greeter OUT [--driftwm BIN] [--vkbd BIN] [--theme dark|light] [--otp CODE]
+                    [--users N] [--step "keys:w o n d e r enter" | "sleep:1" | "shot:name"] ...
+                    [--hold SECONDS]
+
+Stages the greeter the way install.sh lays it out under OUT/root, starts
+test/fake-greetd (password «wonderland») and the real launcher
+(wonderland-greeter) nested in the running Wayland session. Each `shot:` step
+writes OUT/<name>.png with grim; `keys:` types through drift-vkbd
+(dev/bench/client). OUT/greetd.jsonl is what the greeter asked greetd for.
+Nothing of the real login is touched and no session is started.
+"""
+
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+GREETER = HERE.parent
+REPO = GREETER.parent.parent
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("out", type=Path)
+    ap.add_argument("--driftwm", default=shutil.which("driftwm") or "driftwm")
+    ap.add_argument("--vkbd", default=str(REPO / "dev/bench/client/target/release/drift-vkbd"))
+    ap.add_argument("--theme", choices=["dark", "light"], default="dark")
+    ap.add_argument("--otp")
+    ap.add_argument("--users", type=int, help="pretend N accounts exist (0 = type the name)")
+    ap.add_argument("--step", action="append", default=[])
+    ap.add_argument("--hold", type=float, default=0)
+    args = ap.parse_args()
+
+    out = args.out.resolve()
+    if out.exists():
+        shutil.rmtree(out)
+    root = out / "root"
+    prefix = root / "usr/local"
+    etc, var = root / "etc/wonderland-greeter", root / "var/lib/wonderland-greeter"
+    share = prefix / "share/wonderland-greeter"
+    for d in (prefix / "bin", etc, var, share):
+        d.mkdir(parents=True)
+
+    settings = {"light_mode": args.theme == "light"}
+    subprocess.run([str(GREETER / "scripts/greeter-setup"), str(etc), "--prefix", str(prefix),
+                    "--settings", json.dumps(settings), "--config", "/nonexistent"],
+                   check=True, stderr=subprocess.DEVNULL)
+    shutil.move(etc / "wallpaper.glsl", share / "wallpaper.glsl")
+    shutil.copytree(GREETER, share / "ui", ignore=shutil.ignore_patterns("test", "*.in"))
+    for name in ("wonderland-greeter", "wonderland-greeter-ui"):
+        shutil.copy(GREETER / "scripts" / name, prefix / "bin" / name)
+    os.symlink(os.path.realpath(args.driftwm), prefix / "bin/driftwm")
+
+    info = None
+    if args.users is not None:
+        real = json.loads(subprocess.run([str(GREETER / "scripts/greeter-info")],
+                                         capture_output=True, text=True, check=True).stdout)
+        names = [("alicia", "Alicia Liddell"), ("sombrerero", "El Sombrerero"), ("reina", "")]
+        real["users"] = [{"name": n, "fullName": f, "avatar": ""} for n, f in names[:args.users]]
+        info = out / "info.sh"
+        info.write_text("#!/bin/sh\ncat <<'EOF'\n" + json.dumps(real) + "\nEOF\n")
+        info.chmod(0o755)
+
+    sock = out / "greetd.sock"
+    fake = [str(HERE / "fake-greetd"), str(sock), "--log", str(out / "greetd.jsonl")]
+    if args.otp:
+        fake += ["--otp", args.otp]
+    procs = [subprocess.Popen(fake)]
+    env = dict(os.environ,
+               PATH=f"{prefix / 'bin'}:{os.environ['PATH']}",
+               GREETD_SOCK=str(sock),
+               WONDERLAND_GREETER_ETC=str(etc), WONDERLAND_GREETER_VAR=str(var),
+               WONDERLAND_GREETER_SHARE=str(share),
+               WONDERLAND_GREETER_CONFIG=str(etc / "greeter.json"),
+               RUST_LOG="warn,driftwm=info")
+    if info:
+        env["WONDERLAND_GREETER_INFO"] = str(info)
+    comp = subprocess.Popen([str(prefix / "bin/wonderland-greeter"), "--backend", "winit"], env=env)
+    procs.append(comp)
+    log = var / "greeter.log"
+    vkbd = None
+    try:
+        display = None
+        for _ in range(100):
+            time.sleep(0.1)
+            m = log.exists() and re.search(r"Listening on WAYLAND_DISPLAY=(\S+)", log.read_text())
+            if m:
+                display = m.group(1)
+                break
+        if not display:
+            sys.exit(f"try-greeter: the compositor did not start, see {log}")
+        cenv = dict(env, WAYLAND_DISPLAY=display)
+        time.sleep(3.0)
+        for step in args.step:
+            kind, _, rest = step.partition(":")
+            if kind == "sleep":
+                time.sleep(float(rest))
+            elif kind == "shot":
+                r = subprocess.run(["grim", str(out / f"{rest}.png")], env=cenv,
+                                   capture_output=True, text=True)
+                print(f"shot {rest}:", r.stderr.strip() or "ok")
+            elif kind == "keys":
+                if vkbd is None:
+                    vkbd = subprocess.Popen([args.vkbd], env=cenv, stdin=subprocess.PIPE, text=True)
+                    procs.append(vkbd)
+                    time.sleep(0.5)
+                for key in rest.split():
+                    vkbd.stdin.write(key + "\n")
+                    vkbd.stdin.flush()
+                    time.sleep(0.06)
+                time.sleep(0.5)
+            else:
+                sys.exit(f"try-greeter: unknown step {step!r}")
+        if args.hold:
+            time.sleep(args.hold)
+        print("compositor:", "running" if comp.poll() is None else f"exited {comp.returncode}")
+    finally:
+        for p in reversed(procs):
+            if p.poll() is None:
+                p.terminate()
+        for p in procs:
+            try:
+                p.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                p.kill()
+
+
+if __name__ == "__main__":
+    main()

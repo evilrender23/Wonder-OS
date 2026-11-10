@@ -1,0 +1,19 @@
+[2m2026-11-09T17:21:56.710056Z[0m [32m INFO[0m [2mdriftwm::config[0m[2m:[0m Loaded config from dev/bench/results/bench-hermes.toml
+MESA-EGL: warning: pci id for fd 108: 10de:2684, driver (null)
+[2m2026-11-09T17:21:56.744645Z[0m [32m INFO[0m [2mdriftwm::state::output[0m[2m:[0m output winit: auto layout position (0, 0)
+[2m2026-11-09T17:21:56.744769Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m Listening on WAYLAND_DISPLAY=wayland-2
+[2m2026-11-09T17:21:56.744805Z[0m [32m INFO[0m [2mdriftwm::ipc[0m[2m:[0m IPC socket started at /run/user/1000/driftwm/ipc-wayland-2.sock
+[2m2026-11-09T17:21:56.755007Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m Starting event loop — launch apps with: WAYLAND_DISPLAY=wayland-2 <app>
+[2m2026-11-09T17:21:56.756988Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface
+[2m2026-11-09T17:21:57.804628Z[0m [32m INFO[0m [2mdriftwm[0m[2m:[0m New client connected
+[2m2026-11-09T17:21:57.804966Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805035Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805050Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805064Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805076Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805093Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805105Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805115Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805127Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:21:57.805146Z[0m [32m INFO[0m [2mdriftwm::handlers::xdg_shell[0m[2m:[0m New toplevel surface
+[2m2026-11-09T17:22:00.121109Z[0m [31mERROR[0m [2msmithay::backend::egl::ffi[0m[2m:[0m [EGL] 0x300d (BAD_SURFACE) eglQuerySurface: eglQuerySurface

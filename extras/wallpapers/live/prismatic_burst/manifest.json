@@ -1,0 +1,213 @@
+{
+  "name": "Estallido prismático",
+  "component": "PrismaticBurst",
+  "description": "Haz de rayos de luz prismática que gira en 3D desde un núcleo oscuro.",
+  "tags": [
+    "rayos",
+    "prisma",
+    "espectro",
+    "3d",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "color_count",
+      "label": "Número de colores (0 = espectro)",
+      "type": "int",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "key": "color_1",
+      "label": "Color 1",
+      "type": "color",
+      "default": "#a855f7"
+    },
+    {
+      "key": "color_2",
+      "label": "Color 2",
+      "type": "color",
+      "default": "#7c3aed"
+    },
+    {
+      "key": "color_3",
+      "label": "Color 3",
+      "type": "color",
+      "default": "#6366f1"
+    },
+    {
+      "key": "color_4",
+      "label": "Color 4",
+      "type": "color",
+      "default": "#ec4899"
+    },
+    {
+      "key": "intensity",
+      "label": "Intensidad",
+      "type": "float",
+      "min": 0.2,
+      "max": 6.0,
+      "step": 0.1,
+      "default": 2.0
+    },
+    {
+      "key": "animation",
+      "label": "Animación",
+      "type": "enum",
+      "options": [
+        {
+          "value": "rotate",
+          "label": "Rotación plana"
+        },
+        {
+          "value": "rotate3d",
+          "label": "Rotación 3D"
+        }
+      ],
+      "default": "rotate3d"
+    },
+    {
+      "key": "zoom",
+      "label": "Zoom",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "ray_width",
+      "label": "Grosor de los rayos",
+      "type": "float",
+      "min": 0.2,
+      "max": 2.5,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "ray_count",
+      "label": "Número de radios (0 = orgánico)",
+      "type": "int",
+      "min": 0,
+      "max": 32,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "key": "distort",
+      "label": "Distorsión",
+      "type": "float",
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "twist",
+      "label": "Espiral",
+      "type": "float",
+      "min": -10.0,
+      "max": 10.0,
+      "step": 0.1,
+      "default": 0.0
+    },
+    {
+      "key": "flow",
+      "label": "Flujo de color",
+      "type": "float",
+      "min": -3.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "center_fade",
+      "label": "Tamaño del núcleo oscuro",
+      "type": "float",
+      "min": 0.5,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "glow",
+      "label": "Resplandor",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "grain",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.3,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.8
+    },
+    {
+      "key": "offset_x",
+      "label": "Desplazamiento horizontal (px)",
+      "type": "float",
+      "min": -1000.0,
+      "max": 1000.0,
+      "step": 1.0,
+      "default": 0.0
+    },
+    {
+      "key": "offset_y",
+      "label": "Desplazamiento vertical (px)",
+      "type": "float",
+      "min": -1000.0,
+      "max": 1000.0,
+      "step": 1.0,
+      "default": 0.0
+    },
+    {
+      "key": "fade",
+      "label": "Desvanecer bordes",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "quality",
+      "label": "Calidad",
+      "type": "enum",
+      "options": [
+        {
+          "value": "low",
+          "label": "Baja"
+        },
+        {
+          "value": "medium",
+          "label": "Media"
+        },
+        {
+          "value": "high",
+          "label": "Alta"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "El bloom de 4 niveles se aproxima con una copia suavizada del patrón de rayos acumulada en el mismo ray-march; la calidad elige el número de pasos de la marcha (26 por defecto; «Alta» = los 44 del original, más pesada en GPUs integradas) en vez de la resolución. Hasta 4 colores (0 = espectro); sin inclinación ni pulsos del cursor, sin animación «hover» ni intro."
+}

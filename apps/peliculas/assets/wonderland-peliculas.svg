@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff9a62"/>
+      <stop offset="1" stop-color="#e0432b"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ffe9df"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="108" height="108" rx="26" fill="url(#tile)"/>
+  <rect x="26" y="36" width="76" height="56" rx="11" fill="url(#screen)"/>
+  <g fill="#e0432b" opacity="0.55">
+    <rect x="31" y="42" width="6" height="6" rx="1.500"/>
+    <rect x="31" y="54" width="6" height="6" rx="1.500"/>
+    <rect x="31" y="67" width="6" height="6" rx="1.500"/>
+    <rect x="31" y="80" width="6" height="6" rx="1.500"/>
+    <rect x="91" y="42" width="6" height="6" rx="1.500"/>
+    <rect x="91" y="54" width="6" height="6" rx="1.500"/>
+    <rect x="91" y="67" width="6" height="6" rx="1.500"/>
+    <rect x="91" y="80" width="6" height="6" rx="1.500"/>
+  </g>
+  <path fill="#e0432b" d="M56 51.500a3 3 0 0 1 4.500-2.600l19 11a3 3 0 0 1 0 5.200l-19 11a3 3 0 0 1-4.500-2.600z"/>
+</svg>

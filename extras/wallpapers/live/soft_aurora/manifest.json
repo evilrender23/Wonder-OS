@@ -1,0 +1,25 @@
+{
+  "name": "Aurora suave",
+  "component": "SoftAurora",
+  "description": "Una banda de aurora boreal que ondula despacio con reflejos de arcoíris.",
+  "tags": ["aurora", "suave", "oscuro", "colorido"],
+  "params": [
+    {"key": "color1", "label": "Color de la primera capa", "type": "color", "default": "#f7f7f7"},
+    {"key": "color2", "label": "Color de la segunda capa", "type": "color", "default": "#e100ff"},
+    {"key": "spectrum", "label": "Arcoíris", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 1.0},
+    {"key": "color_speed", "label": "Velocidad del color", "type": "float", "min": 0.0, "max": 4.0, "step": 0.1, "default": 1.0},
+    {"key": "scale", "label": "Escala del ruido", "type": "float", "min": 0.2, "max": 4.0, "step": 0.05, "default": 1.5},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.3, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "noise_frequency", "label": "Frecuencia de la ondulación", "type": "float", "min": 0.2, "max": 8.0, "step": 0.1, "default": 2.5},
+    {"key": "noise_amplitude", "label": "Amplitud de la ondulación", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "band_height", "label": "Altura de la banda", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "band_spread", "label": "Intensidad de la banda", "type": "float", "min": 0.3, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "tilt", "label": "Inclinación (°)", "type": "float", "min": -90.0, "max": 90.0, "step": 1.0, "default": 0.0},
+    {"key": "octave_decay", "label": "Ondulación fina", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.1},
+    {"key": "layer_offset", "label": "Separación de capas", "type": "float", "min": 0.0, "max": 10.0, "step": 0.1, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_background", "label": "Fondo en modo claro", "type": "color", "default": "#f6f6f8"}
+  ],
+  "notes": "Sin interacción: se quitan el desplazamiento hacia el cursor, los pulsos al hacer clic y la intro. La salida transparente se compone sobre el color de fondo (uno distinto para el modo claro)."
+}

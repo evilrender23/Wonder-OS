@@ -1,0 +1,192 @@
+# driftwm — example rice
+#
+# An opinionated starting point: a Quickshell top bar and the shell around
+# it. Install with
+# `extras/install.sh`. Everything here is optional — `config.reference.toml`
+# documents every setting, and partial configs merge with built-in defaults, so
+# trim this to taste.
+
+autostart = [
+    # Notifications are served by the Quickshell bar (qs below); don't start
+    # swaync too or one of them won't get the D-Bus name.
+    "swayosd-server --top-margin 0.95",            # volume/brightness OSD
+    "/usr/lib/polkit-kde-authentication-agent-1",  # password prompts (pkexec, mounts)
+    "qs -p ~/.config/driftwm/quickshell",          # top bar + notifications (Quickshell)
+    "~/.config/driftwm/scripts/battery_notify.sh", # low-battery alert
+    "swayidle -w before-sleep 'swaylock'",         # lock before sleep
+]
+
+# Sloppy focus: windows don't overlap, so a cursor over a window is deliberate.
+# Pairs with hover -> `mod+c` / 4-finger hold to target windows when zoomed out.
+focus_follows_mouse = true
+
+# The dot grid is the default. For an image that scrolls with the canvas, tile
+# it — `mirror_tile` folds a non-seamless photo so it repeats without seams:
+# [background]
+# type = "tile"
+# path = "~/Pictures/wallpaper.jpg"
+# mirror_tile = true
+# The shaders installed to ~/.config/driftwm/wallpapers/ work the same way with
+# type = "shader".
+
+# Fallback context menu: a right-click the app leaves unanswered (and any on
+# empty canvas or a title bar) opens the shell's menu. Apps that show their own
+# menu keep it. Turn it off, or mute it per app, from the bar's settings.
+[mouse]
+context_menu = "qs -p ~/.config/driftwm/quickshell ipc call contextmenu open \"$DRIFTWM_MENU_TARGET\" \"$DRIFTWM_MENU_X\" \"$DRIFTWM_MENU_Y\" \"$DRIFTWM_MENU_OUTPUT\" \"$DRIFTWM_MENU_WINDOW\""
+
+[snap]
+# Extra snap target (off by default): other windows' centers.
+# centers = true
+
+[navigation]
+# The origin — your "home" — is a navigation target even with no
+# window there (4-finger swipe / Mod+Arrow toward it).
+anchors = [[0, 0]]
+
+# Multiple layouts make the bar's layout indicator meaningful (clicking it
+# switches to the next one). Example:
+# [input.keyboard]
+# layout = "us,ru"
+# options = "grp:caps_toggle,grp_led:caps"
+# remember_layout_per_window = true
+
+[env]
+# Qt apps (and the bar) outside Plasma: KDE's platform theme gives them an
+# icon theme and style, otherwise app icons render as magenta squares.
+QT_QPA_PLATFORMTHEME = "kde"
+# App icons in the bar and the dock: WhiteSur (macOS style), which install.sh
+# fetches with scripts/wonderland-icons. It falls back to Breeze for icons it
+# lacks; install.sh writes "breeze" here if the theme could not be installed.
+QS_ICON_THEME = "WhiteSur"
+# The distro's terminal (apps/wonderterm): mod+return and everything the bar
+# opens in a terminal use it.
+TERMINAL = "wonderterm"
+
+[output]
+# Monitors look at the canvas side by side, as [[outputs]] positions place
+# them: drag a window across the bezel and it stays on one canvas.
+contiguous = true
+
+# Liquid glass on everything frosted: the rim bends the frost behind it and
+# carries a lit edge (React Bits' FluidGlass). The hermes themes frost every
+# window ([decorations] blur), so this reaches the whole desktop.
+[effects.glass]
+enabled = true
+refraction = 1.0
+dispersion = 0.35
+bevel = 16
+reflection = 1.0
+
+[keybindings]
+"mod+alt+a" = "align-outputs"   # line the other monitors up beside this one
+# The bar's panels (`qs ipc call bar togglePanel <widget id>`; ids in
+# extras/quickshell/README.md).
+"mod+n" = "spawn qs -p ~/.config/driftwm/quickshell ipc call bar togglePanel notifications"
+"mod+space" = "spawn qs -p ~/.config/driftwm/quickshell ipc call spotlight toggle"   # Spotlight
+# AquilesAI, on the focused monitor. Takes Mod+A from the built-in
+# home-toggle, which stays on the 4-finger pinch out.
+"mod+a" = "spawn qs -p ~/.config/driftwm/quickshell ipc call aquiles toggle"
+"mod+p" = "spawn qs -p ~/.config/driftwm/quickshell ipc call displays toggle"       # display settings
+"mod+comma" = "spawn qs -p ~/.config/driftwm/quickshell ipc call bar togglePanel settings"
+"mod+shift+b" = "spawn qs -p ~/.config/driftwm/quickshell ipc call bar togglePanel bookmarks"
+"mod+shift+t" = "spawn qs -p ~/.config/driftwm/quickshell ipc call bar toggleTheme"
+# Spotlight: one search over open windows, suspended windows, and installed
+# apps — it replaces the plain launcher on mod+d.
+"mod+d" = "exec ~/.config/driftwm/scripts/spotlight.sh"
+# Route media keys through swayosd for on-screen feedback.
+"XF86AudioRaiseVolume" = "spawn swayosd-client --output-volume raise"
+"XF86AudioLowerVolume" = "spawn swayosd-client --output-volume lower"
+"XF86AudioMute" = "spawn swayosd-client --output-volume mute-toggle"
+"XF86MonBrightnessUp" = "spawn swayosd-client --brightness raise"
+"XF86MonBrightnessDown" = "spawn swayosd-client --brightness lower"
+# Capture overlay (extras/quickshell/capture): window, area or one screen, as a
+# picture or a recording.
+"print" = "spawn qs -p ~/.config/driftwm/quickshell ipc call capture open last"
+"shift+print" = "spawn qs -p ~/.config/driftwm/quickshell ipc call capture open area"
+"ctrl+print" = "spawn qs -p ~/.config/driftwm/quickshell ipc call capture open window"
+"alt+print" = "spawn qs -p ~/.config/driftwm/quickshell ipc call capture shot screen"   # this screen, now
+"mod+shift+s" = "spawn qs -p ~/.config/driftwm/quickshell ipc call capture open area"
+"mod+shift+r" = "spawn qs -p ~/.config/driftwm/quickshell ipc call capture record"       # start choosing / stop
+"mod+alt+shift+q" = "exec systemctl poweroff"
+# Tabs: windows of one app share a frame. Step through the focused frame's
+# tabs, or pull the current one out into a window of its own.
+"mod+ctrl+tab" = "next-tab"
+"mod+ctrl+shift+tab" = "prev-tab"
+"mod+ctrl+d" = "detach-tab"
+
+# Frost the transient shell overlays: their themes are translucent, so the
+# compositor blurs the canvas behind them.
+[[window_rules]]
+app_id = "swaync-control-center"
+blur = true
+
+[[window_rules]]
+app_id = "swaync-notification-window"
+blur = true
+
+[[window_rules]]
+app_id = "launcher"
+blur = true
+
+# The bar is translucent while the shell's liquid glass is on (Settings ›
+# Glass): frost the canvas behind it. A square full-width strip has no edge
+# for the glass rim to follow, so it gets the frost alone.
+[[window_rules]]
+app_id = "wonderland-bar"
+blur = true
+
+# Spotlight and the display settings: frosted glass, rounded, with a shadow.
+[[window_rules]]
+app_id = "wonderland-spotlight"
+blur = true
+corner_radius = 14
+shadow = true
+
+# Launchpad: the whole screen frosted behind the app grid.
+[[window_rules]]
+app_id = "wonderland-launchpad"
+blur = true
+
+[[window_rules]]
+app_id = "wonderland-displays"
+blur = true
+corner_radius = 14
+shadow = true
+
+[[window_rules]]
+app_id = "wonderland-wallpapers"
+blur = true
+corner_radius = 14
+shadow = true
+
+# wonderterm draws its own header and leaves its background translucent, so
+# the compositor only has to frost, round and shade it.
+[[window_rules]]
+app_id = "wonderterm"
+blur = true
+corner_radius = 12
+shadow = true
+
+# Fotos leaves its sidebar translucent: the compositor frosts what is behind
+# it, rounds the window and gives it a shadow.
+[[window_rules]]
+app_id = "wonderland-fotos"
+blur = true
+corner_radius = 12
+shadow = true
+
+[[window_rules]]
+app_id = "swayosd"
+blur = true
+
+# Steam's notification toasts ("X is playing Y") are ordinary X11 windows:
+# without this they open centred, take the keyboard and pull the camera onto
+# them. Keep them in the corner of the screen, out of the way.
+[[window_rules]]
+app_id = "steam"
+title = "/^notificationtoasts_\\d+_desktop$/"
+pinned_to_screen = true
+focus_on_open = false
+decoration = "none"
+position = [10000, -10000]   # clamped: bottom-right corner of the screen

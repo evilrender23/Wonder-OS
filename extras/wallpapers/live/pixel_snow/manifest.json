@@ -1,0 +1,26 @@
+{
+  "name": "Nieve pixelada",
+  "component": "PixelSnow",
+  "description": "Copos de nieve de píxeles que caen, se mecen y centellean.",
+  "tags": ["nieve", "píxel", "invierno", "oscuro"],
+  "params": [
+    {"key": "color", "label": "Color", "type": "color", "default": "#ffffff"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "variant", "label": "Forma de los copos", "type": "enum", "default": "snowflake",
+     "options": [{"value": "square", "label": "Píxeles cuadrados"}, {"value": "round", "label": "Píxeles redondos"},
+                 {"value": "snowflake", "label": "Cristales"}]},
+    {"key": "density", "label": "Cantidad de nieve", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "wind", "label": "Viento", "type": "float", "min": -2.0, "max": 2.0, "step": 0.05, "default": 0.25},
+    {"key": "sway", "label": "Balanceo", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.5},
+    {"key": "flake_size", "label": "Tamaño de los copos", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "pixel_size", "label": "Tamaño del píxel (px)", "type": "int", "min": 1, "max": 12, "step": 1, "default": 3},
+    {"key": "depth", "label": "Profundidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.8},
+    {"key": "twinkle", "label": "Centelleo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.35},
+    {"key": "accumulate", "label": "Acumular nieve abajo", "type": "bool", "default": false},
+    {"key": "fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "La simulación de partículas se sustituye por cinco capas analíticas de celdas que caen (una por tamaño) con los mismos sprites de píxel; el resplandor es un halo gaussiano por copo y la nieve acumulada es el perfil de dunas ya asentado. Sin ratón ni intro, y con píxeles muy grandes los copos se espacian algo más que en el original."
+}

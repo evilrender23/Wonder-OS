@@ -1,0 +1,293 @@
+{
+  "name": "Fibras fantasma",
+  "component": "GhostFibers",
+  "description": "Cintas de fibras luminosas que se retuercen en profundidad, con puntos que fluyen, desenfoque bokeh y polvo flotante.",
+  "tags": [
+    "fibras",
+    "3d",
+    "bokeh",
+    "oscuro",
+    "brillo"
+  ],
+  "heavy": true,
+  "params": [
+    {
+      "key": "glow_color",
+      "label": "Color principal",
+      "type": "color",
+      "default": "#8b5cf6"
+    },
+    {
+      "key": "line_color",
+      "label": "Color de pliegues y destellos",
+      "type": "color",
+      "default": "#dfd1fc"
+    },
+    {
+      "key": "secondary_color",
+      "label": "Color secundario",
+      "type": "color",
+      "default": "#6f4ac5"
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    },
+    {
+      "key": "gradient",
+      "label": "Degradado",
+      "type": "enum",
+      "options": [
+        {
+          "value": "depth",
+          "label": "Por profundidad"
+        },
+        {
+          "value": "along",
+          "label": "A lo largo"
+        },
+        {
+          "value": "across",
+          "label": "A lo ancho"
+        }
+      ],
+      "default": "depth"
+    },
+    {
+      "key": "layers",
+      "label": "Cintas",
+      "type": "int",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "key": "waves",
+      "label": "Ondulación",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "twist",
+      "label": "Torsión",
+      "type": "float",
+      "min": 0.0,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.2
+    },
+    {
+      "key": "volume",
+      "label": "Volumen",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.7
+    },
+    {
+      "key": "spread",
+      "label": "Anchura",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "scale",
+      "label": "Tamaño",
+      "type": "float",
+      "min": 0.3,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "rotation",
+      "label": "Inclinación (grados)",
+      "type": "float",
+      "min": -180.0,
+      "max": 180.0,
+      "step": 1.0,
+      "default": 18.0
+    },
+    {
+      "key": "perspective",
+      "label": "Perspectiva",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.65
+    },
+    {
+      "key": "threads",
+      "label": "Fibras por cinta",
+      "type": "int",
+      "min": 6,
+      "max": 180,
+      "step": 1,
+      "default": 72
+    },
+    {
+      "key": "density",
+      "label": "Puntos por fibra",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "thickness",
+      "label": "Tamaño de los puntos",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "fiber_style",
+      "label": "Estilo de fibra",
+      "type": "enum",
+      "options": [
+        {
+          "value": "dots",
+          "label": "Puntos"
+        },
+        {
+          "value": "dashes",
+          "label": "Guiones"
+        },
+        {
+          "value": "lines",
+          "label": "Líneas"
+        }
+      ],
+      "default": "dots"
+    },
+    {
+      "key": "tips",
+      "label": "Puntas (fibra óptica)",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "fold_glow",
+      "label": "Brillo de los pliegues",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "flow",
+      "label": "Flujo de los puntos",
+      "type": "float",
+      "min": -2.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.4
+    },
+    {
+      "key": "roll_speed",
+      "label": "Giro de las cintas",
+      "type": "float",
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.15
+    },
+    {
+      "key": "depth_of_field",
+      "label": "Desenfoque",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.85
+    },
+    {
+      "key": "focus_depth",
+      "label": "Distancia de enfoque",
+      "type": "float",
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "particles",
+      "label": "Polvo",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "sparkle",
+      "label": "Destellos",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "glow",
+      "label": "Resplandor",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.8
+    },
+    {
+      "key": "brightness",
+      "label": "Brillo",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "vignette",
+      "label": "Viñeta",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.3
+    },
+    {
+      "key": "grain",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.0,
+      "max": 0.3,
+      "step": 0.01,
+      "default": 0.06
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    }
+  ],
+  "notes": "Los miles de puntos instanciados se evalúan analíticamente: las tres fibras más cercanas al píxel y sus dos puntos vecinos, pasando a una densidad continua donde se amontonan (pliegues, desenfoque fuerte). El bloom es esa densidad ensanchada y el polvo una rejilla aleatoria; los colores de pliegue y secundario por defecto son los que el componente deriva del principal. Sin enfoque ni separación por cursor, pulsos al hacer clic ni intro."
+}

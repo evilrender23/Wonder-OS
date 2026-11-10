@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Música
+Name[en]=Music
+GenericName=Reproductor de música
+GenericName[en]=Music Player
+Comment=Tu biblioteca de música: álbumes, artistas, canciones y playlists
+Comment[en]=Your music library: albums, artists, songs and playlists
+Exec=wonderland-musica %U
+Icon=wonderland-musica
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-musica
+MimeType=audio/mpeg;audio/mp3;audio/x-mp3;audio/flac;audio/x-flac;audio/ogg;audio/x-vorbis+ogg;audio/x-opus+ogg;audio/opus;audio/vorbis;audio/mp4;audio/x-m4a;audio/m4a;audio/aac;audio/x-aac;audio/wav;audio/x-wav;audio/vnd.wave;audio/x-ms-wma;audio/aiff;audio/x-aiff;audio/x-ape;audio/x-wavpack;audio/x-musepack;audio/webm;audio/x-matroska;
+Categories=AudioVideo;Audio;Player;Music;Qt;
+Keywords=música;musica;canciones;álbumes;playlist;reproductor;music;songs;player;audio;mp3;flac;

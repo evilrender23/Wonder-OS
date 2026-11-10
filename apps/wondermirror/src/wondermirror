@@ -1,0 +1,15 @@
+#!/usr/bin/python3
+"""Wonder Mirror: Windows apps as windows of the Wonderland desktop."""
+
+import sys
+from pathlib import Path
+
+here = Path(__file__).resolve().parent
+for lib in (here / "lib", here.parent / "share" / "wondermirror" / "lib"):
+    if (lib / "wondermirror" / "__init__.py").exists():
+        sys.path.insert(0, str(lib))
+        break
+
+from wondermirror.cli import main  # noqa: E402
+
+sys.exit(main())

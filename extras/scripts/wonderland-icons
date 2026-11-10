@@ -1,0 +1,69 @@
+#!/bin/sh
+# WonderlandWM's default app icons: WhiteSur, a macOS-style icon theme.
+#
+#     wonderland-icons install     fetch the theme into ~/.local/share/icons
+#                                  (skipped if it is already there) and apply it
+#     wonderland-icons apply [THEME]   make THEME (default WhiteSur) the icon
+#                                  theme of Qt/KDE and GTK apps
+#     wonderland-icons status      print the theme and whether it is installed
+#
+# The theme is not shipped in this repository: it is downloaded from its
+# upstream (https://github.com/vinceliuice/WhiteSur-icon-theme, GPL-3.0) at the
+# commit pinned below. The bar and the dock read it from QS_ICON_THEME in
+# config.toml's [env]; WhiteSur inherits Breeze, so icons it lacks still show.
+set -eu
+
+THEME="WhiteSur"
+REPO="${WONDERLAND_ICONS_REPO:-https://github.com/vinceliuice/WhiteSur-icon-theme}"
+REV="${WONDERLAND_ICONS_REV:-73d8040da51a9ed74e47c7366e7e9ff437601a5c}"
+data="${XDG_DATA_HOME:-$HOME/.local/share}"
+dest="$data/icons"
+
+# Installed for this user or system-wide (a distro package also counts).
+installed() {
+    for d in "$dest" "$HOME/.icons" /usr/local/share/icons /usr/share/icons; do
+        [ -f "$d/$1/index.theme" ] && return 0
+    done
+    return 1
+}
+
+apply() {
+    theme="${1:-$THEME}"
+    installed "$theme" || { echo "wonderland-icons: $theme is not installed" >&2; return 1; }
+    # Qt apps under QT_QPA_PLATFORMTHEME=kde read kdeglobals; GTK reads gsettings.
+    if command -v kwriteconfig6 >/dev/null 2>&1; then
+        kwriteconfig6 --file kdeglobals --group Icons --key Theme "$theme"
+    fi
+    if command -v gsettings >/dev/null 2>&1; then
+        gsettings set org.gnome.desktop.interface icon-theme "$theme" 2>/dev/null || true
+    fi
+    echo "icon theme: $theme"
+}
+
+install() {
+    if installed "$THEME"; then
+        echo "$THEME already installed"
+    else
+        command -v git >/dev/null 2>&1 || { echo "wonderland-icons: git is needed to fetch $THEME" >&2; return 1; }
+        command -v bash >/dev/null 2>&1 || { echo "wonderland-icons: bash is needed by $THEME's installer" >&2; return 1; }
+        tmp="$(mktemp -d)"
+        trap 'rm -rf "$tmp"' EXIT
+        echo "fetching $THEME from $REPO ..."
+        git init -q "$tmp/src"
+        git -C "$tmp/src" fetch -q --depth 1 "$REPO" "$REV"
+        git -C "$tmp/src" checkout -q FETCH_HEAD
+        mkdir -p "$dest"
+        bash "$tmp/src/install.sh" -d "$dest" >/dev/null
+        installed "$THEME" || { echo "wonderland-icons: $THEME's installer left no theme in $dest" >&2; return 1; }
+        echo "installed $THEME -> $dest"
+    fi
+    apply "$THEME"
+}
+
+case "${1:-}" in
+    install) install ;;
+    apply) apply "${2:-}" ;;
+    status)
+        if installed "$THEME"; then echo "$THEME: installed"; else echo "$THEME: not installed"; fi ;;
+    *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

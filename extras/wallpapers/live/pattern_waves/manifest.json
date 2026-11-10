@@ -1,0 +1,39 @@
+{
+  "name": "Ondas de trama",
+  "component": "PatternWaves",
+  "description": "Una superficie de tela ondulante dibujada con una trama de puntos, cruces, líneas o caracteres.",
+  "tags": ["trama", "ondas", "monocromo", "oscuro"],
+  "params": [
+    {"key": "pattern", "label": "Marca", "type": "enum", "default": "dot", "options": [
+      {"value": "dot", "label": "Puntos"},
+      {"value": "square", "label": "Cuadrados"},
+      {"value": "plus", "label": "Cruces"},
+      {"value": "line", "label": "Líneas de contorno"},
+      {"value": "glyph", "label": "Caracteres"}
+    ]},
+    {"key": "wave", "label": "Forma de la superficie", "type": "enum", "default": "silk", "options": [
+      {"value": "silk", "label": "Seda"},
+      {"value": "swell", "label": "Oleaje"},
+      {"value": "ripple", "label": "Ondas en un estanque"}
+    ]},
+    {"key": "color", "label": "Color de la trama", "type": "color", "default": "#ffffff"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#000000"},
+    {"key": "spacing", "label": "Separación de las marcas (px)", "type": "float", "min": 4.0, "max": 40.0, "step": 1.0, "default": 9.0},
+    {"key": "mark_size", "label": "Tamaño de las marcas", "type": "float", "min": 0.05, "max": 1.0, "step": 0.05, "default": 0.95},
+    {"key": "depth", "label": "Relieve", "type": "float", "min": 0.0, "max": 1.5, "step": 0.05, "default": 0.95},
+    {"key": "light", "label": "Ángulo de la luz", "type": "float", "min": -90.0, "max": 90.0, "step": 1.0, "default": 0.0},
+    {"key": "shine", "label": "Destellos", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.8},
+    {"key": "contrast", "label": "Contraste", "type": "float", "min": 0.3, "max": 3.0, "step": 0.05, "default": 1.2},
+    {"key": "scale", "label": "Tamaño de las ondas", "type": "float", "min": 0.2, "max": 5.0, "step": 0.05, "default": 1.0},
+    {"key": "direction", "label": "Dirección (grados)", "type": "float", "min": 0.0, "max": 360.0, "step": 1.0, "default": 20.0},
+    {"key": "fade", "label": "Desvanecido", "type": "enum", "default": "edges", "options": [
+      {"value": "edges", "label": "Bordes"},
+      {"value": "center", "label": "Centro"},
+      {"value": "bottom", "label": "Abajo"},
+      {"value": "top", "label": "Arriba"},
+      {"value": "none", "label": "Ninguno"}
+    ]},
+    {"key": "fade_size", "label": "Alcance del desvanecido", "type": "float", "min": 0.05, "max": 1.0, "step": 0.05, "default": 0.5}
+  ],
+  "notes": "Valores por defecto del preset «silk» (sin selector de preset). El gradiente de la superficie es analítico, los caracteres son formas dibujadas en lugar de una fuente y las líneas se muestrean en cada píxel; sin ondas del ratón ni intro."
+}

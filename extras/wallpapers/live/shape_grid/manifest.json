@@ -1,0 +1,46 @@
+{
+  "name": "Rejilla de formas",
+  "component": "ShapeGrid",
+  "description": "Rejilla de figuras que se desliza despacio mientras una luz errante enciende sus celdas.",
+  "tags": ["rejilla", "geométrico", "minimalista", "oscuro"],
+  "params": [
+    {"key": "shape", "label": "Forma", "type": "enum", "default": "square",
+     "options": [
+       {"value": "square", "label": "Cuadrados"},
+       {"value": "tile", "label": "Baldosas"},
+       {"value": "hexagon", "label": "Hexágonos"},
+       {"value": "triangle", "label": "Triángulos"},
+       {"value": "diamond", "label": "Rombos"},
+       {"value": "circle", "label": "Círculos"},
+       {"value": "cross", "label": "Cruces"},
+       {"value": "dot", "label": "Puntos"}
+     ]},
+    {"key": "cell_size", "label": "Tamaño de celda", "type": "float", "min": 12.0, "max": 160.0, "step": 1.0, "default": 40.0},
+    {"key": "line_width", "label": "Grosor de línea", "type": "float", "min": 0.25, "max": 6.0, "step": 0.25, "default": 1.0},
+    {"key": "direction", "label": "Dirección", "type": "enum", "default": "diagonal",
+     "options": [
+       {"value": "diagonal", "label": "Diagonal"},
+       {"value": "up", "label": "Arriba"},
+       {"value": "down", "label": "Abajo"},
+       {"value": "left", "label": "Izquierda"},
+       {"value": "right", "label": "Derecha"},
+       {"value": "none", "label": "Quieta"}
+     ]},
+    {"key": "line_color", "label": "Color de las líneas", "type": "color", "default": "#2a2734"},
+    {"key": "hover_color", "label": "Color de la luz", "type": "color", "default": "#ffffff"},
+    {"key": "hover_fill_color", "label": "Relleno iluminado", "type": "color", "default": "#ffffff"},
+    {"key": "fill_opacity", "label": "Opacidad del relleno", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.15},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "rainbow", "label": "Arcoíris", "type": "bool", "default": false},
+    {"key": "wander", "label": "Luz errante", "type": "bool", "default": true,
+     "description": "Sustituye al cursor: un foco recorre la rejilla encendiendo celdas."},
+    {"key": "radius", "label": "Radio de la luz (celdas)", "type": "float", "min": 0.0, "max": 6.0, "step": 0.1, "default": 1.5},
+    {"key": "trail", "label": "Estela (s)", "type": "float", "min": 0.05, "max": 3.0, "step": 0.05, "default": 0.6},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.35},
+    {"key": "twinkle", "label": "Destellos al azar", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 1.0},
+    {"key": "tilt_x", "label": "Inclinación vertical", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0},
+    {"key": "tilt_y", "label": "Inclinación lateral", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0}
+  ],
+  "notes": "El foco del cursor lo sustituye una «luz errante» (opcional) cuya estela se reconstruye con unas pocas posiciones pasadas; el resplandor de canvas (shadowBlur) es una caída gaussiana. Sin cascada de clic ni intro."
+}

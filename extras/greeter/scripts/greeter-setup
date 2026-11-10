@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""Generate the greeter's machine-specific files into a staging directory.
+
+    greeter-setup OUT [--prefix /usr/local] [--config ~/.config/driftwm/config.toml]
+                      [--wallpaper light_rays] [--settings JSON]
+
+Run as the person installing, not as root: it reads their compositor config
+so the login screen has the same monitors, keyboard layout and pointer as
+their desktop. Writes into OUT:
+
+    driftwm.toml    the greeter compositor's config
+    wallpaper.glsl  the live wallpaper («Rayos de luz»), rendered with the
+                    settings they use for it on the desktop, if any
+    greeter.json    theme and language of the login screen
+    greetd.toml     greetd's config, pointing at wonderland-greeter
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+import tomllib
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+REPO_EXTRAS = HERE.parent.parent
+
+# Tables of the desktop config that describe the machine, not the desktop.
+MACHINE_TABLES = [("input", "keyboard"), ("input", "mouse"), ("input", "trackpad"),
+                  ("input", "touch"), ("input", "tablet"), ("cursor",), ("backend",)]
+OUTPUT_KEYS = ("name", "mode", "position", "scale", "transform", "vrr")
+
+
+def toml_value(v):
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return repr(v)
+    if isinstance(v, str):
+        return json.dumps(v, ensure_ascii=False)
+    if isinstance(v, list):
+        return "[" + ", ".join(toml_value(x) for x in v) + "]"
+    raise TypeError(type(v))
+
+
+def toml_table(header, table):
+    lines = [header]
+    for k, v in table.items():
+        if not isinstance(v, dict):
+            lines.append(f"{k} = {toml_value(v)}")
+    return "\n".join(lines) + "\n"
+
+
+def machine_blocks(config_path):
+    try:
+        cfg = tomllib.loads(config_path.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as e:
+        print(f"greeter-setup: {config_path}: {e}; using the compositor's defaults",
+              file=sys.stderr)
+        return ""
+    out = []
+    for path in MACHINE_TABLES:
+        t = cfg
+        for key in path:
+            t = t.get(key, {}) if isinstance(t, dict) else {}
+        if isinstance(t, dict) and any(not isinstance(v, dict) for v in t.values()):
+            out.append(toml_table("[" + ".".join(path) + "]", t))
+    for o in cfg.get("outputs", []):
+        out.append(toml_table("[[outputs]]", {k: o[k] for k in OUTPUT_KEYS if k in o}))
+    return "\n".join(out)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("out", type=Path)
+    ap.add_argument("--prefix", default="/usr/local")
+    config_home = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    ap.add_argument("--config", type=Path, default=config_home / "driftwm/config.toml")
+    ap.add_argument("--wallpaper", default="light_rays")
+    ap.add_argument("--settings", help="JSON settings for the wallpaper "
+                    "(default: the ones stored for it in wallpaper.json)")
+    args = ap.parse_args()
+    args.out.mkdir(parents=True, exist_ok=True)
+
+    if args.settings:
+        settings = json.loads(args.settings)
+    else:
+        try:
+            state = json.loads((args.config.parent / "wallpaper.json").read_text())
+            settings = dict(state.get("settings", {}).get(args.wallpaper, {}))
+        except (OSError, ValueError):
+            settings = {}
+    # The login screen has no canvas to follow.
+    settings.update(parallax=0.0, zoom_follow=False)
+
+    shader = args.out / "wallpaper.glsl"
+    env = dict(os.environ, WONDERLAND_WALLPAPERS=str(REPO_EXTRAS / "wallpapers/live"))
+    subprocess.run([str(REPO_EXTRAS / "scripts/wonderland-wallpaper"), "render", args.wallpaper,
+                    json.dumps(settings), "-o", str(shader)], check=True, env=env)
+
+    fps = settings.get("fps", 60) if settings.get("speed", 1.0) > 0 else 0
+    text = (HERE.parent / "driftwm.toml.in").read_text()
+    for key, value in {
+        "@UI@": f"{args.prefix}/bin/wonderland-greeter-ui",
+        "@SHADER@": f"{args.prefix}/share/wonderland-greeter/wallpaper.glsl",
+        "@FPS@": str(int(fps)),
+        "@MACHINE@": machine_blocks(args.config),
+    }.items():
+        text = text.replace(key, value)
+    (args.out / "driftwm.toml").write_text(text)
+
+    lang = (os.environ.get("LC_ALL") or os.environ.get("LC_MESSAGES")
+            or os.environ.get("LANG") or "en").split("_")[0].split(".")[0]
+    (args.out / "greeter.json").write_text(json.dumps({
+        "theme": "light" if settings.get("light_mode") else "dark",
+        "lang": "en" if lang in ("C", "POSIX", "") else lang,
+        "screen": "",
+        "clock24": True,
+    }, indent=2) + "\n")
+
+    (args.out / "greetd.toml").write_text(
+        "# greetd runs Wonderland's login screen (extras/greeter).\n"
+        "[terminal]\nvt = 1\n\n"
+        "[default_session]\n"
+        f'command = "{args.prefix}/bin/wonderland-greeter"\n'
+        'user = "greeter"\n')
+
+
+if __name__ == "__main__":
+    main()

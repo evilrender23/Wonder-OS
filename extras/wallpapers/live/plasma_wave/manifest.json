@@ -1,0 +1,28 @@
+{
+  "name": "Onda de plasma",
+  "component": "PlasmaWave",
+  "description": "Dos cintas de plasma luminoso que se enroscan en perspectiva.",
+  "tags": ["plasma", "neón", "morado", "oscuro"],
+  "params": [
+    {"key": "color1", "label": "Color de la primera onda", "type": "color", "default": "#a855f7"},
+    {"key": "color2", "label": "Color de la segunda onda", "type": "color", "default": "#06b6d4"},
+    {"key": "speed1", "label": "Avance de la primera onda", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.05},
+    {"key": "speed2", "label": "Avance de la segunda onda", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.05},
+    {"key": "reverse2", "label": "Segunda onda en sentido contrario", "type": "bool", "default": false},
+    {"key": "bend1", "label": "Curvatura de la primera onda", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "bend2", "label": "Curvatura de la segunda onda", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.5},
+    {"key": "thickness", "label": "Grosor de las cintas", "type": "float", "min": 0.05, "max": 1.0, "step": 0.01, "default": 0.3},
+    {"key": "focal_length", "label": "Lente (menos = más angular)", "type": "float", "min": 0.3, "max": 4.0, "step": 0.05, "default": 1.25},
+    {"key": "rotation", "label": "Rotación (grados)", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": 0.0},
+    {"key": "x_offset", "label": "Desplazamiento horizontal", "type": "float", "min": -0.5, "max": 0.5, "step": 0.01, "default": 0.0},
+    {"key": "y_offset", "label": "Desplazamiento vertical", "type": "float", "min": -0.5, "max": 0.5, "step": 0.01, "default": 0.0},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "core", "label": "Núcleo incandescente", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.3, "step": 0.01, "default": 0.03},
+    {"key": "fade", "label": "Difuminar bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "Una sola pasada de ray marching a resolución completa en lugar de la pasada gruesa más el refinado; el bloom se aproxima con un halo según la distancia mínima a cada cinta. Los desplazamientos se miden en fracción de la altura de pantalla en vez de en píxeles. Sin interacción con el ratón ni intro."
+}

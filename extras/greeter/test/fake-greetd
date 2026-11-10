@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""A stand-in for greetd, to try the login screen without touching the login.
+
+    fake-greetd SOCKET [--password PW] [--otp CODE] [--log FILE]
+
+Speaks greetd's IPC (native-endian u32 length + JSON, greetd-ipc(7)) on SOCKET.
+Any user logs in with PW (default «wonderland»); with --otp, PAM then asks
+a second, visible question. Every request is appended to FILE as one JSON line
+(responses to hidden prompts are not written). `start_session` only logs: no
+session is started.
+"""
+
+import argparse
+import json
+import os
+import socket
+import struct
+import sys
+
+
+def recv_exact(conn, n):
+    buf = b""
+    while len(buf) < n:
+        chunk = conn.recv(n - len(buf))
+        if not chunk:
+            return None
+        buf += chunk
+    return buf
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("socket")
+    ap.add_argument("--password", default="wonderland")
+    ap.add_argument("--otp")
+    ap.add_argument("--log")
+    args = ap.parse_args()
+
+    if os.path.exists(args.socket):
+        os.unlink(args.socket)
+    srv = socket.socket(socket.AF_UNIX)
+    srv.bind(args.socket)
+    srv.listen(4)
+    log = open(args.log, "a", buffering=1) if args.log else sys.stderr
+
+    def send(conn, obj):
+        data = json.dumps(obj).encode()
+        conn.sendall(struct.pack("=I", len(data)) + data)
+
+    while True:
+        conn, _ = srv.accept()
+        stage = None  # None | "password" | "otp" | "done"
+        while True:
+            head = recv_exact(conn, 4)
+            if head is None:
+                break
+            body = recv_exact(conn, struct.unpack("=I", head)[0])
+            if body is None:
+                break
+            req = json.loads(body)
+            shown = dict(req)
+            if stage == "password" and "response" in shown:
+                shown["response"] = "<hidden>"
+            log.write(json.dumps(shown, ensure_ascii=False) + "\n")
+            kind = req.get("type")
+            if kind == "create_session":
+                if stage is not None:
+                    send(conn, {"type": "error", "error_type": "error",
+                                "description": "a session is already being configured"})
+                    continue
+                stage = "password"
+                send(conn, {"type": "auth_message", "auth_message_type": "secret",
+                            "auth_message": "Password: "})
+            elif kind == "post_auth_message_response":
+                if stage == "password":
+                    if req.get("response") != args.password:
+                        stage = None
+                        send(conn, {"type": "error", "error_type": "auth_error",
+                                    "description": "pam_authenticate: AUTH_ERR"})
+                    elif args.otp:
+                        stage = "otp"
+                        send(conn, {"type": "auth_message", "auth_message_type": "visible",
+                                    "auth_message": "Verification code: "})
+                    else:
+                        stage = "done"
+                        send(conn, {"type": "success"})
+                elif stage == "otp":
+                    if req.get("response") == args.otp:
+                        stage = "done"
+                        send(conn, {"type": "success"})
+                    else:
+                        stage = None
+                        send(conn, {"type": "error", "error_type": "auth_error",
+                                    "description": "pam_authenticate: AUTH_ERR"})
+                else:
+                    send(conn, {"type": "error", "error_type": "error",
+                                "description": "no session being configured"})
+            elif kind == "start_session":
+                if stage == "done":
+                    send(conn, {"type": "success"})
+                else:
+                    send(conn, {"type": "error", "error_type": "error",
+                                "description": "session is not ready"})
+            elif kind == "cancel_session":
+                stage = None
+                send(conn, {"type": "success"})
+            else:
+                send(conn, {"type": "error", "error_type": "error",
+                            "description": f"unknown request {kind!r}"})
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()

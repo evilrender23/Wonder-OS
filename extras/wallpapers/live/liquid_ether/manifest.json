@@ -1,0 +1,20 @@
+{
+  "name": "Éter líquido",
+  "component": "LiquidEther",
+  "description": "Corrientes de líquido luminoso que se remueven solas y se tiñen según su velocidad.",
+  "tags": ["fluido", "colorido", "oscuro", "suave"],
+  "params": [
+    {"key": "color_1", "label": "Color en calma", "type": "color", "default": "#5227ff"},
+    {"key": "color_2", "label": "Color medio", "type": "color", "default": "#ff9ffc"},
+    {"key": "color_3", "label": "Color rápido", "type": "color", "default": "#b497cf"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "intensity", "label": "Intensidad", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "cursor_size", "label": "Anchura del removido", "type": "float", "min": 20.0, "max": 400.0, "step": 5.0, "default": 100.0},
+    {"key": "persistence", "label": "Persistencia", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.75},
+    {"key": "viscosity", "label": "Viscosidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "auto_speed", "label": "Velocidad del removido", "type": "float", "min": 0.05, "max": 2.0, "step": 0.05, "default": 0.5},
+    {"key": "auto_intensity", "label": "Fuerza del removido", "type": "float", "min": 0.2, "max": 5.0, "step": 0.1, "default": 2.2},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "La simulación de fluidos (advección, presión y viscosidad en varias pasadas) se sustituye por una reconstrucción analítica: la estela reciente del removedor automático deja chorros que se desvanecen, se ensanchan y se arremolinan con ruido. Sin cursor, clics ni intro; en modo claro la tinta va sobre un papel claro derivado del fondo."
+}

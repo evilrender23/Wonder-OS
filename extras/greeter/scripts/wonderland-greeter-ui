@@ -1,0 +1,9 @@
+#!/bin/sh
+# wonderland-greeter-ui — autostarted by the greeter's compositor: the login
+# screen, then the end of the compositor. greetd starts the session once the
+# greeter is gone, and starts a new greeter if the screen died instead.
+bin=$(dirname -- "$(readlink -f -- "$0")")
+share=${WONDERLAND_GREETER_SHARE:-$bin/../share/wonderland-greeter}
+
+QT_QPA_PLATFORM=wayland QS_NO_RELOAD_POPUP=1 qs --no-duplicate -p "$share/ui"
+exec driftwm msg action quit

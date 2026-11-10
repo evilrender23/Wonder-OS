@@ -1,0 +1,30 @@
+{
+  "name": "Ferrofluido",
+  "component": "Ferrofluid",
+  "description": "Un líquido magnético negro y brillante que levanta oleadas de pinchos bajo luces de estudio.",
+  "tags": ["3d", "líquido", "pinchos", "brillo", "oscuro"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "key_color", "label": "Luz principal", "type": "color", "default": "#ffffff"},
+    {"key": "side_color", "label": "Luces laterales", "type": "color", "default": "#ffffff"},
+    {"key": "fill_color", "label": "Luz de relleno", "type": "color", "default": "#ffffff"},
+    {"key": "brightness", "label": "Intensidad de los reflejos", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "scale", "label": "Zoom", "type": "float", "min": 0.4, "max": 6.0, "step": 0.05, "default": 1.6},
+    {"key": "spike_height", "label": "Altura de los pinchos", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "sharpness", "label": "Afilado", "type": "float", "min": 0.6, "max": 6.0, "step": 0.1, "default": 2.5},
+    {"key": "tilt", "label": "Inclinación de la cámara (°)", "type": "float", "min": 10.0, "max": 70.0, "step": 1.0, "default": 48.0},
+    {"key": "turbulence", "label": "Turbulencia", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "magnetism", "label": "Magnetismo", "type": "float", "min": 0.4, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "variation", "label": "Variación", "type": "float", "min": 0.0, "max": 100.0, "step": 1.0, "default": 0.0},
+    {"key": "flow_direction", "label": "Dirección de las oleadas", "type": "enum", "options": [
+      {"value": "down", "label": "Hacia abajo"},
+      {"value": "up", "label": "Hacia arriba"},
+      {"value": "left", "label": "Hacia la izquierda"},
+      {"value": "right", "label": "Hacia la derecha"},
+      {"value": "none", "label": "Sin desplazamiento"}
+    ], "default": "down"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "La simulación de muelles se sustituye por su estado de equilibrio (sin «fluidez» ni rebotes) y la textura de límites por la amplitud muestreada a la entrada y salida de la capa de pinchos. Sin imán del cursor, pulsos al hacer clic ni intro; en modo claro se usa fondo blanco salvo que el fondo elegido ya sea claro."
+}

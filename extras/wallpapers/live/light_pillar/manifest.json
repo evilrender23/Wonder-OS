@@ -1,0 +1,137 @@
+{
+  "name": "Pilar de luz",
+  "component": "LightPillar",
+  "description": "Columna de luz volumétrica con hebras turbulentas que giran y fluyen hacia arriba.",
+  "tags": [
+    "luz",
+    "volumétrico",
+    "neón",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "top_color",
+      "label": "Color inferior (denso)",
+      "type": "color",
+      "default": "#5227ff"
+    },
+    {
+      "key": "bottom_color",
+      "label": "Color superior",
+      "type": "color",
+      "default": "#ff9ffc"
+    },
+    {
+      "key": "intensity",
+      "label": "Intensidad",
+      "type": "float",
+      "min": 0.1,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "glow_amount",
+      "label": "Luz de las hebras",
+      "type": "float",
+      "min": 0.0005,
+      "max": 0.01,
+      "step": 0.0005,
+      "default": 0.002
+    },
+    {
+      "key": "bloom",
+      "label": "Halo",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "pillar_width",
+      "label": "Anchura del pilar",
+      "type": "float",
+      "min": 0.5,
+      "max": 8.0,
+      "step": 0.1,
+      "default": 3.0
+    },
+    {
+      "key": "pillar_height",
+      "label": "Estiramiento vertical",
+      "type": "float",
+      "min": 0.05,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.4
+    },
+    {
+      "key": "pillar_rotation",
+      "label": "Inclinación (grados)",
+      "type": "float",
+      "min": -90.0,
+      "max": 90.0,
+      "step": 1.0,
+      "default": 25.0
+    },
+    {
+      "key": "twist",
+      "label": "Remolino",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.14,
+      "step": 0.02,
+      "default": 0.4
+    },
+    {
+      "key": "detail",
+      "label": "Capas de turbulencia",
+      "type": "int",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "key": "flow",
+      "label": "Flujo",
+      "type": "float",
+      "min": 0.0,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "noise_intensity",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.5,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "fade",
+      "label": "Desvanecer bordes",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Color de fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "El trazado volumétrico usa 30 pasos en lugar de 80 (más largos, con el mismo peso de luz por distancia) a resolución completa, y el bloom por mipmaps se sustituye por un halo analítico alrededor del eje. Sin inclinación hacia el cursor, pulsos al hacer clic ni intro; la mezcla «screen» se hace sobre el color de fondo."
+}

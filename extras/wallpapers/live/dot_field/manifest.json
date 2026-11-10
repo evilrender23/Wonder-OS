@@ -1,0 +1,33 @@
+{
+  "name": "Campo de puntos",
+  "component": "DotField",
+  "description": "Una retícula de puntos con degradado, con ondas lentas, destellos y una lente que la amplía.",
+  "tags": ["puntos", "minimalista", "oscuro", "degradado"],
+  "params": [
+    {"key": "pattern", "label": "Distribución", "type": "enum", "default": "grid", "options": [
+      {"value": "grid", "label": "Cuadrícula"},
+      {"value": "hex", "label": "Panal"},
+      {"value": "spiral", "label": "Espiral de girasol"},
+      {"value": "scatter", "label": "Dispersos"}
+    ]},
+    {"key": "dot_radius", "label": "Radio del punto (px)", "type": "float", "min": 0.5, "max": 8.0, "step": 0.25, "default": 1.5},
+    {"key": "dot_spacing", "label": "Separación (px)", "type": "float", "min": 2.0, "max": 80.0, "step": 1.0, "default": 14.0},
+    {"key": "gradient_from", "label": "Color inicial", "type": "color", "default": "#5227ff"},
+    {"key": "gradient_to", "label": "Color final", "type": "color", "default": "#ff9ffc"},
+    {"key": "gradient_angle", "label": "Ángulo del degradado (°)", "type": "float", "min": 0.0, "max": 360.0, "step": 1.0, "default": 135.0},
+    {"key": "base_opacity", "label": "Opacidad de los puntos", "type": "float", "min": 0.05, "max": 1.0, "step": 0.05, "default": 0.55},
+    {"key": "wave_amplitude", "label": "Ondulación (px)", "type": "float", "min": 0.0, "max": 30.0, "step": 1.0, "default": 0.0},
+    {"key": "sparkle", "label": "Destellos", "type": "bool", "default": false},
+    {"key": "wander_lens", "label": "Lente errante", "type": "bool", "default": false},
+    {"key": "cursor_radius", "label": "Radio de la lente (px)", "type": "float", "min": 40.0, "max": 800.0, "step": 10.0, "default": 240.0},
+    {"key": "bulge_strength", "label": "Aumento de la lente", "type": "float", "min": -1.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "twist", "label": "Remolino de la lente (°)", "type": "float", "min": -360.0, "max": 360.0, "step": 5.0, "default": 0.0},
+    {"key": "glow_color", "label": "Color del resplandor", "type": "color", "default": "#ffffff"},
+    {"key": "glow_radius", "label": "Radio del resplandor (px)", "type": "float", "min": 0.0, "max": 600.0, "step": 10.0, "default": 160.0},
+    {"key": "glow_intensity", "label": "Intensidad del resplandor", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.8},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_background", "label": "Fondo en modo claro", "type": "color", "default": "#f6f6f8"}
+  ],
+  "notes": "Los puntos instanciados se evalúan por píxel buscando las celdas vecinas. La lente ya no sigue al cursor: con «Lente errante» recorre la pantalla sola (sin lupa al mantener pulsado ni intro). La ondulación se limita a 30 px para que la búsqueda inversa converja."
+}

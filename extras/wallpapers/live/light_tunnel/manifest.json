@@ -1,0 +1,41 @@
+{
+  "name": "Túnel de luz",
+  "component": "LightTunnel",
+  "description": "Túnel de fibras ópticas con pulsos de luz que viajan hacia el fondo.",
+  "tags": ["túnel", "fibras", "luz", "oscuro"],
+  "params": [
+    {"key": "cable_color", "label": "Color de las fibras", "type": "color", "default": "#ffffff"},
+    {"key": "pulse_color", "label": "Color de los pulsos", "type": "color", "default": "#ffffff"},
+    {"key": "tunnel_color", "label": "Color del halo del túnel", "type": "color", "default": "#ffffff"},
+    {"key": "tunnel_opacity", "label": "Halo del túnel", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "flow_direction", "label": "Dirección de los pulsos", "type": "enum", "default": "inward", "options": [
+      {"value": "inward", "label": "Hacia dentro"},
+      {"value": "outward", "label": "Hacia fuera"}
+    ]},
+    {"key": "pulse_speed", "label": "Velocidad de los pulsos", "type": "float", "min": 0.0, "max": 8.0, "step": 0.1, "default": 2.0},
+    {"key": "pulse_length", "label": "Longitud de los pulsos", "type": "float", "min": 0.02, "max": 1.0, "step": 0.01, "default": 0.28},
+    {"key": "pulse_blend", "label": "Suavidad de los pulsos", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "pulse_width", "label": "Anchura de los pulsos", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "pulse_density", "label": "Cantidad de pulsos", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "cable_count", "label": "Número de fibras", "type": "int", "min": 4, "max": 200, "step": 1, "default": 56},
+    {"key": "thickness", "label": "Grosor de las fibras", "type": "float", "min": 0.05, "max": 2.0, "step": 0.05, "default": 0.35},
+    {"key": "rim_width", "label": "Halo de los pulsos", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.15},
+    {"key": "waviness", "label": "Ondulación", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.3},
+    {"key": "sway", "label": "Balanceo", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.5},
+    {"key": "bend", "label": "Curvatura del fondo", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.4},
+    {"key": "size", "label": "Tamaño", "type": "float", "min": 0.2, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "center_x", "label": "Centro horizontal", "type": "float", "min": -1.0, "max": 1.0, "step": 0.01, "default": 0.0},
+    {"key": "center_y", "label": "Centro vertical", "type": "float", "min": -1.0, "max": 1.0, "step": 0.01, "default": 0.0},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "fade_near", "label": "Hueco central", "type": "float", "min": 0.01, "max": 2.0, "step": 0.01, "default": 0.5},
+    {"key": "fade_far", "label": "Alcance hacia los bordes", "type": "float", "min": 0.2, "max": 4.0, "step": 0.05, "default": 2.0},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "color_variance", "label": "Variar el brillo de cada fibra", "type": "bool", "default": true},
+    {"key": "grain", "label": "Grano", "type": "bool", "default": false},
+    {"key": "grain_intensity", "label": "Intensidad del grano", "type": "float", "min": 0.0, "max": 0.3, "step": 0.01, "default": 0.05},
+    {"key": "variation", "label": "Variación", "type": "float", "min": 0.0, "max": 100.0, "step": 1.0, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "Sin guiado con el ratón, sin el anillo de luz al hacer clic y sin intro. En modo claro, si el fondo elegido es oscuro se usa un fondo claro."
+}

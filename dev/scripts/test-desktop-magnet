@@ -1,0 +1,164 @@
+#!/usr/bin/env node
+// Checks the desktop icons' placement math (extras/quickshell/desktop/magnet.js)
+// under node: the file is a QML `.pragma library`, so it is loaded as text.
+//
+//     dev/scripts/test-desktop-magnet
+const fs = require("fs")
+const path = require("path")
+const assert = require("assert")
+
+const file = path.join(__dirname, "../../extras/quickshell/desktop/magnet.js")
+const names = ["shape", "clamp", "overlaps", "targets", "magnetize", "stacked", "resolve", "settle",
+    "freeSlot", "arrange", "cleanUp", "slot", "columns", "rows"]
+const src = fs.readFileSync(file, "utf8").replace(/^\.pragma library$/m, "")
+const M = new Function(`${src}\nreturn { ${names.join(", ")} }`)()
+
+const cfg = { cellW: 108, cellH: 116, width: 1920, height: 1000, margin: 12, radius: 16, capture: 0.7, reach: 3.5, magnet: true }
+const near = (a, b, eps = 1e-6) => Math.abs(a - b) < eps
+let passed = 0
+function test(name, fn) {
+    try { fn(); passed++ } catch (e) { console.error(`FAIL ${name}\n  ${e.message}`); process.exitCode = 1 }
+}
+
+test("shape sticks at the target and meets free motion at the rim", () => {
+    assert(near(M.shape(0, 16), 0))
+    assert(near(M.shape(16, 16), 16) && near(M.shape(-16, 16), -16))
+    assert(Math.abs(M.shape(2, 16)) < 0.5, "next to the target it barely moves")
+    const slope = (M.shape(16, 16) - M.shape(15.999, 16)) / 0.001
+    assert(Math.abs(slope - 1) < 0.01, `slope at the rim is ${slope}`)
+})
+
+test("shape never moves backwards", () => {
+    let prev = -Infinity
+    for (let u = -16; u <= 16; u += 0.25) {
+        const s = M.shape(u, 16)
+        assert(s >= prev, `not monotonic at ${u}`)
+        prev = s
+    }
+})
+
+test("far from everything an icon stays exactly where it is put", () => {
+    const m = M.magnetize({ x: 700, y: 400 }, [{ x: 100, y: 100 }], cfg)
+    assert(near(m.x, 700) && near(m.y, 400) && m.guides.length === 0 && !m.lockX && !m.lockY)
+    const s = M.settle({ x: 700, y: 400 }, [{ x: 100, y: 100 }], cfg)
+    assert(near(s.x, 700) && near(s.y, 400))
+})
+
+test("the pull is continuous across the rim of the field", () => {
+    const other = [{ x: 500, y: 300 }]
+    let prev = null
+    for (let x = 470; x <= 530; x += 0.5) {
+        const m = M.magnetize({ x, y: 520 }, other, cfg)
+        if (prev !== null) assert(Math.abs(m.x - prev) <= 1.01, `jump of ${m.x - prev} at ${x}`)
+        prev = m.x
+    }
+})
+
+test("near a neighbour's column it aligns, shows a guide and locks", () => {
+    const m = M.magnetize({ x: 503, y: 520 }, [{ x: 500, y: 300 }], cfg)
+    assert(Math.abs(m.x - 500) < 1.2, `x=${m.x}`)
+    assert(m.lockX && !m.lockY)
+    assert.strictEqual(m.guides.length, 1)
+    assert(m.guides[0].vertical && near(m.guides[0].pos, 500 + cfg.cellW / 2))
+    assert(m.guides[0].from < 300 && m.guides[0].to > 520 + cfg.cellH)
+    const s = M.settle({ x: 503, y: 520 }, [{ x: 500, y: 300 }], cfg)
+    assert(near(s.x, 500) && near(s.y, 520), "x snaps, y stays free")
+})
+
+test("just under a neighbour it lands one cell below", () => {
+    const s = M.settle({ x: 505, y: 300 + cfg.cellH + 6 }, [{ x: 500, y: 300 }], cfg)
+    assert(near(s.x, 500) && near(s.y, 300 + cfg.cellH))
+})
+
+test("outside the capture radius the drop keeps the shown position", () => {
+    const raw = { x: 513, y: 520 }
+    const m = M.magnetize(raw, [{ x: 500, y: 300 }], cfg)
+    const s = M.settle(raw, [{ x: 500, y: 300 }], cfg)
+    assert(!m.lockX && near(s.x, m.x) && s.x > 500 && s.x < 513)
+})
+
+test("distant icons do not pull", () => {
+    const m = M.magnetize({ x: 503, y: 300 + cfg.cellH * 5 }, [{ x: 500, y: 300 }], cfg)
+    assert(near(m.x, 503))
+})
+
+test("the screen margins pull too", () => {
+    const s = M.settle({ x: 15, y: 400 }, [], cfg)
+    assert(near(s.x, cfg.margin))
+    const r = M.settle({ x: cfg.width - cfg.cellW - cfg.margin + 4, y: 400 }, [], cfg)
+    assert(near(r.x, cfg.width - cfg.cellW - cfg.margin))
+})
+
+test("magnet off: free, but still inside the screen", () => {
+    const off = Object.assign({}, cfg, { magnet: false })
+    const m = M.magnetize({ x: 503, y: 520 }, [{ x: 500, y: 300 }], off)
+    assert(near(m.x, 503) && m.guides.length === 0)
+    const s = M.settle({ x: -50, y: 5000 }, [], off)
+    assert(near(s.x, 0) && near(s.y, cfg.height - cfg.cellH))
+})
+
+test("a drop on top of another icon is nudged just clear of it", () => {
+    const others = [{ x: 500, y: 300 }]
+    const s = M.resolve({ x: 520, y: 310 }, others, cfg)
+    assert(!M.stacked(s, others[0], cfg))
+    assert(near(s.x, 500 + cfg.cellW * 0.4) && near(s.y, 310), `landed at ${s.x},${s.y}`)
+})
+
+test("a drop close to another icon, but not on it, stays put", () => {
+    const others = [{ x: 500, y: 300 }]
+    const s = M.resolve({ x: 560, y: 330 }, others, cfg)
+    assert(near(s.x, 560) && near(s.y, 330), `moved to ${s.x},${s.y}`)
+})
+
+test("resolve never leaves the screen or stacks icons, even in a corner", () => {
+    const others = []
+    for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) others.push(M.slot(c, r, cfg))
+    const s = M.resolve({ x: cfg.width, y: 0 }, others, cfg)
+    assert(s.x >= 0 && s.x <= cfg.width - cfg.cellW && s.y >= 0 && s.y <= cfg.height - cfg.cellH)
+    for (const o of others) assert(!M.stacked(s, o, cfg))
+})
+
+test("new icons fill columns from the top-right corner", () => {
+    const a = M.arrange(["a", "b", "c"], cfg)
+    assert(near(a.a.x, cfg.width - cfg.margin - cfg.cellW) && near(a.a.y, cfg.margin))
+    assert(near(a.b.x, a.a.x) && near(a.b.y, cfg.margin + cfg.cellH))
+    const many = M.arrange(Array.from({ length: M.rows(cfg) + 1 }, (_, i) => "n" + i), cfg)
+    assert(near(many["n" + M.rows(cfg)].x, a.a.x - cfg.cellW), "the next column starts to the left")
+})
+
+test("a free slot skips cells taken by freely placed icons", () => {
+    const s = M.freeSlot([{ x: cfg.width - cfg.margin - cfg.cellW - 20, y: cfg.margin + 10 }], cfg)
+    assert(near(s.y, cfg.margin + cfg.cellH))
+})
+
+test("clean up puts every icon on its own nearest slot", () => {
+    const items = [
+        { name: "a", x: 1790, y: 20 }, { name: "b", x: 1795, y: 30 },
+        { name: "c", x: 900, y: 500 }
+    ]
+    const out = M.cleanUp(items, cfg)
+    const seen = new Set()
+    for (const n in out) {
+        const key = out[n].x + ":" + out[n].y
+        assert(!seen.has(key), "two icons on one slot")
+        seen.add(key)
+        assert(near((cfg.width - cfg.margin - out[n].x) % cfg.cellW, 0), "on the lattice")
+    }
+    assert(Math.hypot(out.c.x - 900, out.c.y - 500) < cfg.cellH, "c stays near where it was")
+})
+
+test("with the magnet off an icon lands exactly where it is dropped", () => {
+    const free = Object.assign({}, cfg, { magnet: false })
+    const others = [{ x: 500, y: 300 }, { x: 500 + cfg.cellW, y: 300 }]
+    // next to a row, one px off a neighbour's line, and right on top of one
+    for (const raw of [{ x: 503, y: 300 + cfg.cellH + 2 }, { x: 501, y: 640 }, { x: 504, y: 303 }, { x: cfg.margin + 1, y: cfg.margin + 1 }]) {
+        const m = M.magnetize(raw, others, free)
+        const s = M.settle(raw, others, free)
+        assert(m.x === raw.x && m.y === raw.y && m.guides.length === 0, `shown at ${m.x},${m.y}`)
+        assert(s.x === raw.x && s.y === raw.y, `landed at ${s.x},${s.y} for ${raw.x},${raw.y}`)
+    }
+    const out = M.settle({ x: cfg.width + 50, y: -20 }, others, free)
+    assert(out.x === cfg.width - cfg.cellW && out.y === 0, "still held inside the screen")
+})
+
+console.log(`${passed} passed${process.exitCode ? ", some FAILED" : ""}`)

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Sistema
+GenericName=Ajustes del sistema
+Comment=Los ajustes del escritorio y los atajos de teclado
+Exec=wonderland-sistema
+Icon=wonderland-sistema
+Categories=Settings;Qt;
+Keywords=ajustes;preferencias;configuración;atajos;teclado;settings;
+StartupWMClass=wonderland-sistema

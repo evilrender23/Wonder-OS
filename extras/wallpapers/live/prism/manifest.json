@@ -1,0 +1,160 @@
+{
+  "name": "Prisma",
+  "component": "Prism",
+  "description": "Pirámide de luz volumétrica que gira y descompone el espectro en bandas brillantes.",
+  "tags": [
+    "luz",
+    "espectro",
+    "3d",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "animation",
+      "label": "Animación",
+      "type": "enum",
+      "options": [
+        {
+          "value": "rotate",
+          "label": "Girar"
+        },
+        {
+          "value": "3drotate",
+          "label": "Voltear en 3D"
+        },
+        {
+          "value": "static",
+          "label": "Quieto"
+        }
+      ],
+      "default": "rotate"
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    },
+    {
+      "key": "glow",
+      "label": "Brillo",
+      "type": "float",
+      "min": 0.25,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "scale",
+      "label": "Tamaño",
+      "type": "float",
+      "min": 1.0,
+      "max": 8.0,
+      "step": 0.1,
+      "default": 3.6
+    },
+    {
+      "key": "height",
+      "label": "Altura",
+      "type": "float",
+      "min": 0.5,
+      "max": 8.0,
+      "step": 0.1,
+      "default": 3.5
+    },
+    {
+      "key": "base_width",
+      "label": "Anchura de la base",
+      "type": "float",
+      "min": 0.5,
+      "max": 10.0,
+      "step": 0.1,
+      "default": 5.5
+    },
+    {
+      "key": "hue_shift",
+      "label": "Giro de tono",
+      "type": "float",
+      "min": -180.0,
+      "max": 180.0,
+      "step": 1.0,
+      "default": 0.0
+    },
+    {
+      "key": "color_frequency",
+      "label": "Frecuencia de color",
+      "type": "float",
+      "min": 0.0,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "saturation",
+      "label": "Saturación",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 1.5
+    },
+    {
+      "key": "noise",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "offset_x",
+      "label": "Desplazamiento horizontal",
+      "type": "float",
+      "min": -0.5,
+      "max": 0.5,
+      "step": 0.01,
+      "default": 0.0
+    },
+    {
+      "key": "offset_y",
+      "label": "Desplazamiento vertical",
+      "type": "float",
+      "min": -0.5,
+      "max": 0.5,
+      "step": 0.01,
+      "default": 0.0
+    },
+    {
+      "key": "custom_colors",
+      "label": "Colores propios",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "color_1",
+      "label": "Color 1",
+      "type": "color",
+      "default": "#ff3d7f"
+    },
+    {
+      "key": "color_2",
+      "label": "Color 2",
+      "type": "color",
+      "default": "#3d8bff"
+    },
+    {
+      "key": "color_3",
+      "label": "Color 3",
+      "type": "color",
+      "default": "#ffd23d"
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    }
+  ],
+  "notes": "Sin inclinación hacia el cursor, modo «hover» ni intro. La marcha usa 60 pasos más largos en vez de 100 (a resolución completa); el desplazamiento se da en fracción de pantalla en vez de píxeles, y la paleta propia admite tres colores (desactivada = espectro original). En modo claro la tinta se imprime sobre un papel claro derivado del fondo."
+}

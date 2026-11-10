@@ -1,0 +1,713 @@
+#!/usr/bin/env -S python3 -I
+"""WonderlandWM live wallpapers: list, render and apply them.
+
+A live wallpaper is a folder `<live>/<id>/` with `wallpaper.glsl` (a GLSL ES
+1.00 body without precision/uniform declarations), `manifest.json` (name and
+settings schema) and `preview.png`. `render` prepends the prelude
+(`<live>/lib/prelude.glsl`) and one `#define P_<KEY>` per setting, so the
+compositor sees a plain driftwm background shader. `apply` writes it to
+`~/.config/driftwm/wallpapers/current.glsl`, points `[background]` at it and
+touches the config so driftwm reloads it. `preview` shows a wallpaper the same
+way without keeping it: it writes `preview.glsl` instead, leaves the stored
+settings alone and remembers the `[background]` it covers, so `cancel` puts
+that back and `apply` keeps what is on screen.
+
+A picture of your own is a wallpaper too: `import` copies it to
+`~/.local/share/wonderlandwm/wallpapers/img-<hash>/` (as the PNG or JPEG the
+compositor reads, upright and at most 3840 px on its long side when
+ImageMagick is installed) and from then on it is listed, previewed and applied
+like the others, under the id `img-<hash>`. Its shader is
+`<live>/lib/image.glsl`, which samples the picture through
+`[background] texture`.
+
+  wonderland-wallpaper list                    JSON: wallpapers + state
+  wonderland-wallpaper current                 JSON: state
+  wonderland-wallpaper render ID [JSON] [-o F] generated shader (stdout or F)
+  wonderland-wallpaper apply ID [JSON]         apply, merging JSON into the
+                                               settings stored for ID
+  wonderland-wallpaper preview ID [JSON]       show ID with JSON over its stored
+                                               settings, without saving either
+  wonderland-wallpaper cancel                  end a preview: back to what was
+                                               applied before it
+  wonderland-wallpaper reset ID                forget the settings of ID
+  wonderland-wallpaper restore                 put back the [background] that
+                                               was there before the first apply
+  wonderland-wallpaper import FILE...          add pictures; JSON: their ids
+  wonderland-wallpaper pick                    the same, asking for the files in
+                                               a dialog (kdialog or zenity, or
+                                               the command in $WONDERLAND_PICKER,
+                                               one path per output line)
+  wonderland-wallpaper remove ID               delete an imported picture
+"""
+
+import hashlib
+import json
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "driftwm"
+CONFIG = Path(os.environ.get("DRIFTWM_CONFIG", CONFIG_DIR / "config.toml"))
+STATE = CONFIG_DIR / "wallpaper.json"
+OUTPUT = CONFIG_DIR / "wallpapers" / "current.glsl"
+PREVIEW = CONFIG_DIR / "wallpapers" / "preview.glsl"
+# Imported pictures live with the user's data, not in the config folder:
+# extras/install.sh replaces `wallpapers/` there.
+IMAGES = (Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share")
+          / "wonderlandwm" / "wallpapers")
+IMAGE_ID_RE = re.compile(r"^img-[0-9a-f]{12}$")
+# Longest side kept on import. A larger texture costs memory on every output
+# and shimmers when it is drawn at less than half its size.
+IMAGE_MAX_SIDE = 3840
+
+# Settings every wallpaper gets on top of its own, shown under «General».
+GLOBAL_PARAMS = [
+    {"key": "speed", "label": "Velocidad", "type": "float", "min": 0.0, "max": 3.0,
+     "step": 0.05, "default": 1.0, "group": "general",
+     "description": "0 congela el fondo y deja de redibujarlo."},
+    {"key": "parallax", "label": "Desplazar con el lienzo", "type": "float", "min": 0.0,
+     "max": 1.0, "step": 0.05, "default": 0.0, "group": "general",
+     "description": "Cuánto se mueve el fondo al desplazar el lienzo infinito."},
+    {"key": "zoom_follow", "label": "Seguir el zoom del lienzo", "type": "bool",
+     "default": False, "group": "general"},
+    {"key": "fps", "label": "Fotogramas por segundo", "type": "int", "min": 10, "max": 240,
+     "step": 5, "default": 60, "group": "general",
+     "description": "Tope de redibujado del fondo animado; menos gasta menos GPU."},
+]
+
+PARALLAX, ZOOM_FOLLOW = GLOBAL_PARAMS[1], GLOBAL_PARAMS[2]
+
+# Settings of an imported picture.
+IMAGE_PARAMS = [
+    {"key": "fit", "label": "Ajuste", "type": "enum", "default": "cover", "options": [
+        {"value": "cover", "label": "Rellenar"},
+        {"value": "contain", "label": "Ajustar"},
+        {"value": "stretch", "label": "Estirar"},
+        {"value": "center", "label": "Centrar"},
+        {"value": "tile", "label": "Mosaico"}],
+     "description": "Rellenar cubre la pantalla recortando lo que sobra; Ajustar muestra "
+                    "la imagen entera; Centrar y Mosaico la dejan a su tamaño real."},
+    {"key": "scale", "label": "Tamaño", "type": "float", "min": 0.25, "max": 4.0,
+     "step": 0.05, "default": 1.0},
+    {"key": "focus_x", "label": "Encuadre horizontal", "type": "float", "min": 0.0,
+     "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "focus_y", "label": "Encuadre vertical", "type": "float", "min": 0.0,
+     "max": 1.0, "step": 0.01, "default": 0.5,
+     "description": "Qué parte se ve cuando la imagen no cabe entera, o dónde queda "
+                    "cuando es más pequeña que la pantalla."},
+    {"key": "background", "label": "Color de fondo", "type": "color", "default": "#000000",
+     "description": "Se ve alrededor de la imagen con Ajustar y Centrar."},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.2, "max": 1.5,
+     "step": 0.05, "default": 1.0},
+    {"key": "saturation", "label": "Saturación", "type": "float", "min": 0.0, "max": 2.0,
+     "step": 0.05, "default": 1.0},
+    {"key": "vignette", "label": "Viñeta", "type": "float", "min": 0.0, "max": 1.0,
+     "step": 0.05, "default": 0.0},
+]
+
+COLOR_RE = re.compile(r"^#?([0-9a-fA-F]{6})$")
+
+
+def live_dirs():
+    env = os.environ.get("WONDERLAND_WALLPAPERS")
+    here = Path(__file__).resolve().parent.parent / "wallpapers" / "live"
+    for d in [Path(env)] if env else []:
+        yield d
+    yield CONFIG_DIR / "wallpapers" / "live"
+    yield here
+    yield Path("/usr/local/share/driftwm/wallpapers/live")
+    yield Path("/usr/share/driftwm/wallpapers/live")
+
+
+def live_dir():
+    for d in live_dirs():
+        if (d / "lib" / "prelude.glsl").is_file():
+            return d
+    sys.exit("wonderland-wallpaper: no live wallpapers found (set WONDERLAND_WALLPAPERS)")
+
+
+def is_image(wid):
+    return bool(IMAGE_ID_RE.match(wid))
+
+
+def load_manifest(root, wid):
+    if is_image(wid):
+        return load_image_manifest(wid)
+    path = root / wid / "manifest.json"
+    if not path.is_file():
+        sys.exit(f"wonderland-wallpaper: unknown wallpaper {wid!r}")
+    m = json.loads(path.read_text())
+    m["id"] = wid
+    return m
+
+
+def load_image_manifest(wid):
+    folder = IMAGES / wid
+    try:
+        m = json.loads((folder / "manifest.json").read_text())
+        image = folder / m["file"]
+    except (OSError, ValueError, KeyError, TypeError):
+        sys.exit(f"wonderland-wallpaper: unknown wallpaper {wid!r}")
+    if image.parent != folder or not image.is_file():
+        sys.exit(f"wonderland-wallpaper: the picture of {wid!r} is missing")
+    thumb = folder / "preview.jpg"
+    return {
+        "id": wid,
+        "kind": "image",
+        "static": True,
+        "name": str(m.get("name") or wid),
+        "description": "Imagen importada · {}×{} px".format(m.get("width", "?"), m.get("height", "?")),
+        "tags": ["imagen", "foto", "importada"],
+        "image": str(image),
+        "preview": str(thumb if thumb.is_file() else image),
+        "imported": m.get("imported", 0),
+    }
+
+
+def all_params(manifest):
+    if manifest.get("kind") == "image":
+        return ([dict(p, group="wallpaper") for p in IMAGE_PARAMS]
+                + [dict(PARALLAX), dict(ZOOM_FOLLOW)])
+    own = [dict(p, group=p.get("group", "wallpaper")) for p in manifest.get("params", [])]
+    return own + [dict(p) for p in GLOBAL_PARAMS]
+
+
+def coerce(param, value):
+    """Clamp/validate one value against its schema; None when invalid."""
+    t = param["type"]
+    try:
+        if t == "float":
+            v = float(value)
+            if v != v:
+                return None
+            return min(max(v, float(param["min"])), float(param["max"]))
+        if t == "int":
+            v = int(round(float(value)))
+            return min(max(v, int(param["min"])), int(param["max"]))
+        if t == "bool":
+            if isinstance(value, str):
+                return value.lower() in ("1", "true", "yes", "on")
+            return bool(value)
+        if t == "color":
+            m = COLOR_RE.match(str(value).strip())
+            return "#" + m.group(1).lower() if m else None
+        if t == "enum":
+            values = [o["value"] for o in param["options"]]
+            return value if value in values else None
+    except (TypeError, ValueError):
+        return None
+    raise ValueError(f"unknown param type {t!r}")
+
+
+def resolve(manifest, stored):
+    values = {}
+    for p in all_params(manifest):
+        v = coerce(p, stored[p["key"]]) if p["key"] in stored else None
+        values[p["key"]] = coerce(p, p["default"]) if v is None else v
+    return values
+
+
+def glsl_float(v):
+    s = f"{float(v):.6f}".rstrip("0")
+    return s + "0" if s.endswith(".") else s
+
+
+def define(param, value):
+    name = "P_" + param["key"].upper()
+    t = param["type"]
+    if t == "float":
+        body = glsl_float(value)
+    elif t == "int":
+        body = str(int(value))
+    elif t == "bool":
+        body = "1" if value else "0"
+    elif t == "color":
+        h = value.lstrip("#")
+        r, g, b = (int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+        body = f"vec3({glsl_float(r)}, {glsl_float(g)}, {glsl_float(b)})"
+    else:
+        body = str([o["value"] for o in param["options"]].index(value))
+    return f"#define {name} {body}"
+
+
+def render_image(root, manifest, values):
+    """The texture shader that draws an imported picture."""
+    uses_camera = values["parallax"] > 0
+    # Screen pixels matter when the picture keeps its own size or moves with
+    # the canvas; otherwise the viewport's aspect is enough.
+    uses_zoom = uses_camera or values["zoom_follow"] or values["fit"] in ("center", "tile")
+    head = [f"// WonderlandWM image wallpaper: {manifest['id']} (generated, do not edit)",
+            f"#define WL_USES_CAMERA {int(uses_camera)}",
+            f"#define WL_USES_ZOOM {int(uses_zoom)}"]
+    for p in all_params(manifest):
+        head.append(define(p, values[p["key"]]))
+    src = "\n".join(head) + "\n" + (root / "lib" / "image.glsl").read_text()
+    # driftwm redraws on every camera or zoom change while these are declared.
+    if not uses_camera:
+        src = src.replace("uniform vec2 u_camera;\n", "")
+    if not uses_zoom:
+        src = src.replace("uniform float u_zoom;\n", "")
+    return src
+
+
+def render(root, manifest, values):
+    """The full shader source driftwm compiles (it prepends `#version 100`)."""
+    if manifest.get("kind") == "image":
+        return render_image(root, manifest, values)
+    prelude = (root / "lib" / "prelude.glsl").read_text()
+    body = (root / manifest["id"] / "wallpaper.glsl").read_text()
+    head = []
+    for ext in manifest.get("extensions", []):
+        head.append(f"#extension {ext} : enable")
+    head.append(f"// WonderlandWM live wallpaper: {manifest['id']} (generated, do not edit)")
+    animated = values.get("speed", 0) > 0 and not manifest.get("static", False)
+    head.append(f"#define WL_ANIMATED {1 if animated else 0}")
+    for p in all_params(manifest):
+        head.append(define(p, values[p["key"]]))
+    src = "\n".join(head) + "\n" + prelude + "\n" + body
+    if not animated:
+        # driftwm redraws every frame while the source declares u_time.
+        src = src.replace("uniform float u_time;", "")
+    return src
+
+
+def load_state():
+    try:
+        state = json.loads(STATE.read_text())
+    except (OSError, ValueError):
+        return {"current": None, "settings": {}}
+    try:
+        block = background_block(CONFIG.read_text()) or ""
+    except OSError:
+        block = ""
+    # A preview hides the applied background: judge by the one it covers.
+    # If something else replaced the preview since, it is over.
+    if "preview" in state:
+        if str(PREVIEW) in block:
+            block = state["preview"].get("background") or ""
+        else:
+            del state["preview"]
+    # Something else (wonderland-theme, a hand edit) may have replaced the
+    # background since: then no live wallpaper is current.
+    if state.get("current") and str(OUTPUT) not in block:
+        state["current"] = None
+    return state
+
+
+def save_state(state):
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = STATE.with_suffix(".tmp")
+    tmp.write_text(json.dumps(state, indent=2, ensure_ascii=False) + "\n")
+    tmp.replace(STATE)
+
+
+SECTION_RE = re.compile(r"(?m)^\[background\][^\n]*\n(?:(?!^\[).*\n?)*")
+
+
+def background_block(text):
+    m = SECTION_RE.search(text)
+    return m.group(0) if m else None
+
+
+def set_background(text, block):
+    m = SECTION_RE.search(text)
+    if m:
+        return text[:m.start()] + block + text[m.end():]
+    sep = "" if text.endswith("\n") or not text else "\n"
+    return text + sep + "\n" + block
+
+
+def write_config(text):
+    """Replace config.toml atomically, after the compositor accepts it."""
+    tmp = CONFIG.with_suffix(".toml.wallpaper-tmp")
+    tmp.write_text(text)
+    if shutil.which("driftwm"):
+        r = subprocess.run(["driftwm", "--config", str(tmp), "--check-config"],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            tmp.unlink()
+            sys.exit("wonderland-wallpaper: driftwm rejects the new config:\n"
+                     + (r.stdout + r.stderr).strip())
+    tmp.replace(CONFIG)
+
+
+def toml_string(value):
+    """A TOML basic string (JSON's escapes are a subset of TOML's)."""
+    return json.dumps(str(value), ensure_ascii=False)
+
+
+def image_ids():
+    if not IMAGES.is_dir():
+        return []
+    return [d.name for d in IMAGES.iterdir()
+            if is_image(d.name) and (d / "manifest.json").is_file()]
+
+
+def cmd_list(root):
+    out = []
+    for d in sorted(root.iterdir()):
+        if d.name == "lib" or not (d / "manifest.json").is_file():
+            continue
+        m = load_manifest(root, d.name)
+        m["params"] = all_params(m)
+        m["preview"] = str(d / "preview.png") if (d / "preview.png").is_file() else ""
+        out.append(m)
+    out.sort(key=lambda m: m.get("name", m["id"]).lower())
+    # The user's own pictures come first, newest first.
+    images = []
+    for wid in image_ids():
+        try:
+            m = load_image_manifest(wid)
+        except SystemExit:
+            continue  # a folder without its picture: not listed
+        m["params"] = all_params(m)
+        images.append(m)
+    images.sort(key=lambda m: (-float(m["imported"] or 0), m["name"].lower()))
+    out = images + out
+    print(json.dumps({"wallpapers": out, "state": load_state(), "root": str(root)},
+                     ensure_ascii=False))
+
+
+def parse_json_arg(args):
+    if not args:
+        return {}
+    try:
+        v = json.loads(args[0])
+    except ValueError as e:
+        sys.exit(f"wonderland-wallpaper: invalid JSON: {e}")
+    if not isinstance(v, dict):
+        sys.exit("wonderland-wallpaper: settings must be a JSON object")
+    return v
+
+
+def cmd_apply(root, wid, overrides, keep=True):
+    """Show `wid` on screen; `keep=False` is a preview that `cancel` undoes."""
+    manifest = load_manifest(root, wid)
+    state = load_state()
+    stored = dict(state.get("settings", {}).get(wid, {}))
+    schema = {p["key"]: p for p in all_params(manifest)}
+    for key, value in overrides.items():
+        # An invalid value keeps the previous one instead of the default.
+        if key in schema and coerce(schema[key], value) is not None:
+            stored[key] = value
+    values = resolve(manifest, stored)
+    target = OUTPUT if keep else PREVIEW
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_suffix(".tmp")
+    tmp.write_text(render(root, manifest, values))
+    tmp.replace(target)
+
+    text = CONFIG.read_text() if CONFIG.is_file() else ""
+    # The background under a running preview is the one it covers.
+    preview = state.pop("preview", None)
+    covered = preview.get("background") if preview else background_block(text)
+    fps = values["fps"] if values.get("speed", 0) > 0 else 0
+    texture = f'texture = {toml_string(manifest["image"])}\n' if "image" in manifest else ""
+    block = ("[background]\n"
+             "# Managed by wonderland-wallpaper (Spotlight → «wallpapers»).\n"
+             'type = "shader"\n'
+             f'path = "{target}"\n'
+             f"{texture}"
+             f"animate_fps = {fps}\n\n")
+    new = set_background(text, block)
+    if new != text:
+        write_config(new)
+    else:
+        os.utime(CONFIG)  # same config: still reload so the new shader is read
+    if keep:
+        # Remember the background a live wallpaper replaces, for `restore`.
+        if str(OUTPUT) not in (covered or ""):
+            state["previous_background"] = covered
+        state["current"] = wid
+        state.setdefault("settings", {})[wid] = {k: v for k, v in values.items()}
+    else:
+        state["preview"] = {"id": wid, "values": values, "background": covered}
+    save_state(state)
+    print(json.dumps({"applied" if keep else "previewing": wid, "values": values},
+                     ensure_ascii=False))
+
+
+def cmd_cancel():
+    state = load_state()
+    preview = state.pop("preview", None)
+    if preview is None:
+        # Nothing on screen to undo; still drop a stale record of one.
+        if STATE.is_file():
+            save_state(state)
+        print("no preview")
+        return
+    text = CONFIG.read_text()
+    covered = preview.get("background")
+    write_config(set_background(text, covered) if covered else SECTION_RE.sub("", text))
+    save_state(state)
+    print("cancelled")
+
+
+def cmd_restore():
+    state = load_state()
+    if "previous_background" not in state:
+        sys.exit("wonderland-wallpaper: nothing to restore")
+    text = CONFIG.read_text()
+    prev = state.pop("previous_background")
+    state.pop("preview", None)
+    if prev:
+        text = set_background(text, prev)
+    else:
+        text = SECTION_RE.sub("", text)
+    write_config(text)
+    state["current"] = None
+    save_state(state)
+    print("restored")
+
+
+def image_size(path):
+    """(kind, width, height) of a PNG or JPEG file, None for anything else."""
+    try:
+        with open(path, "rb") as f:
+            head = f.read(26)
+            if head[:8] == b"\x89PNG\r\n\x1a\n" and head[12:16] == b"IHDR":
+                return ("png", int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big"))
+            if head[:2] != b"\xff\xd8":
+                return None
+            f.seek(2)
+            while True:
+                b = f.read(1)
+                if not b:
+                    return None
+                if b != b"\xff":
+                    continue
+                marker = f.read(1)
+                while marker == b"\xff":
+                    marker = f.read(1)
+                if not marker:
+                    return None
+                m = marker[0]
+                if m in (0x01, 0xD8) or 0xD0 <= m <= 0xD7:
+                    continue
+                seg = f.read(2)
+                if len(seg) < 2:
+                    return None
+                length = int.from_bytes(seg, "big")
+                # SOF0..SOF15, minus DHT (C4), JPG (C8) and DAC (CC).
+                if 0xC0 <= m <= 0xCF and m not in (0xC4, 0xC8, 0xCC):
+                    d = f.read(5)
+                    if len(d) < 5:
+                        return None
+                    return ("jpeg", int.from_bytes(d[3:5], "big"), int.from_bytes(d[1:3], "big"))
+                f.seek(length - 2, 1)
+    except OSError:
+        return None
+
+
+def magick():
+    return shutil.which("magick")
+
+
+def needs_convert(src, info):
+    """Whether the compositor would show `src` wrong or not at all as it is."""
+    if info is None:
+        return True
+    kind, w, h = info
+    if max(w, h) > IMAGE_MAX_SIDE:
+        return True
+    if kind == "jpeg" and magick():
+        # The compositor ignores the EXIF rotation phones and cameras write.
+        r = subprocess.run([magick(), "identify", "-format", "%[orientation]", f"{src}[0]"],
+                           capture_output=True, text=True)
+        return r.returncode == 0 and r.stdout.strip() not in ("", "Undefined", "TopLeft")
+    return False
+
+
+def import_image(src):
+    """Copy one picture into IMAGES and return its id; raises ValueError."""
+    src = Path(src).expanduser()
+    if not src.is_file():
+        raise ValueError("no existe o no es un archivo")
+    src = src.resolve()
+    IMAGES.mkdir(parents=True, exist_ok=True)
+    work = IMAGES / f".import-{os.getpid()}"
+    shutil.rmtree(work, ignore_errors=True)
+    work.mkdir()
+    try:
+        info = image_size(src)
+        if needs_convert(src, info):
+            if not magick():
+                raise ValueError("solo se admiten PNG y JPEG de hasta "
+                                 f"{IMAGE_MAX_SIDE} px sin ImageMagick instalado")
+            # PNG stays PNG (flat colours, transparency); the rest become JPEG.
+            ext = "png" if info and info[0] == "png" else "jpg"
+            out = work / f"image.{ext}"
+            cmd = [magick(), f"{src}[0]", "-auto-orient",
+                   "-resize", f"{IMAGE_MAX_SIDE}x{IMAGE_MAX_SIDE}>", "-strip"]
+            if ext == "jpg":
+                cmd += ["-background", "black", "-alpha", "remove", "-alpha", "off",
+                        "-colorspace", "sRGB", "-quality", "93"]
+            r = subprocess.run(cmd + [str(out)], capture_output=True, text=True)
+            if r.returncode != 0 or not out.is_file():
+                raise ValueError("no es una imagen que se pueda leer")
+        else:
+            out = work / ("image.png" if info[0] == "png" else "image.jpg")
+            shutil.copyfile(src, out)
+        info = image_size(out)
+        if info is None or info[1] <= 0 or info[2] <= 0:
+            raise ValueError("no es una imagen que se pueda leer")
+        digest = hashlib.sha1(out.read_bytes()).hexdigest()[:12]
+        wid = f"img-{digest}"
+        dest = IMAGES / wid
+        if (dest / "manifest.json").is_file():
+            return wid  # the same picture again
+        if magick():
+            # A small thumbnail for the gallery; without it the panel scales
+            # the picture itself.
+            subprocess.run([magick(), str(out), "-thumbnail", "480x270^", "-gravity", "center",
+                            "-extent", "480x270", "-background", "black", "-alpha", "remove",
+                            "-quality", "85", str(work / "preview.jpg")], capture_output=True)
+        (work / "manifest.json").write_text(json.dumps({
+            "name": src.stem, "source": str(src), "file": out.name,
+            "width": info[1], "height": info[2], "imported": time.time(),
+        }, indent=2, ensure_ascii=False) + "\n")
+        shutil.rmtree(dest, ignore_errors=True)
+        work.rename(dest)
+        return wid
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def cmd_import(paths):
+    imported, errors = [], []
+    for p in paths:
+        try:
+            wid = import_image(p)
+            if wid not in imported:
+                imported.append(wid)
+        except ValueError as e:
+            errors.append(f"{Path(p).name}: {e}")
+    print(json.dumps({"imported": imported, "errors": errors}, ensure_ascii=False))
+    return 0 if imported or not errors else 1
+
+
+def pictures_dir():
+    if shutil.which("xdg-user-dir"):
+        r = subprocess.run(["xdg-user-dir", "PICTURES"], capture_output=True, text=True)
+        d = Path(r.stdout.strip() or "/nonexistent")
+        if r.returncode == 0 and d.is_dir() and d != Path.home():
+            return d
+    return Path.home()
+
+
+def picker_command():
+    """The file dialog to run and whether it exists."""
+    custom = os.environ.get("WONDERLAND_PICKER")
+    if custom:
+        return shlex.split(custom)
+    exts = ["png", "jpg", "jpeg"]
+    if magick():
+        exts += ["webp", "avif", "heic", "heif", "jxl", "bmp", "gif", "tif", "tiff"]
+    start = str(pictures_dir()) + "/"
+    title = "Importar imagen de fondo"
+    if shutil.which("kdialog"):
+        globs = " ".join(f"*.{e} *.{e.upper()}" for e in exts)
+        return ["kdialog", "--title", title, "--multiple", "--separate-output",
+                "--getopenfilename", start, f"Imágenes ({globs})"]
+    if shutil.which("zenity"):
+        globs = " ".join(f"*.{e} *.{e.upper()}" for e in exts)
+        return ["zenity", "--file-selection", "--multiple", "--separator=\n",
+                f"--title={title}", f"--filename={start}", f"--file-filter=Imágenes | {globs}"]
+    return None
+
+
+def cmd_pick():
+    cmd = picker_command()
+    if not cmd:
+        sys.exit("wonderland-wallpaper: no hay selector de archivos (instala kdialog o zenity, "
+                 "o usa `wonderland-wallpaper import ARCHIVO`)")
+    try:
+        r = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+    except OSError as e:
+        sys.exit(f"wonderland-wallpaper: {cmd[0]}: {e}")
+    paths = [line for line in r.stdout.splitlines() if line.strip()]
+    if r.returncode != 0 or not paths:
+        print(json.dumps({"imported": [], "errors": [], "cancelled": True}))
+        return 0
+    return cmd_import(paths)
+
+
+def cmd_remove(wid):
+    if not is_image(wid) or not (IMAGES / wid).is_dir():
+        sys.exit(f"wonderland-wallpaper: {wid!r} is not an imported picture")
+    state = load_state()
+    if (state.get("preview") or {}).get("id") == wid:
+        cmd_cancel()
+        state = load_state()
+    if state.get("current") == wid:
+        # Its picture is on screen: back to the background from before the
+        # managed wallpapers, as «restore» does.
+        cmd_restore()
+        state = load_state()
+    if state.get("settings", {}).pop(wid, None) is not None:
+        save_state(state)
+    shutil.rmtree(IMAGES / wid)
+    print("removed")
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__)
+        return
+    cmd, args = argv[0], argv[1:]
+    if cmd == "restore":
+        return cmd_restore()
+    if cmd == "cancel":
+        return cmd_cancel()
+    if cmd == "import":
+        if not args:
+            sys.exit("wonderland-wallpaper: import needs at least one file")
+        return cmd_import(args)
+    if cmd == "pick":
+        return cmd_pick()
+    if cmd == "remove":
+        if not args:
+            sys.exit("wonderland-wallpaper: remove needs a wallpaper id")
+        return cmd_remove(args[0])
+    if cmd == "current":
+        print(json.dumps(load_state(), ensure_ascii=False))
+        return
+    root = live_dir()
+    if cmd == "list":
+        return cmd_list(root)
+    if cmd in ("render", "apply", "preview", "reset") and not args:
+        sys.exit(f"wonderland-wallpaper: {cmd} needs a wallpaper id")
+    if cmd == "render":
+        out = None
+        if "-o" in args:
+            i = args.index("-o")
+            out = args[i + 1]
+            args = args[:i] + args[i + 2:]
+        manifest = load_manifest(root, args[0])
+        src = render(root, manifest, resolve(manifest, parse_json_arg(args[1:])))
+        if out:
+            Path(out).write_text(src)
+        else:
+            sys.stdout.write(src)
+        return
+    if cmd == "apply":
+        return cmd_apply(root, args[0], parse_json_arg(args[1:]))
+    if cmd == "preview":
+        return cmd_apply(root, args[0], parse_json_arg(args[1:]), keep=False)
+    if cmd == "reset":
+        state = load_state()
+        state.get("settings", {}).pop(args[0], None)
+        save_state(state)
+        if state.get("current") == args[0]:
+            cmd_apply(root, args[0], {})
+        return
+    sys.exit(f"wonderland-wallpaper: unknown command {cmd!r}")
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -1,0 +1,25 @@
+{
+  "name": "Letras con fallos",
+  "component": "LetterGlitch",
+  "description": "Una rejilla de letras tenues que se encienden y cambian en destellos de color, como una pantalla con fallos.",
+  "tags": ["letras", "glitch", "matriz", "oscuro"],
+  "params": [
+    {"key": "color_count", "label": "Colores de fallo", "type": "int", "min": 1, "max": 3, "step": 1, "default": 2},
+    {"key": "glitch_color_1", "label": "Color de fallo 1", "type": "color", "default": "#ffffff"},
+    {"key": "glitch_color_2", "label": "Color de fallo 2", "type": "color", "default": "#61dca3"},
+    {"key": "glitch_color_3", "label": "Color de fallo 3", "type": "color", "default": "#61b3dc"},
+    {"key": "base_color", "label": "Color de las letras", "type": "color", "default": "#ffffff"},
+    {"key": "font_size", "label": "Tamaño de letra (px)", "type": "float", "min": 6.0, "max": 96.0, "step": 1.0, "default": 14.0},
+    {"key": "spacing", "label": "Espaciado", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.6},
+    {"key": "density", "label": "Densidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.9},
+    {"key": "base_opacity", "label": "Opacidad en reposo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.16},
+    {"key": "glitch_amount", "label": "Cantidad de fallos", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "flow", "label": "Ondas de luz", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "smooth", "label": "Fundidos suaves", "type": "bool", "default": true},
+    {"key": "edge_fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.0},
+    {"key": "center_fade", "label": "Despejar el centro", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "Las letras usan una fuente de puntos 5x7 integrada con los 59 caracteres por defecto (sin fuente ni caracteres personalizados). Los fallos son eventos pseudoaleatorios por celda con el mismo ritmo, rachas en fila y fundidos; sin cursor, clics (desgarro/estallido) ni intro. En modo claro las tintas se oscurecen y el fondo pasa a claro si el elegido es oscuro."
+}

@@ -1,0 +1,8 @@
+[Unit]
+Description=OpenAI Codex usage (app-server RPC, feeds the Quickshell quota widget)
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/codex-usage
+StandardOutput=journal
+StandardError=journal

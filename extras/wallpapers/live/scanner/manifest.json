@@ -1,0 +1,36 @@
+{
+  "name": "Escáner",
+  "component": "Scanner",
+  "description": "Líneas onduladas que un barrido de luz va encendiendo, con aire de monitor CRT.",
+  "tags": ["líneas", "neón", "retro", "oscuro"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "color1", "label": "Color de las líneas en reposo", "type": "color", "default": "#5227ff"},
+    {"key": "color2", "label": "Color de las líneas encendidas", "type": "color", "default": "#ff9ffc"},
+    {"key": "color3", "label": "Color del cabezal", "type": "color", "default": "#ffffff"},
+    {"key": "sweep_speed", "label": "Velocidad del barrido", "type": "float", "min": 0.0, "max": 1.5, "step": 0.01, "default": 0.25},
+    {"key": "sweep_width", "label": "Distancia entre barridos", "type": "float", "min": 0.3, "max": 5.0, "step": 0.05, "default": 1.6},
+    {"key": "trail", "label": "Estela", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "reverse", "label": "Barrido invertido", "type": "bool", "default": false},
+    {"key": "direction", "label": "Dirección del barrido", "type": "enum", "default": "vertical", "options": [
+      {"value": "vertical", "label": "Vertical"},
+      {"value": "horizontal", "label": "Horizontal"},
+      {"value": "diagonal", "label": "Diagonal"}
+    ]},
+    {"key": "scale", "label": "Escala", "type": "float", "min": 0.4, "max": 4.0, "step": 0.05, "default": 1.5},
+    {"key": "frequency", "label": "Frecuencia de las ondas", "type": "float", "min": 0.0, "max": 6.0, "step": 0.1, "default": 2.0},
+    {"key": "ripple", "label": "Altura de las ondas", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.22},
+    {"key": "band_density", "label": "Densidad de líneas", "type": "float", "min": 2.0, "max": 40.0, "step": 0.5, "default": 11.0},
+    {"key": "line_width", "label": "Grosor de línea (px)", "type": "float", "min": 0.3, "max": 6.0, "step": 0.1, "default": 1.2},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.6},
+    {"key": "color_spread", "label": "Franjas de color", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.7},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.2, "max": 2.5, "step": 0.05, "default": 1.0},
+    {"key": "vignette", "label": "Viñeta", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.3},
+    {"key": "scanlines", "label": "Líneas CRT", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.3, "step": 0.01, "default": 0.04},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "paper", "label": "Fondo en modo claro", "type": "color", "default": "#f5f5f7"}
+  ],
+  "notes": "Sin cursor (lente que dobla las líneas), sin pulsos al hacer clic ni el barrido de encendido inicial. «Líneas CRT» une el interruptor y la intensidad de las líneas de barrido del original (0 = apagadas), igual que «Grano»."
+}

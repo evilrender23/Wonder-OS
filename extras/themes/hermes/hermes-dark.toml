@@ -1,0 +1,54 @@
+# Hermes Dark — WonderlandWM theme.
+# Colors come from Hermes Agent Desktop's default "nous" theme, dark mode
+# (app.asar → dist/assets/storage-*.js theme table and main-*.css :root
+# tokens, composited to opaque values over the app chrome). Merge these
+# sections into your config.toml; install.sh copies the shaders into place.
+
+[decorations]
+bg_color = "#010409"            # sidebarBackground: Hermes header/sidebar surface
+fg_color = "#e6edf3"            # foreground
+corner_radius = 6               # Hermes uses small, crisp radii (--radius-scalar .2)
+shadow = true
+# Glass windows: everything is frosted, and an unfocused window lets a little
+# of the canvas through. The focused one stays solid so text stays crisp.
+blur = true
+opacity = 0.93
+opacity_focused = 1.0
+title_bar_height = 38           # WonderTerm's header height; its chrome is laid out for it
+font = "Ubuntu"                 # WonderTerm's interface face (egui's Ubuntu Light);
+font_size = 9.9                 # falls back through fontconfig when it isn't installed
+font_weight = "light"
+title_align = "left"            # Hermes headers are left-aligned
+border_width = 1
+border_color = "#30363d"        # border
+border_color_focused = "#4a84fe" # Nous blue (dark) marks the focused window
+
+[background]
+type = "shader"
+path = "~/.config/driftwm/themes/hermes/hermes-dark.glsl"
+# Dots keep their screen size and fade by level as you zoom out. Measured on a
+# Radeon 610M at 1280x800: about +0.8-1.2 ms of GPU per frame while the camera
+# moves, compared with the built-in dot grid.
+# Static alternative: same GPU cost as the built-in grid once baked, but
+# +100-300 MB of VRAM for the chunk cache, and one bake stalled a frame 1.5 s.
+# path = "~/.config/driftwm/themes/hermes/hermes-dark-static.glsl"
+# cache_shader = true
+
+[output.outline]
+color = "#4a84fe"
+thickness = 1
+opacity = 0.45
+
+# Terminals and other apps that draw no title bar of their own get the Hermes
+# header instead of a bare frame.
+[[window_rules]]
+app_id = "Alacritty"
+decoration = "server"
+
+[[window_rules]]
+app_id = "foot"
+decoration = "server"
+
+[[window_rules]]
+app_id = "kitty"
+decoration = "server"

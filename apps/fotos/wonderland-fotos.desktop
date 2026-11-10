@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Fotos
+Name[en]=Photos
+GenericName=Biblioteca de imágenes y vídeos
+GenericName[en]=Photo and Video Library
+Comment=Tus fotos y vídeos: por fecha, por carpeta, en álbumes y favoritos
+Comment[en]=Your photos and videos: by date, by folder, in albums and favourites
+Exec=wonderland-fotos %U
+Icon=wonderland-fotos
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-fotos
+MimeType=image/jpeg;image/png;image/gif;image/webp;image/bmp;image/tiff;image/heif;image/heic;image/avif;image/jxl;image/svg+xml;image/x-adobe-dng;video/mp4;video/x-matroska;video/webm;video/quicktime;video/x-msvideo;video/mpeg;video/x-m4v;video/3gpp;video/mp2t;
+Categories=Graphics;Photography;Viewer;Qt;
+Keywords=imágenes;imagenes;vídeos;videos;galería;galeria;álbumes;biblioteca;photos;pictures;gallery;images;

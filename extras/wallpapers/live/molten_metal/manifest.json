@@ -1,0 +1,203 @@
+{
+  "name": "Metal fundido",
+  "component": "MoltenMetal",
+  "extensions": [
+    "GL_OES_standard_derivatives"
+  ],
+  "description": "Filamentos de metal incandescente que se pliegan y arremolinan con núcleos al rojo blanco.",
+  "tags": [
+    "metal",
+    "fuego",
+    "remolino",
+    "oscuro",
+    "brillante"
+  ],
+  "params": [
+    {
+      "key": "color_count",
+      "label": "Número de colores",
+      "type": "int",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "key": "color_1",
+      "label": "Color 1 (brillo tenue)",
+      "type": "color",
+      "default": "#5227ff"
+    },
+    {
+      "key": "color_2",
+      "label": "Color 2",
+      "type": "color",
+      "default": "#ff9ffc"
+    },
+    {
+      "key": "color_3",
+      "label": "Color 3",
+      "type": "color",
+      "default": "#ff6a3d"
+    },
+    {
+      "key": "color_4",
+      "label": "Color 4",
+      "type": "color",
+      "default": "#ffd23f"
+    },
+    {
+      "key": "color_5",
+      "label": "Color 5",
+      "type": "color",
+      "default": "#3dd6ff"
+    },
+    {
+      "key": "core_color",
+      "label": "Color del núcleo",
+      "type": "color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "scale",
+      "label": "Escala",
+      "type": "float",
+      "min": 0.5,
+      "max": 12.0,
+      "step": 0.1,
+      "default": 4.0
+    },
+    {
+      "key": "detail",
+      "label": "Capas de filamentos",
+      "type": "float",
+      "min": 1.0,
+      "max": 8.0,
+      "step": 0.1,
+      "default": 3.0
+    },
+    {
+      "key": "glow",
+      "label": "Calor",
+      "type": "float",
+      "min": 0.2,
+      "max": 5.0,
+      "step": 0.05,
+      "default": 1.6
+    },
+    {
+      "key": "thickness",
+      "label": "Grosor",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "swirl",
+      "label": "Espiral",
+      "type": "float",
+      "min": -4.0,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "turbulence",
+      "label": "Turbulencia",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.5,
+      "step": 0.01,
+      "default": 0.2
+    },
+    {
+      "key": "haze",
+      "label": "Bruma entre filamentos",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.75
+    },
+    {
+      "key": "brightness",
+      "label": "Brillo",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.3
+    },
+    {
+      "key": "color_mode",
+      "label": "Equilibrio del degradado",
+      "type": "enum",
+      "options": [
+        {
+          "value": "molten",
+          "label": "Fundido"
+        },
+        {
+          "value": "ember",
+          "label": "Brasa (más caliente)"
+        },
+        {
+          "value": "frost",
+          "label": "Escarcha (más fría)"
+        }
+      ],
+      "default": "molten"
+    },
+    {
+      "key": "rotation",
+      "label": "Rotación (grados)",
+      "type": "float",
+      "min": -180.0,
+      "max": 180.0,
+      "step": 1.0,
+      "default": 0.0
+    },
+    {
+      "key": "offset_x",
+      "label": "Desplazamiento horizontal",
+      "type": "float",
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01,
+      "default": 0.0
+    },
+    {
+      "key": "offset_y",
+      "label": "Desplazamiento vertical",
+      "type": "float",
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.01,
+      "default": 0.0
+    },
+    {
+      "key": "grain",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.0,
+      "max": 0.3,
+      "step": 0.01,
+      "default": 0.05
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "Mismo campo de filamentos plegados que el original; se quitan el rastro de calor del cursor, los destellos al hacer clic, la deriva con el ratón y la intro de ignición."
+}

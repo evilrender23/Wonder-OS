@@ -1,0 +1,2 @@
+drift-bench-client: 50 windows, animated=true, 640x400
+t=10s frames_drawn=3096

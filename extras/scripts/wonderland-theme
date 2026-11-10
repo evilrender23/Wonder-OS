@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""Switch WonderlandWM's compositor theme (decorations, background, outline).
+
+    wonderland-theme hermes-light|hermes-dark [--wallpaper IMG [--mode wallpaper|tile]]
+                     [--config PATH] [--dry-run]
+    wonderland-theme --list
+
+The theme's tables go into one marked block of config.toml, replacing the
+previous block and any loose [decorations]/[background]/[output.outline]
+table, so running it again never stacks duplicates. The result is checked
+with `driftwm --check-config` before it replaces the file (the compositor
+hot-reloads it); the previous file is kept as config.toml.bak.
+"""
+import argparse
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+BEGIN = "# >>> wonderland-theme (managed: edits inside are replaced) >>>"
+END = "# <<< wonderland-theme <<<"
+MANAGED = {"decorations", "background", "output.outline"}
+HEADER = re.compile(r"^\s*(\[\[?)\s*([A-Za-z0-9_.\"-]+)\s*\]\]?")
+
+config_home = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+here = Path(__file__).resolve().parent
+
+
+def theme_dirs():
+    return [config_home / "driftwm/themes/hermes", here.parent / "themes/hermes",
+            Path("/usr/share/wonderlandwm/themes/hermes")]
+
+
+def find_theme(name):
+    for d in theme_dirs():
+        p = d / f"{name}.toml"
+        if p.is_file():
+            return p
+    return None
+
+
+def strip_managed(text):
+    """Drop the marked block and loose managed tables; keep everything else."""
+    out, skipping, in_block = [], False, False
+    for line in text.splitlines(keepends=True):
+        if line.strip() == BEGIN:
+            in_block = True
+            continue
+        if in_block:
+            if line.strip() == END:
+                in_block = False
+            continue
+        m = HEADER.match(line)
+        if m:
+            skipping = m.group(1) == "[" and m.group(2).strip('"') in MANAGED
+        if not skipping:
+            out.append(line)
+    return "".join(out).rstrip() + "\n"
+
+
+def theme_block(theme_path, wallpaper, mode):
+    body = theme_path.read_text()
+    # The theme files point their shaders at the install dir; fall back to the
+    # copy next to the theme file when that isn't installed.
+    def fix(m):
+        p = Path(os.path.expanduser(m.group(2)))
+        if not p.exists() and (theme_path.parent / p.name).exists():
+            return f'{m.group(1)}"{theme_path.parent / p.name}"'
+        return m.group(0)
+    body = re.sub(r'^(path\s*=\s*)"([^"]+)"', fix, body, flags=re.M)
+    if wallpaper:
+        body = re.sub(r"(?ms)^\[background\]\n.*?(?=^\[|\Z)",
+                      f'[background]\ntype = "{mode}"\npath = "{wallpaper}"\n\n', body)
+    return f"{BEGIN}\n{body.rstrip()}\n{END}\n"
+
+
+def check(path):
+    driftwm = shutil.which("driftwm") or shutil.which("wonderlandwm")
+    if not driftwm:
+        return True, "driftwm not on PATH; not validated"
+    r = subprocess.run([driftwm, "--check-config", "--config", str(path)], capture_output=True, text=True)
+    return r.returncode == 0, (r.stdout + r.stderr).strip()
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("theme", nargs="?")
+    ap.add_argument("--wallpaper", help="image to use instead of the theme's background")
+    ap.add_argument("--mode", choices=["wallpaper", "tile"], default="wallpaper")
+    ap.add_argument("--config", type=Path, default=config_home / "driftwm/config.toml")
+    ap.add_argument("--dry-run", action="store_true", help="print the new config instead of writing it")
+    ap.add_argument("--list", action="store_true")
+    a = ap.parse_args()
+
+    if a.list:
+        names = sorted({p.stem for d in theme_dirs() if d.is_dir() for p in d.glob("*.toml")})
+        print("\n".join(names))
+        return 0
+    if not a.theme:
+        ap.error("theme name required (see --list)")
+    theme = find_theme(a.theme)
+    if not theme:
+        print(f"wonderland-theme: unknown theme {a.theme!r} (looked in {', '.join(map(str, theme_dirs()))})", file=sys.stderr)
+        return 2
+    wallpaper = None
+    if a.wallpaper:
+        wp = Path(os.path.expanduser(a.wallpaper)).resolve()
+        if not wp.is_file():
+            print(f"wonderland-theme: no such image {wp}", file=sys.stderr)
+            return 2
+        wallpaper = str(wp)
+
+    current = a.config.read_text() if a.config.exists() else ""
+    new = strip_managed(current) + "\n" + theme_block(theme, wallpaper, a.mode)
+    if a.dry_run:
+        sys.stdout.write(new)
+        return 0
+
+    a.config.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(prefix=".config.", suffix=".toml", dir=a.config.parent)
+    with os.fdopen(fd, "w") as f:
+        f.write(new)
+    ok, msg = check(tmp)
+    if not ok:
+        os.unlink(tmp)
+        print(f"wonderland-theme: the result doesn't validate, config left untouched:\n{msg}", file=sys.stderr)
+        return 1
+    if a.config.exists():
+        shutil.copy2(a.config, a.config.with_name(a.config.name + ".bak"))
+    os.replace(tmp, a.config)
+    print(f"{a.theme}{' + ' + wallpaper if wallpaper else ''} → {a.config}" + (f" ({msg})" if msg and "OK" not in msg else ""))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

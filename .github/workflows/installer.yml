@@ -1,0 +1,118 @@
+name: Installer
+
+# Runs install.sh end to end on a clean Arch Linux, as a user would: packages,
+# build, login session, apps, desktop config; then a re-run (which must keep the
+# user's config) and the uninstall. Weekly too, because what breaks an installer
+# is usually the distro (a renamed package), not this repository.
+
+on:
+  pull_request:
+    paths:
+      - install.sh
+      - dev/scripts/install-wonderlandwm
+      - extras/**
+      - apps/**
+      - resources/**
+      - Cargo.toml
+      - Cargo.lock
+      - .github/workflows/installer.yml
+  push:
+    branches: [main]
+    paths:
+      - install.sh
+      - dev/scripts/install-wonderlandwm
+      - extras/**
+      - apps/**
+      - resources/**
+      - Cargo.toml
+      - Cargo.lock
+      - .github/workflows/installer.yml
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - run: shellcheck install.sh dev/scripts/install-wonderlandwm extras/install.sh
+          extras/greeter/install.sh extras/greeter/scripts/wonderland-greeter
+          extras/greeter/scripts/wonderland-greeter-ui
+      - run: shellcheck -x apps/wonderupdate/src/wonderupdate apps/wonderupdate/src/lib/*.sh apps/wonderupdate/tests/run.sh
+      - name: WonderUpdate tests
+        run: apps/wonderupdate/tests/run.sh
+      - run: shellcheck apps/wondermirror/tests/run.sh apps/wondermirror/patches/build-freerdp.sh
+      - name: Wonder Mirror tests
+        run: apps/wondermirror/tests/run.sh
+
+  arch:
+    name: install on Arch Linux
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    container: archlinux:base-devel
+    steps:
+      # No git yet on purpose: checkout falls back to a tarball, and install.sh
+      # has to bring its own dependencies (and sync pacman's databases).
+      - uses: actions/checkout@v5
+
+      - name: A normal user with sudo
+        run: |
+          useradd -m tester
+          echo 'tester ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/tester
+          chown -R tester: "$GITHUB_WORKSPACE"
+          echo "AS_TESTER=sudo -u tester -H env -C $GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+
+      - name: ./install.sh --dry-run changes nothing
+        run: |
+          $AS_TESTER ./install.sh --yes --dry-run
+          test ! -e /usr/local/bin/driftwm
+          test ! -e /home/tester/.config/driftwm
+
+      - name: ./install.sh
+        run: $AS_TESTER ./install.sh --yes
+
+      - name: Everything is in place
+        run: |
+          set -x
+          cmp /usr/local/bin/driftwm target/release/driftwm
+          test -L /usr/local/bin/wonderlandwm
+          test -x /usr/local/bin/driftwm-session
+          grep -q '^Name=WonderlandWM' /usr/share/wayland-sessions/wonderlandwm.desktop
+          test -f /usr/lib/systemd/user/driftwm.service
+          ! ldd /usr/local/bin/driftwm | grep 'not found'
+          for app in apps/*/; do
+            app=$(basename "$app")
+            test -x "/usr/local/bin/wonderland-$app" || test -x "/usr/local/bin/$app"
+          done
+          cfg=/home/tester/.config/driftwm
+          test -f $cfg/config.toml
+          test -f $cfg/quickshell/shell.qml
+          test -x $cfg/scripts/wonderland-theme
+          test -d $cfg/themes/hermes
+          test -f /home/tester/.local/share/icons/WhiteSur/index.theme
+          $AS_TESTER /usr/local/bin/driftwm --check-config | tee check.log
+          grep -q 'Config OK' check.log
+
+      - name: A re-run keeps the user's config
+        run: |
+          cfg=/home/tester/.config/driftwm/config.toml
+          echo '# my own setting' | $AS_TESTER tee -a $cfg
+          $AS_TESTER ./install.sh --yes
+          tail -n1 $cfg | grep -q '# my own setting'
+
+      - name: ./install.sh --uninstall
+        run: |
+          $AS_TESTER ./install.sh --yes --uninstall
+          test ! -e /usr/local/bin/driftwm
+          test ! -e /usr/share/wayland-sessions/wonderlandwm.desktop
+          for app in apps/*/; do
+            app=$(basename "$app")
+            test ! -e "/usr/local/bin/wonderland-$app" && test ! -e "/usr/local/bin/$app"
+          done
+          test -f /home/tester/.config/driftwm/config.toml

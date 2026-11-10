@@ -1,0 +1,235 @@
+{
+  "name": "Antigravedad",
+  "component": "Antigravity",
+  "description": "Miles de partículas flotantes que se ordenan en un anillo ondulante que deriva por la pantalla.",
+  "tags": [
+    "partículas",
+    "anillo",
+    "colorido",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "colors",
+      "label": "Número de colores",
+      "type": "int",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "key": "color_1",
+      "label": "Color 1",
+      "type": "color",
+      "default": "#5227ff"
+    },
+    {
+      "key": "color_2",
+      "label": "Color 2",
+      "type": "color",
+      "default": "#ff9ffc"
+    },
+    {
+      "key": "color_3",
+      "label": "Color 3",
+      "type": "color",
+      "default": "#b497cf"
+    },
+    {
+      "key": "color_4",
+      "label": "Color 4",
+      "type": "color",
+      "default": "#27c4ff"
+    },
+    {
+      "key": "color_mode",
+      "label": "Reparto de colores",
+      "type": "enum",
+      "options": [
+        {
+          "value": "conic",
+          "label": "Cónico"
+        },
+        {
+          "value": "radial",
+          "label": "Radial"
+        },
+        {
+          "value": "random",
+          "label": "Aleatorio"
+        }
+      ],
+      "default": "conic"
+    },
+    {
+      "key": "color_speed",
+      "label": "Giro de la paleta",
+      "type": "float",
+      "min": -0.5,
+      "max": 0.5,
+      "step": 0.01,
+      "default": 0.05
+    },
+    {
+      "key": "particle_shape",
+      "label": "Forma de las partículas",
+      "type": "enum",
+      "options": [
+        {
+          "value": "capsule",
+          "label": "Cápsula"
+        },
+        {
+          "value": "sphere",
+          "label": "Esfera"
+        },
+        {
+          "value": "box",
+          "label": "Caja"
+        },
+        {
+          "value": "tetrahedron",
+          "label": "Tetraedro"
+        }
+      ],
+      "default": "capsule"
+    },
+    {
+      "key": "count",
+      "label": "Número de partículas",
+      "type": "int",
+      "min": 200,
+      "max": 6000,
+      "step": 50,
+      "default": 1500
+    },
+    {
+      "key": "particle_size",
+      "label": "Tamaño de partícula",
+      "type": "float",
+      "min": 0.2,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.9
+    },
+    {
+      "key": "particle_variance",
+      "label": "Pulso de tamaño",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "magnet_radius",
+      "label": "Radio del imán",
+      "type": "float",
+      "min": 2.0,
+      "max": 16.0,
+      "step": 0.1,
+      "default": 9.0
+    },
+    {
+      "key": "ring_radius",
+      "label": "Radio del anillo",
+      "type": "float",
+      "min": 1.0,
+      "max": 14.0,
+      "step": 0.1,
+      "default": 7.0
+    },
+    {
+      "key": "field_strength",
+      "label": "Cohesión del anillo",
+      "type": "float",
+      "min": 1.0,
+      "max": 30.0,
+      "step": 0.5,
+      "default": 10.0
+    },
+    {
+      "key": "wave_amplitude",
+      "label": "Ondulación del anillo",
+      "type": "float",
+      "min": 0.0,
+      "max": 5.0,
+      "step": 0.1,
+      "default": 1.0
+    },
+    {
+      "key": "wave_count",
+      "label": "Número de ondas",
+      "type": "int",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "key": "wave_speed",
+      "label": "Velocidad de las ondas",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.4
+    },
+    {
+      "key": "rotation_speed",
+      "label": "Giro del anillo",
+      "type": "float",
+      "min": -2.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "pulse_speed",
+      "label": "Velocidad del pulso",
+      "type": "float",
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.1,
+      "default": 3.0
+    },
+    {
+      "key": "depth_factor",
+      "label": "Profundidad 3D",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "ambient",
+      "label": "Partículas lejanas",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.25
+    },
+    {
+      "key": "auto_animate",
+      "label": "Deriva automática",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Color de fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "La simulación de muelles se resuelve de forma analítica: el anillo sigue la deriva automática con un retardo fijo, las partículas lejanas están en su rejilla de origen y las capturadas se reparten en ranuras angulares del anillo. Sin cursor, explosión al hacer clic ni intro."
+}

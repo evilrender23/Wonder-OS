@@ -1,0 +1,24 @@
+{
+ "crashed": true,
+ "exit_code": 0,
+ "panics": [],
+ "hours": 0.35,
+ "ops": {
+  "close": 467,
+  "term": 322,
+  "spawn": 663,
+  "chord": 1621,
+  "camera": 947,
+  "focus": 975,
+  "move": 1588,
+  "zoom": 823,
+  "action": 1676,
+  "resize": 999,
+  "bookmark": 155,
+  "kill": 319,
+  "suspend": 178
+ },
+ "ipc_errors": 374,
+ "rest_samples": 2,
+ "pass": false
+}

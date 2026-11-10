@@ -1,0 +1,240 @@
+{
+  "name": "Hipervelocidad",
+  "component": "Hyperspeed",
+  "description": "Autopista nocturna con estelas de faros y pilotos que corren por una carretera sinuosa.",
+  "tags": [
+    "carretera",
+    "luces",
+    "velocidad",
+    "3d",
+    "oscuro",
+    "neón"
+  ],
+  "params": [
+    {
+      "key": "curve",
+      "label": "Forma de la carretera",
+      "type": "enum",
+      "options": [
+        {
+          "value": "straight",
+          "label": "Recta"
+        },
+        {
+          "value": "gentle",
+          "label": "Suave"
+        },
+        {
+          "value": "winding",
+          "label": "Sinuosa"
+        },
+        {
+          "value": "hills",
+          "label": "Colinas"
+        },
+        {
+          "value": "racing",
+          "label": "Circuito"
+        },
+        {
+          "value": "deep",
+          "label": "Profunda"
+        }
+      ],
+      "default": "winding"
+    },
+    {
+      "key": "curvature",
+      "label": "Curvatura",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "fov",
+      "label": "Campo de visión (grados)",
+      "type": "float",
+      "min": 30.0,
+      "max": 150.0,
+      "step": 1.0,
+      "default": 90.0
+    },
+    {
+      "key": "lanes",
+      "label": "Carriles por sentido",
+      "type": "int",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "key": "road_width",
+      "label": "Ancho de cada sentido",
+      "type": "float",
+      "min": 4.0,
+      "max": 30.0,
+      "step": 0.5,
+      "default": 10.0
+    },
+    {
+      "key": "median_width",
+      "label": "Ancho de la mediana",
+      "type": "float",
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.1,
+      "default": 2.0
+    },
+    {
+      "key": "density",
+      "label": "Coches por sentido",
+      "type": "int",
+      "min": 0,
+      "max": 120,
+      "step": 1,
+      "default": 40
+    },
+    {
+      "key": "trail_length",
+      "label": "Longitud de las estelas",
+      "type": "float",
+      "min": 0.1,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "light_size",
+      "label": "Grosor de las estelas",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "poles",
+      "label": "Farolas por arcén",
+      "type": "int",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "key": "pole_height",
+      "label": "Altura de las farolas",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "dust",
+      "label": "Partículas en el aire",
+      "type": "int",
+      "min": 0,
+      "max": 400,
+      "step": 1,
+      "default": 100
+    },
+    {
+      "key": "glow",
+      "label": "Resplandor",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.6
+    },
+    {
+      "key": "reflections",
+      "label": "Reflejos en el asfalto",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "road_opacity",
+      "label": "Opacidad de la carretera",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.1
+    },
+    {
+      "key": "tail_color_1",
+      "label": "Pilotos (color 1)",
+      "type": "color",
+      "default": "#d856bf"
+    },
+    {
+      "key": "tail_color_2",
+      "label": "Pilotos (color 2)",
+      "type": "color",
+      "default": "#6750a2"
+    },
+    {
+      "key": "tail_color_3",
+      "label": "Pilotos (color 3)",
+      "type": "color",
+      "default": "#c247ac"
+    },
+    {
+      "key": "head_color_1",
+      "label": "Faros (color 1)",
+      "type": "color",
+      "default": "#03b3c3"
+    },
+    {
+      "key": "head_color_2",
+      "label": "Faros (color 2)",
+      "type": "color",
+      "default": "#0e5ea5"
+    },
+    {
+      "key": "head_color_3",
+      "label": "Faros (color 3)",
+      "type": "color",
+      "default": "#324555"
+    },
+    {
+      "key": "pole_color",
+      "label": "Color de las farolas",
+      "type": "color",
+      "default": "#03b3c3"
+    },
+    {
+      "key": "road_color",
+      "label": "Color del asfalto",
+      "type": "color",
+      "default": "#08080a"
+    },
+    {
+      "key": "line_color",
+      "label": "Color de las marcas viales",
+      "type": "color",
+      "default": "#25252d"
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "La escena 3D instanciada se resuelve analíticamente por píxel: los coches se reparten por turnos entre carriles, el polvo se agrupa en 12 capas de profundidad y el bloom es un halo analítico. Sin turbo al pulsar, sin cámara que sigue al cursor; en modo claro el asfalto y las marcas usan los colores claros del original."
+}

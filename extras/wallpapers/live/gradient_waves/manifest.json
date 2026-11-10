@@ -1,0 +1,191 @@
+{
+  "name": "Olas degradadas",
+  "component": "GradientWaves",
+  "description": "Mar de olas en perspectiva con degradado de color que se funde en la bruma del horizonte.",
+  "tags": [
+    "olas",
+    "mar",
+    "3d",
+    "degradado",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "horizon_color",
+      "label": "Color del horizonte",
+      "type": "color",
+      "default": "#5227ff"
+    },
+    {
+      "key": "wave_color",
+      "label": "Color de las olas",
+      "type": "color",
+      "default": "#ff9ffc"
+    },
+    {
+      "key": "crest_color",
+      "label": "Color de las crestas",
+      "type": "color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "amplitude",
+      "label": "Altura de las olas",
+      "type": "float",
+      "min": 0.0,
+      "max": 8.0,
+      "step": 0.1,
+      "default": 2.5
+    },
+    {
+      "key": "wave_scale",
+      "label": "Densidad de olas",
+      "type": "float",
+      "min": 0.1,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.6
+    },
+    {
+      "key": "wave_ratio",
+      "label": "Olas largas / cruzadas",
+      "type": "float",
+      "min": 0.1,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.9
+    },
+    {
+      "key": "swell",
+      "label": "Serpenteo del oleaje",
+      "type": "float",
+      "min": 0.0,
+      "max": 80.0,
+      "step": 1.0,
+      "default": 35.0
+    },
+    {
+      "key": "turbulence",
+      "label": "Turbulencia",
+      "type": "float",
+      "min": 0.0,
+      "max": 60.0,
+      "step": 1.0,
+      "default": 20.0
+    },
+    {
+      "key": "tilt",
+      "label": "Inclinación de la cámara",
+      "type": "float",
+      "min": 10.0,
+      "max": 85.0,
+      "step": 1.0,
+      "default": 64.0
+    },
+    {
+      "key": "zoom",
+      "label": "Zoom",
+      "type": "float",
+      "min": 0.5,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "height",
+      "label": "Nivel del agua",
+      "type": "float",
+      "min": -5.0,
+      "max": 20.0,
+      "step": 0.1,
+      "default": 5.5
+    },
+    {
+      "key": "fog_depth",
+      "label": "Profundidad de la bruma",
+      "type": "float",
+      "min": 5.0,
+      "max": 60.0,
+      "step": 0.5,
+      "default": 15.0
+    },
+    {
+      "key": "relief",
+      "label": "Relieve",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "light_angle",
+      "label": "Ángulo de la luz",
+      "type": "float",
+      "min": 0.0,
+      "max": 360.0,
+      "step": 1.0,
+      "default": 120.0
+    },
+    {
+      "key": "sheen",
+      "label": "Brillo en las crestas",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "brightness",
+      "label": "Brillo",
+      "type": "float",
+      "min": 0.1,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "grain",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.0,
+      "max": 0.5,
+      "step": 0.01,
+      "default": 0.2
+    },
+    {
+      "key": "quality",
+      "label": "Calidad",
+      "type": "enum",
+      "options": [
+        {
+          "value": "low",
+          "label": "Baja"
+        },
+        {
+          "value": "medium",
+          "label": "Media"
+        },
+        {
+          "value": "high",
+          "label": "Alta"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "Mismo ray-marching del campo de alturas que el original; se quitan el giro de cámara y la luz que siguen al ratón, los oleajes al hacer clic y la intro."
+}

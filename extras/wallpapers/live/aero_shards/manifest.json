@@ -1,0 +1,39 @@
+{
+  "name": "Esquirlas de cristal",
+  "component": "AeroShards",
+  "description": "Cintas de esquirlas de vidrio que fluyen a varias profundidades, con bordes que atrapan la luz y marcas de topógrafo.",
+  "tags": ["cristal", "3d", "partículas", "oscuro"],
+  "heavy": true,
+  "params": [
+    {"key": "shard_color", "label": "Color de las esquirlas", "type": "color", "default": "#896abd"},
+    {"key": "accent_color", "label": "Color de la luz", "type": "color", "default": "#a855f7"},
+    {"key": "placement", "label": "Recorrido de las cintas", "type": "enum", "default": "full", "options": [
+      {"value": "full", "label": "Toda la pantalla"},
+      {"value": "left", "label": "Lado izquierdo"},
+      {"value": "right", "label": "Lado derecho"},
+      {"value": "center", "label": "Anillo central"}
+    ]},
+    {"key": "material", "label": "Material", "type": "enum", "default": "glass", "options": [
+      {"value": "glass", "label": "Vidrio"},
+      {"value": "chrome", "label": "Cromo"}
+    ]},
+    {"key": "markers", "label": "Marcas", "type": "enum", "default": "plus", "options": [
+      {"value": "plus", "label": "Cruces"},
+      {"value": "dots", "label": "Puntos"},
+      {"value": "none", "label": "Ninguna"}
+    ]},
+    {"key": "count", "label": "Número de esquirlas", "type": "int", "min": 200, "max": 3000, "step": 50, "default": 1300},
+    {"key": "shard_size", "label": "Tamaño de las esquirlas", "type": "float", "min": 0.3, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "spread", "label": "Anchura de las cintas", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "twist", "label": "Torsión", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "billow", "label": "Ondulación", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "scale", "label": "Zoom de la escena", "type": "float", "min": 0.5, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "depth_of_field", "label": "Profundidad de campo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.75},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.35},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.06},
+    {"key": "vignette", "label": "Viñeta", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.3},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false, "description": "Vidrio tintado suave para fondos claros; si el fondo es oscuro se usa uno claro."}
+  ],
+  "notes": "Escena WebGPU reconstruida en una pasada: cada cinta es una banda analítica en pantalla con una esquirla por celda (solo se evalúan las vecinas), el vidrio es una placa biselada con un único rayo refractado y el desenfoque y el bloom se aproximan ensanchando bordes y con un halo; sin interacción, pulsos, agrupado ni intro."
+}

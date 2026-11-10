@@ -1,0 +1,48 @@
+{
+  "name": "Baldosas ácidas",
+  "component": "AcidSquares",
+  "description": "Un suelo de baldosas acolchadas que ondula en 3D bajo dos luces de colores.",
+  "tags": ["3d", "cuadrícula", "neón", "oscuro"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "color", "label": "Color de las baldosas", "type": "color", "default": "#120f17"},
+    {"key": "accent_color", "label": "Color de la primera luz", "type": "color", "default": "#ff4fb8"},
+    {"key": "secondary_color", "label": "Color de la segunda luz", "type": "color", "default": "#3b6bff"},
+    {"key": "tile_size", "label": "Tamaño de las baldosas", "type": "float", "min": 0.3, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "gap", "label": "Separación", "type": "float", "min": 0.0, "max": 0.6, "step": 0.01, "default": 0.12},
+    {"key": "roundness", "label": "Redondez", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.25},
+    {"key": "softness", "label": "Suavidad de los bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "bulge", "label": "Abombado", "type": "float", "min": 0.0, "max": 1.5, "step": 0.05, "default": 0.3},
+    {"key": "rotation", "label": "Rotación de la cuadrícula (grados)", "type": "float", "min": -90.0, "max": 90.0, "step": 1.0, "default": 35.0},
+    {"key": "gloss", "label": "Brillo especular", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "waves", "label": "Altura del oleaje", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "wave_scale", "label": "Tamaño del oleaje", "type": "float", "min": 0.2, "max": 5.0, "step": 0.05, "default": 1.0},
+    {"key": "shape", "label": "Forma de las ondas", "type": "enum", "default": "square", "options": [
+      {"value": "square", "label": "Cuadrada"},
+      {"value": "round", "label": "Redonda"}
+    ]},
+    {"key": "pulse", "label": "Altura de las ondas", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "pulse_speed", "label": "Velocidad de las ondas", "type": "float", "min": 0.05, "max": 3.0, "step": 0.05, "default": 0.45},
+    {"key": "pulse_spacing", "label": "Tiempo entre ondas", "type": "float", "min": 0.2, "max": 6.0, "step": 0.1, "default": 1.0},
+    {"key": "pulse_width", "label": "Anchura de las ondas", "type": "float", "min": 0.1, "max": 5.0, "step": 0.1, "default": 1.0},
+    {"key": "pulse_origin", "label": "Origen de las ondas", "type": "enum", "default": "center", "options": [
+      {"value": "center", "label": "Centro"},
+      {"value": "random", "label": "Aleatorio"}
+    ]},
+    {"key": "lighting", "label": "Iluminación", "type": "enum", "default": "split", "options": [
+      {"value": "split", "label": "A los lados"},
+      {"value": "backlit", "label": "Contraluz"},
+      {"value": "overhead", "label": "Cenital"}
+    ]},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.2, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "tilt", "label": "Inclinación de la vista", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.7},
+    {"key": "zoom", "label": "Zoom", "type": "float", "min": 0.3, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "depth", "label": "Alcance", "type": "float", "min": 3.0, "max": 40.0, "step": 0.5, "default": 10.0},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.12},
+    {"key": "fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "paper", "label": "Fondo en modo claro", "type": "color", "default": "#f5f5f7"}
+  ],
+  "notes": "La malla 3D desplazada se sustituye por un trazado de rayos corto sobre el mismo campo de alturas, con la misma cámara y sombreado. Las ondas siguen el mismo calendario; se omiten el cursor (hundir/levantar, ondas al clic, cámara que lo sigue) y la aparición inicial. En modo claro las baldosas toman el color del fondo claro, como pide el original (color de baldosa = color de la página)."
+}

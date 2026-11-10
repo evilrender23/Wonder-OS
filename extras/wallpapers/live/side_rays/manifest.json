@@ -1,0 +1,31 @@
+{
+  "name": "Rayos laterales",
+  "component": "SideRays",
+  "description": "Haces de luz cálida y fría que entran en abanico desde una esquina.",
+  "tags": ["luz", "rayos", "cálido", "oscuro"],
+  "params": [
+    {"key": "ray_color1", "label": "Color de los rayos superiores", "type": "color", "default": "#ffc46b"},
+    {"key": "ray_color2", "label": "Color de los rayos inferiores", "type": "color", "default": "#96c8ff"},
+    {"key": "blend", "label": "Mezcla entre colores", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "origin", "label": "Origen de la luz", "type": "enum", "default": "top-right", "options": [
+      {"value": "top-right", "label": "Arriba a la derecha"},
+      {"value": "top-left", "label": "Arriba a la izquierda"},
+      {"value": "bottom-right", "label": "Abajo a la derecha"},
+      {"value": "bottom-left", "label": "Abajo a la izquierda"},
+      {"value": "right", "label": "Derecha"},
+      {"value": "left", "label": "Izquierda"}
+    ]},
+    {"key": "intensity", "label": "Intensidad", "type": "float", "min": 0.5, "max": 5.0, "step": 0.05, "default": 2.0},
+    {"key": "spread", "label": "Apertura del abanico", "type": "float", "min": 0.1, "max": 8.0, "step": 0.05, "default": 2.0},
+    {"key": "density", "label": "Densidad de rayos", "type": "float", "min": 1.0, "max": 40.0, "step": 0.5, "default": 5.0},
+    {"key": "sharpness", "label": "Nitidez", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "tilt", "label": "Inclinación (grados)", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": 0.0},
+    {"key": "falloff", "label": "Atenuación con la distancia", "type": "float", "min": 0.2, "max": 6.0, "step": 0.05, "default": 1.6},
+    {"key": "glow", "label": "Resplandor del foco", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "saturation", "label": "Saturación", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "dust", "label": "Polvo en suspensión", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "Sin seguimiento del ratón ni intro; el antialiasing con fwidth se calcula de forma analítica. En modo claro, si el fondo elegido es oscuro se usa un fondo claro."
+}

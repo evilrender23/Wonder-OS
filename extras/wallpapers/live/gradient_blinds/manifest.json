@@ -1,0 +1,232 @@
+{
+  "name": "Persianas degradadas",
+  "component": "GradientBlinds",
+  "description": "Lamas verticales con un degradado de color, relieve y un foco de luz que deriva.",
+  "tags": [
+    "persianas",
+    "gradiente",
+    "luz",
+    "oscuro"
+  ],
+  "extensions": [
+    "GL_OES_standard_derivatives"
+  ],
+  "params": [
+    {
+      "key": "colors",
+      "label": "Número de colores",
+      "type": "int",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "key": "color_1",
+      "label": "Color 1",
+      "type": "color",
+      "default": "#ff9ffc"
+    },
+    {
+      "key": "color_2",
+      "label": "Color 2",
+      "type": "color",
+      "default": "#5227ff"
+    },
+    {
+      "key": "color_3",
+      "label": "Color 3",
+      "type": "color",
+      "default": "#00d4ff"
+    },
+    {
+      "key": "color_4",
+      "label": "Color 4",
+      "type": "color",
+      "default": "#ffd36e"
+    },
+    {
+      "key": "angle",
+      "label": "Ángulo (grados)",
+      "type": "float",
+      "min": -90.0,
+      "max": 90.0,
+      "step": 1.0,
+      "default": 0.0
+    },
+    {
+      "key": "blind_count",
+      "label": "Número de lamas",
+      "type": "int",
+      "min": 1,
+      "max": 64,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "key": "blind_min_width",
+      "label": "Anchura mínima de lama (px)",
+      "type": "float",
+      "min": 10.0,
+      "max": 400.0,
+      "step": 1.0,
+      "default": 60.0
+    },
+    {
+      "key": "shine_direction",
+      "label": "Borde iluminado",
+      "type": "enum",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierdo"
+        },
+        {
+          "value": "right",
+          "label": "Derecho"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "key": "light_color",
+      "label": "Color de la luz",
+      "type": "color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "spotlight_radius",
+      "label": "Radio del foco",
+      "type": "float",
+      "min": 0.05,
+      "max": 2.0,
+      "step": 0.01,
+      "default": 0.5
+    },
+    {
+      "key": "spotlight_softness",
+      "label": "Suavidad del foco",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "spotlight_opacity",
+      "label": "Intensidad del foco",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "idle",
+      "label": "Movimiento del foco",
+      "type": "enum",
+      "options": [
+        {
+          "value": "drift",
+          "label": "Deriva"
+        },
+        {
+          "value": "center",
+          "label": "Centrado"
+        }
+      ],
+      "default": "drift"
+    },
+    {
+      "key": "shine",
+      "label": "Brillo del borde",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.4
+    },
+    {
+      "key": "relief",
+      "label": "Relieve",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.5
+    },
+    {
+      "key": "glow",
+      "label": "Halo de color",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.4
+    },
+    {
+      "key": "sway",
+      "label": "Balanceo",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.35
+    },
+    {
+      "key": "perspective",
+      "label": "Perspectiva",
+      "type": "float",
+      "min": -1.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "gradient_speed",
+      "label": "Desplazamiento del degradado",
+      "type": "float",
+      "min": 0.0,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "mirror_gradient",
+      "label": "Degradado en espejo",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "distort_amount",
+      "label": "Ondulación",
+      "type": "float",
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.1,
+      "default": 0.0
+    },
+    {
+      "key": "noise",
+      "label": "Grano",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.01,
+      "default": 0.3
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Color de fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "Sin ratón: el foco sigue la deriva automática del componente (o queda centrado) y se quitan la inclinación al pasar el cursor, las ondas al hacer clic y la intro. La mezcla «lighten» con la página se hace contra el color de fondo; la paleta admite hasta 4 colores."
+}

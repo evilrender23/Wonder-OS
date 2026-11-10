@@ -1,0 +1,26 @@
+{
+  "name": "Líneas de flujo",
+  "component": "FluxLines",
+  "description": "Contornos luminosos de un fluido que se agita y deriva.",
+  "tags": ["líneas", "fluido", "oscuro"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "color_1", "label": "Color 1", "type": "color", "default": "#ffffff"},
+    {"key": "color_2", "label": "Color 2", "type": "color", "default": "#ffffff"},
+    {"key": "color_3", "label": "Color 3", "type": "color", "default": "#ffffff"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "scale", "label": "Escala", "type": "float", "min": 0.3, "max": 5.0, "step": 0.05, "default": 1.6},
+    {"key": "turbulence", "label": "Turbulencia", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "fluidity", "label": "Fluidez", "type": "float", "min": 0.01, "max": 0.2, "step": 0.01, "default": 0.1},
+    {"key": "rim_width", "label": "Ancho del halo", "type": "float", "min": 0.12, "max": 1.0, "step": 0.01, "default": 0.2},
+    {"key": "sharpness", "label": "Nitidez del halo", "type": "float", "min": 0.2, "max": 8.0, "step": 0.1, "default": 2.5},
+    {"key": "shimmer", "label": "Fragmentación", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.5},
+    {"key": "glow", "label": "Brillo", "type": "float", "min": 0.5, "max": 6.0, "step": 0.1, "default": 2.0},
+    {"key": "line_width", "label": "Grosor del trazo (px)", "type": "float", "min": 0.0, "max": 6.0, "step": 0.25, "default": 1.0},
+    {"key": "flow_direction", "label": "Dirección del flujo", "type": "enum", "default": "down",
+     "options": [{"value": "up", "label": "Arriba"}, {"value": "down", "label": "Abajo"},
+                 {"value": "left", "label": "Izquierda"}, {"value": "right", "label": "Derecha"}]},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "Un solo pase idéntico al original; sin imán del cursor, remolino al hacer clic ni intro, y la paleta admite tres colores en lugar de hasta ocho. En modo claro un fondo oscuro se sustituye por blanco."
+}

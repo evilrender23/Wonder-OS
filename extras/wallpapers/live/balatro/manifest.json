@@ -1,0 +1,23 @@
+{
+  "name": "Balatro",
+  "component": "Balatro",
+  "description": "Pintura psicodélica en espiral que se pliega sobre sí misma, pixelada como en el juego.",
+  "tags": ["psicodélico", "espiral", "pixel", "colores"],
+  "params": [
+    {"key": "color1", "label": "Pintura principal", "type": "color", "default": "#de443b"},
+    {"key": "color2", "label": "Pintura secundaria", "type": "color", "default": "#006bb4"},
+    {"key": "color3", "label": "Color de los huecos", "type": "color", "default": "#162325"},
+    {"key": "contrast", "label": "Contraste", "type": "float", "min": 0.5, "max": 10.0, "step": 0.1, "default": 3.5},
+    {"key": "lighting", "label": "Brillos", "type": "float", "min": 0.0, "max": 1.5, "step": 0.05, "default": 0.4},
+    {"key": "swirl", "label": "Espiral", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.25},
+    {"key": "rotation_speed", "label": "Velocidad de giro", "type": "float", "min": -10.0, "max": 10.0, "step": 0.1, "default": 0.0},
+    {"key": "scale", "label": "Tamaño de las formas", "type": "float", "min": 0.2, "max": 5.0, "step": 0.05, "default": 1.0},
+    {"key": "detail", "label": "Pliegues", "type": "int", "min": 1, "max": 8, "step": 1, "default": 5},
+    {"key": "offset_x", "label": "Centro horizontal", "type": "float", "min": -0.5, "max": 0.5, "step": 0.01, "default": 0.0},
+    {"key": "offset_y", "label": "Centro vertical", "type": "float", "min": -0.5, "max": 0.5, "step": 0.01, "default": 0.0},
+    {"key": "pixel_size", "label": "Tamaño de píxel", "type": "float", "min": 0.0, "max": 24.0, "step": 0.5, "default": 1.5},
+    {"key": "crt", "label": "Efecto CRT", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "Sin remolinos del ratón, clics ni intro. El pixelado se calcula por bloques de píxeles de pantalla (redondeado a entero) y el pase CRT se aplica en el mismo pase."
+}

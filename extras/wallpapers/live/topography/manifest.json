@@ -1,0 +1,174 @@
+{
+  "name": "Topografía",
+  "component": "Topography",
+  "description": "Curvas de nivel luminosas sobre montañas en 3D que se deslizan bajo la cámara.",
+  "tags": [
+    "mapa",
+    "líneas",
+    "3d",
+    "oscuro"
+  ],
+  "extensions": [
+    "GL_OES_standard_derivatives"
+  ],
+  "params": [
+    {
+      "key": "color",
+      "label": "Color de las líneas",
+      "type": "color",
+      "default": "#4f7cff"
+    },
+    {
+      "key": "line_count",
+      "label": "Número de curvas",
+      "type": "int",
+      "min": 2,
+      "max": 80,
+      "step": 1,
+      "default": 22
+    },
+    {
+      "key": "line_width",
+      "label": "Grosor de línea (px)",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.1,
+      "default": 1.2
+    },
+    {
+      "key": "major_lines",
+      "label": "Curvas maestras",
+      "type": "bool",
+      "default": true
+    },
+    {
+      "key": "elevation",
+      "label": "Elevación",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "foreground",
+      "label": "Relieve en primer plano",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.2
+    },
+    {
+      "key": "scale",
+      "label": "Tamaño del relieve",
+      "type": "float",
+      "min": 0.2,
+      "max": 5.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "detail",
+      "label": "Detalle fino",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.35
+    },
+    {
+      "key": "tilt",
+      "label": "Ángulo de cámara (grados)",
+      "type": "float",
+      "min": 12.0,
+      "max": 90.0,
+      "step": 1.0,
+      "default": 32.0
+    },
+    {
+      "key": "direction",
+      "label": "Dirección del viaje",
+      "type": "enum",
+      "options": [
+        {
+          "value": "forward",
+          "label": "Adelante"
+        },
+        {
+          "value": "backward",
+          "label": "Atrás"
+        },
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "forward"
+    },
+    {
+      "key": "morph",
+      "label": "Transformación del terreno",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.2
+    },
+    {
+      "key": "glow",
+      "label": "Resplandor",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.6
+    },
+    {
+      "key": "depth_of_field",
+      "label": "Desenfoque por profundidad",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.4
+    },
+    {
+      "key": "fog",
+      "label": "Niebla",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.35
+    },
+    {
+      "key": "brightness",
+      "label": "Brillo",
+      "type": "float",
+      "min": 0.1,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 1.0
+    },
+    {
+      "key": "light_mode",
+      "label": "Modo claro",
+      "type": "bool",
+      "default": false
+    },
+    {
+      "key": "background",
+      "label": "Color de fondo",
+      "type": "color",
+      "default": "#0d1117"
+    }
+  ],
+  "notes": "La malla 3D se sustituye por un trazado de rayos sobre el mapa de alturas (pasos según la distancia al terreno, bisección y secante) y el bloom de 4 niveles por un halo analítico según la densidad de curvas. Sin cursor (elevar, trazar, iluminar), pulsos al hacer clic, marcadores, glitches ni intro; en modo claro, si el fondo es oscuro se usa un papel casi blanco.",
+  "heavy": true
+}

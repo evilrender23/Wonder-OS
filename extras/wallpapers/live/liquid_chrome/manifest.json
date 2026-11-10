@@ -1,0 +1,23 @@
+{
+  "name": "Cromo líquido",
+  "component": "LiquidChrome",
+  "description": "Metal líquido pulido que fluye en cintas y refleja un estudio fotográfico.",
+  "tags": ["metal", "líquido", "reflejos", "oscuro"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "color", "label": "Color del metal", "type": "color", "default": "#ffffff"},
+    {"key": "amplitude", "label": "Remolino", "type": "float", "min": 0.0, "max": 2.0, "step": 0.01, "default": 0.3},
+    {"key": "frequency_x", "label": "Pliegues horizontales", "type": "float", "min": 0.1, "max": 10.0, "step": 0.1, "default": 3.0},
+    {"key": "frequency_y", "label": "Pliegues verticales", "type": "float", "min": 0.1, "max": 10.0, "step": 0.1, "default": 3.0},
+    {"key": "detail", "label": "Capas de detalle", "type": "int", "min": 1, "max": 8, "step": 1, "default": 4},
+    {"key": "thickness", "label": "Anchura de las cintas", "type": "float", "min": 0.25, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "depth", "label": "Relieve", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "roughness", "label": "Rugosidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.3},
+    {"key": "exposure", "label": "Exposición", "type": "float", "min": 0.2, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "tilt", "label": "Balanceo de los reflejos", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "paper", "label": "Fondo en modo claro", "type": "color", "default": "#f5f5f7"}
+  ],
+  "notes": "Se omite la simulación de ondas del cursor (estela y ondas al hacer clic, dos pasadas extra sobre textura) y la subida inicial; el balanceo de los reflejos sigue directamente su recorrido en reposo en vez de un muelle."
+}

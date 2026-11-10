@@ -1,0 +1,337 @@
+#!/usr/bin/env python3
+"""Screenshots and screen recordings for WonderlandWM's capture overlay.
+
+    wonderland-capture shot screen OUTPUT        [--cursor] [--no-save] [--no-copy]
+    wonderland-capture shot area "X,Y WxH"       (layout pixels, as slurp prints)
+    wonderland-capture shot window ID            (alone, with its shadow, on transparency)
+    wonderland-capture record start screen OUTPUT | area "X,Y WxH"  [--audio] [--fps N]
+    wonderland-capture record stop | status
+
+Every command prints one JSON object. A shot lands in Pictures/Capturas and on
+the clipboard; a recording in Videos/Grabaciones. `--dir` (or
+$WONDERLAND_CAPTURE_DIR) overrides the folder.
+
+Recording uses wf-recorder when it is installed. Without it, frames are pulled
+with grim and encoded by ffmpeg — no extra package, at a lower frame rate.
+The recorder outlives this command; `record stop` finalizes the file.
+"""
+import argparse
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+
+GEOMETRY = re.compile(r"^(-?\d+),(-?\d+) (\d+)x(\d+)$")
+OUTPUT = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+runtime = Path(os.environ.get("XDG_RUNTIME_DIR") or "/tmp") / "wonderland-capture"
+rec_file = runtime / "recording.json"
+
+
+class Failure(Exception):
+    pass
+
+
+def user_dir(kind, fallback):
+    try:
+        out = subprocess.run(["xdg-user-dir", kind], capture_output=True, text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        out = ""
+    home = str(Path.home())
+    return Path(out) if out and out != home else Path.home() / fallback
+
+
+def target_path(args, kind, sub, prefix, ext):
+    override = args.dir or os.environ.get("WONDERLAND_CAPTURE_DIR")
+    folder = Path(override).expanduser() if override else user_dir(kind, "Pictures" if kind == "PICTURES" else "Videos") / sub
+    folder.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y-%m-%d %H.%M.%S")
+    path = folder / f"{prefix} {stamp}.{ext}"
+    n = 2
+    while path.exists():
+        path = folder / f"{prefix} {stamp} ({n}).{ext}"
+        n += 1
+    return path
+
+
+def need(tool):
+    if not shutil.which(tool):
+        raise Failure(f"falta {tool}")
+
+
+def geometry(text):
+    m = GEOMETRY.match(text.strip())
+    if not m:
+        raise Failure(f"geometría no válida: {text!r} (se espera «X,Y WxH»)")
+    x, y, w, h = map(int, m.groups())
+    if w < 2 or h < 2:
+        raise Failure("el área es demasiado pequeña")
+    return x, y, w, h
+
+
+def output_name(text):
+    if not OUTPUT.match(text):
+        raise Failure(f"salida no válida: {text!r}")
+    return text
+
+
+def run(cmd, **kw):
+    proc = subprocess.run(cmd, capture_output=True, **kw)
+    if proc.returncode != 0:
+        text = (proc.stderr or proc.stdout).decode(errors="replace").strip()
+        try:
+            text = json.loads(text)["Err"]
+        except (ValueError, KeyError, TypeError):
+            text = text.splitlines()[-1] if text else "falló"
+        raise Failure(f"{cmd[0]}: {text}")
+    return proc
+
+
+def png_size(path):
+    with open(path, "rb") as f:
+        head = f.read(24)
+    if len(head) < 24 or head[:8] != b"\x89PNG\r\n\x1a\n":
+        return 0, 0
+    return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+
+
+def copy_png(path):
+    if not shutil.which("wl-copy"):
+        return False
+    with open(path, "rb") as f:
+        # wl-copy forks to keep serving the selection; its stdio must not tie
+        # this command's pipes open.
+        subprocess.run(["wl-copy", "--type", "image/png"], stdin=f,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
+    return True
+
+
+def shot(args):
+    save = not args.no_save
+    if save:
+        path = target_path(args, "PICTURES", "Capturas", "Captura", "png")
+    else:
+        runtime.mkdir(parents=True, exist_ok=True)
+        path = runtime / "clipboard.png"
+    if args.target == "window":
+        if not args.value.isdigit():
+            raise Failure(f"id de ventana no válido: {args.value!r}")
+        need("driftwm")
+        run(["driftwm", "msg", "--json", "screenshot", "window", "--id", args.value,
+             "--scale", f"{args.scale:g}", "-o", str(path)], timeout=30)
+    else:
+        need("grim")
+        cmd = ["grim"] + (["-c"] if args.cursor else [])
+        if args.target == "screen":
+            cmd += ["-o", output_name(args.value)]
+        else:
+            x, y, w, h = geometry(args.value)
+            cmd += ["-g", f"{x},{y} {w}x{h}"]
+        run(cmd + [str(path)], timeout=30)
+    width, height = png_size(path)
+    copied = copy_png(path) if not args.no_copy else False
+    return {"kind": "shot", "path": str(path), "width": width, "height": height,
+            "saved": save, "copied": copied}
+
+
+def alive(pid):
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    try:
+        with open(f"/proc/{pid}/stat") as f:
+            return f.read().rsplit(")", 1)[1].split()[0] != "Z"
+    except OSError:
+        return False
+
+
+def recording():
+    try:
+        info = json.loads(rec_file.read_text())
+    except (OSError, ValueError):
+        return None
+    if not alive(int(info.get("pid", 0))):
+        rec_file.unlink(missing_ok=True)
+        return None
+    return info
+
+
+def monitor_source():
+    try:
+        sink = subprocess.run(["pactl", "get-default-sink"], capture_output=True, text=True, timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        sink = ""
+    if not sink:
+        raise Failure("no hay salida de audio que grabar (pactl)")
+    return sink + ".monitor"
+
+
+def even(n):
+    return n - n % 2
+
+
+def record_start(args):
+    if recording():
+        raise Failure("ya hay una grabación en curso")
+    if args.target == "screen":
+        region = ["-o", output_name(args.value)]
+    else:
+        x, y, w, h = geometry(args.value)
+        # H.264 wants even dimensions.
+        region = ["-g", f"{x},{y} {even(w)}x{even(h)}"]
+    audio = monitor_source() if args.audio else None
+    path = target_path(args, "VIDEOS", "Grabaciones", "Grabación", "mp4")
+    runtime.mkdir(parents=True, exist_ok=True)
+    log = open(runtime / "recorder.log", "wb")
+
+    backend = os.environ.get("WONDERLAND_CAPTURE_BACKEND") or ("wf-recorder" if shutil.which("wf-recorder") else "grim")
+    if backend == "wf-recorder":
+        need("wf-recorder")
+        cmd = ["wf-recorder", "-y", "-f", str(path), "-r", str(args.fps), "-x", "yuv420p"] + region
+        if audio:
+            cmd.append(f"--audio={audio}")
+    else:
+        need("grim")
+        need("ffmpeg")
+        cmd = [sys.executable, os.path.abspath(__file__), "_pump", str(path), str(args.fps), audio or "-"] + region
+    proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True)
+    started = time.time()
+
+    # A recorder that cannot start (bad region, no encoder) dies right away.
+    deadline = time.monotonic() + 1.2
+    while time.monotonic() < deadline:
+        if proc.poll() is not None:
+            tail = (runtime / "recorder.log").read_text(errors="replace").strip().splitlines()
+            raise Failure(f"{backend}: {tail[-1] if tail else 'no arrancó'}")
+        time.sleep(0.1)
+    info = {"pid": proc.pid, "path": str(path), "started": started, "backend": backend,
+            "audio": bool(audio), "target": args.target, "value": args.value}
+    rec_file.write_text(json.dumps(info))
+    return {"kind": "recording", "recording": True, **info}
+
+
+def record_stop(_args):
+    info = recording()
+    if not info:
+        raise Failure("no hay ninguna grabación en curso")
+    pid = int(info["pid"])
+    os.kill(pid, signal.SIGINT)
+    deadline = time.monotonic() + 20
+    while alive(pid) and time.monotonic() < deadline:
+        time.sleep(0.1)
+    if alive(pid):
+        os.kill(pid, signal.SIGKILL)
+    rec_file.unlink(missing_ok=True)
+    path = Path(info["path"])
+    if not path.exists() or path.stat().st_size == 0:
+        raise Failure("la grabación quedó vacía")
+    return {"kind": "video", "path": str(path), "seconds": round(time.time() - float(info["started"]), 1),
+            "bytes": path.stat().st_size}
+
+
+def record_status(_args):
+    info = recording()
+    return {"kind": "recording", "recording": True, **info} if info else {"kind": "recording", "recording": False}
+
+
+def pump(path, fps, audio, region):
+    """grim → ffmpeg: one PPM per frame down a pipe, stamped by arrival time."""
+    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+           "-use_wallclock_as_timestamps", "1", "-f", "image2pipe", "-c:v", "ppm", "-i", "-"]
+    if audio != "-":
+        cmd += ["-f", "pulse", "-i", audio, "-c:a", "aac", "-b:a", "160k"]
+    cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "21", "-pix_fmt", "yuv420p",
+            "-vf", "crop=trunc(iw/2)*2:trunc(ih/2)*2", "-fps_mode", "cfr", "-r", str(fps),
+            "-movflags", "+faststart", path]
+    encoder = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+    stop = []
+    signal.signal(signal.SIGINT, lambda *_: stop.append(1))
+    signal.signal(signal.SIGTERM, lambda *_: stop.append(1))
+    grab = ["grim", "-c", "-t", "ppm"] + region + ["-"]
+    step = 1.0 / fps
+    due = time.monotonic()
+    code = 0
+    while not stop and encoder.poll() is None:
+        frame = subprocess.run(grab, capture_output=True)
+        if frame.returncode != 0:
+            sys.stderr.buffer.write(frame.stderr)
+            code = 1
+            break
+        try:
+            encoder.stdin.write(frame.stdout)
+        except BrokenPipeError:
+            code = 1
+            break
+        due += step
+        wait = due - time.monotonic()
+        if wait > 0:
+            time.sleep(wait)
+        else:
+            due = time.monotonic()
+    try:
+        encoder.stdin.close()
+    except BrokenPipeError:
+        pass
+    if audio != "-":
+        # The pulse input never ends on its own.
+        time.sleep(0.2)
+        encoder.send_signal(signal.SIGINT)
+    try:
+        encoder.wait(timeout=15)
+    except subprocess.TimeoutExpired:
+        encoder.kill()
+    return code or (0 if encoder.returncode in (0, 255) else 1)
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "_pump":
+        sys.exit(pump(sys.argv[2], int(sys.argv[3]), sys.argv[4], sys.argv[5:]))
+
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    s = sub.add_parser("shot")
+    s.add_argument("target", choices=["screen", "area", "window"])
+    s.add_argument("value")
+    s.add_argument("--cursor", action="store_true")
+    s.add_argument("--no-save", action="store_true")
+    s.add_argument("--no-copy", action="store_true")
+    s.add_argument("--scale", type=float, default=1.0)
+    s.add_argument("--dir")
+    s.set_defaults(fn=shot)
+
+    r = sub.add_parser("record").add_subparsers(dest="rec", required=True)
+    start = r.add_parser("start")
+    start.add_argument("target", choices=["screen", "area"])
+    start.add_argument("value")
+    start.add_argument("--audio", action="store_true")
+    start.add_argument("--fps", type=int, default=30, choices=range(5, 121), metavar="5-120")
+    start.add_argument("--dir")
+    start.set_defaults(fn=record_start)
+    r.add_parser("stop").set_defaults(fn=record_stop)
+    r.add_parser("status").set_defaults(fn=record_status)
+
+    args = ap.parse_args()
+    if getattr(args, "no_save", False) and getattr(args, "no_copy", False):
+        ap.error("--no-save and --no-copy together would capture nothing")
+    try:
+        print(json.dumps(args.fn(args), ensure_ascii=False))
+    except Failure as e:
+        print(json.dumps({"error": str(e)}, ensure_ascii=False))
+        sys.exit(1)
+    except subprocess.TimeoutExpired as e:
+        print(json.dumps({"error": f"{e.cmd[0]}: no respondió"}, ensure_ascii=False))
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

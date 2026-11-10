@@ -1,0 +1,7 @@
+[Unit]
+Description=WonderUpdate: check for updates
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=@BINDIR@/wonderupdate --check

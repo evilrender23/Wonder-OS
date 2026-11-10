@@ -1,0 +1,30 @@
+{
+  "name": "Anillos mágicos",
+  "component": "MagicRings",
+  "description": "Anillos concéntricos luminosos que laten y se abren en arcos laterales.",
+  "tags": ["anillos", "neón", "morado", "oscuro"],
+  "params": [
+    {"key": "color", "label": "Color del anillo interior", "type": "color", "default": "#a855f7"},
+    {"key": "color_two", "label": "Color del anillo exterior", "type": "color", "default": "#6366f1"},
+    {"key": "ring_count", "label": "Número de anillos", "type": "int", "min": 1, "max": 12, "step": 1, "default": 6},
+    {"key": "motion", "label": "Movimiento", "type": "enum", "default": "pulse", "options": [
+      {"value": "pulse", "label": "Pulso"},
+      {"value": "ripple", "label": "Ondas hacia fuera"},
+      {"value": "breathe", "label": "Respiración"}
+    ]},
+    {"key": "line_thickness", "label": "Grosor de línea (px)", "type": "float", "min": 0.25, "max": 8.0, "step": 0.05, "default": 2.0},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "base_radius", "label": "Radio del anillo interior", "type": "float", "min": 0.02, "max": 0.7, "step": 0.01, "default": 0.35},
+    {"key": "radius_step", "label": "Separación entre anillos", "type": "float", "min": 0.0, "max": 0.4, "step": 0.01, "default": 0.1},
+    {"key": "expansion", "label": "Expansión al brillar", "type": "float", "min": -0.2, "max": 0.5, "step": 0.01, "default": 0.1},
+    {"key": "taper", "label": "Acortamiento de los anillos exteriores", "type": "float", "min": 0.5, "max": 3.0, "step": 0.05, "default": 1.5},
+    {"key": "rotation", "label": "Rotación (grados)", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": 0.0},
+    {"key": "spin", "label": "Giro de los arcos", "type": "float", "min": -2.0, "max": 2.0, "step": 0.05, "default": 0.0},
+    {"key": "tilt", "label": "Inclinación 3D (grados)", "type": "float", "min": -80.0, "max": 80.0, "step": 1.0, "default": 0.0},
+    {"key": "dispersion", "label": "Dispersión prismática", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "El búfer de resplandor a media resolución y las tiras de geometría instanciada se evalúan por píxel para cada anillo. Sin hover, seguimiento ni paralaje del ratón, sin ráfagas al hacer clic y sin intro. En modo claro, si el fondo elegido es oscuro se usa un fondo claro."
+}

@@ -1,0 +1,146 @@
+#!/usr/bin/env -S python3 -I
+"""Validate a live wallpaper and (re)build its preview.
+
+  dev/scripts/wallpaper-check ID [ID...]   # or --all
+
+For each wallpaper: render the default shader, check it with glslangValidator
+(strict GLSL ES 1.00), compile+render it on the NVIDIA GPU and on the Radeon
+iGPU (radeonsi, the strictest driver here), time it, write preview.png, then
+render every setting at its extremes (min/max, every enum option, both bool
+states) and flag images that come out flat (std < 1: all black or one
+colour). Exit status 1 when anything fails.
+"""
+
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+LIVE = REPO / "extras" / "wallpapers" / "live"
+GEN = REPO / "extras" / "scripts" / "wonderland-wallpaper"
+SHOT = REPO / "dev" / "tools" / "wallshot" / "wallshot"
+RADEON = os.environ.get("WALLSHOT_RADEON", "1")
+
+
+def build_shot():
+    if not SHOT.exists() or SHOT.stat().st_mtime < (SHOT.parent / "wallshot.c").stat().st_mtime:
+        subprocess.run(["make", "-s", "-C", str(SHOT.parent)], check=True)
+
+
+def gen(wid, settings, out):
+    env = dict(os.environ, WONDERLAND_WALLPAPERS=str(LIVE))
+    subprocess.run([sys.executable, "-I", str(GEN), "render", wid, json.dumps(settings), "-o", out],
+                   check=True, env=env)
+
+
+def glslang(src_path):
+    with tempfile.NamedTemporaryFile("w", suffix=".frag", delete=False) as f:
+        f.write("#version 100\n" + Path(src_path).read_text())
+        name = f.name
+    r = subprocess.run(["glslangValidator", name], capture_output=True, text=True)
+    os.unlink(name)
+    return r.returncode == 0, (r.stdout + r.stderr).strip()
+
+
+def shot(src, out, size, device=None, bench=0, time=4.0):
+    env = dict(os.environ)
+    if device is not None:
+        env["WALLSHOT_DEVICE"] = device
+    cmd = [str(SHOT), src, out, "--size", size, "--time", str(time)]
+    if bench:
+        cmd += ["--bench", str(bench)]
+    r = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=120)
+    err = "\n".join(l for l in r.stderr.splitlines() if "MESA" not in l and "pci id" not in l)
+    info = {"rc": r.returncode, "err": err.strip()}
+    m = re.search(r"mean ([\d.]+) ([\d.]+) ([\d.]+) std ([\d.]+)", r.stdout)
+    if m:
+        info["mean"] = [float(m.group(i)) for i in (1, 2, 3)]
+        info["std"] = float(m.group(4))
+    m = re.search(r"frame_ms ([\d.]+)", r.stdout)
+    if m:
+        info["ms"] = float(m.group(1))
+    return info
+
+
+def variants(manifest):
+    for p in manifest.get("params", []):
+        t = p["type"]
+        if t in ("float", "int"):
+            for v in (p["min"], p["max"]):
+                yield p["key"], v
+        elif t == "bool":
+            yield p["key"], not p["default"]
+        elif t == "enum":
+            for o in p["options"]:
+                if o["value"] != p["default"]:
+                    yield p["key"], o["value"]
+        elif t == "color":
+            for v in ("#000000", "#ffffff"):
+                yield p["key"], v
+
+
+def check(wid, tmp):
+    problems = []
+    mpath = LIVE / wid / "manifest.json"
+    manifest = json.loads(mpath.read_text())
+    keys = [p["key"] for p in manifest.get("params", [])]
+    if len(keys) != len(set(keys)):
+        problems.append("duplicate param keys")
+    for p in manifest.get("params", []):
+        if p["key"] in ("speed", "parallax", "zoom_follow", "fps"):
+            problems.append(f"param {p['key']!r} is a global setting, drop it")
+    src = f"{tmp}/{wid}.glsl"
+    gen(wid, {}, src)
+    ok, log = glslang(src)
+    if not ok:
+        problems.append("glslangValidator:\n" + log)
+    nv = shot(src, f"{tmp}/{wid}-nv.png", "2560x1440", bench=60)
+    if nv["rc"]:
+        problems.append("nvidia: " + nv["err"])
+    rd = shot(src, f"{tmp}/{wid}-rd.png", "1920x1080", device=RADEON, bench=5)
+    if rd["rc"]:
+        problems.append("radeonsi: " + rd["err"])
+    if nv.get("std", 1) < 1:
+        problems.append(f"default render is flat (mean {nv.get('mean')})")
+    report = {"id": wid, "nvidia_ms_1440p": nv.get("ms"), "radeon_ms_1080p": rd.get("ms"),
+              "default_mean": nv.get("mean"), "default_std": nv.get("std")}
+    if nv["rc"] == 0:
+        big = f"{tmp}/{wid}-1080.png"
+        shot(src, big, "1920x1080", time=4.0)
+        subprocess.run(["magick", big, "-resize", "480x270", "-strip",
+                        str(LIVE / wid / "preview.png")], check=True)
+    flat = []
+    for key, value in variants(manifest):
+        vsrc = f"{tmp}/{wid}-{key}.glsl"
+        gen(wid, {key: value}, vsrc)
+        r = shot(vsrc, f"{tmp}/{wid}-{key}.png", "640x360")
+        if r["rc"]:
+            problems.append(f"{key}={value}: {r['err']}")
+        elif r.get("std", 1) < 1:
+            flat.append(f"{key}={value}")
+    if flat:
+        report["flat_variants"] = flat
+    report["problems"] = problems
+    return report
+
+
+def main(argv):
+    build_shot()
+    ids = argv
+    if not ids or ids == ["--all"]:
+        ids = sorted(d.name for d in LIVE.iterdir() if (d / "manifest.json").is_file())
+    failed = False
+    with tempfile.TemporaryDirectory(prefix="wallcheck-") as tmp:
+        for wid in ids:
+            rep = check(wid, tmp)
+            failed |= bool(rep["problems"])
+            print(json.dumps(rep, ensure_ascii=False))
+    sys.exit(1 if failed else 0)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

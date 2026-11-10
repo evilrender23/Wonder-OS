@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Películas
+Name[en]=Movies
+GenericName=Reproductor de vídeo
+GenericName[en]=Video Player
+Comment=Mira tus vídeos y películas, con subtítulos y lista de reproducción
+Comment[en]=Watch your videos and films, with subtitles and a playlist
+Exec=wonderland-peliculas %U
+Icon=wonderland-peliculas
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-peliculas
+MimeType=video/mp4;video/x-matroska;video/webm;video/quicktime;video/x-msvideo;video/mpeg;video/x-m4v;video/3gpp;video/mp2t;video/ogg;video/x-flv;video/x-ms-wmv;video/vnd.avi;
+Categories=AudioVideo;Video;Player;Qt;
+Keywords=vídeo;video;película;peliculas;películas;cine;reproductor;subtítulos;movies;films;player;

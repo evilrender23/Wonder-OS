@@ -1,0 +1,27 @@
+# Hermetic config for the Phase-0 baseline: no session restore, no X11, no
+# autostart, defaults everywhere else (dot-grid background, CSD, shadows on).
+window_placement = "auto"
+autostart = []
+
+[session]
+suspend_on_close = false
+restore_windows = false
+restore_camera = false
+restore_bookmarks = false
+
+[xwayland]
+enabled = false
+[decorations]
+bg_color = "#f3f7ff"            # --ui-bg-sidebar: Hermes header/sidebar surface
+fg_color = "#242528"            # --ui-text-primary over chrome
+corner_radius = 6               # Hermes uses small, crisp radii (--radius-scalar .2)
+shadow = true
+title_bar_height = 34
+font = "Noto Sans"              # what system-ui resolves to for the app on this desktop
+font_size = 10
+font_weight = "medium"
+title_align = "left"            # Hermes headers are left-aligned
+border_width = 1
+border_color = "#c3d1f0"        # --ui-stroke-secondary: blue-tinted 1px hairline
+border_color_focused = "#0053fd" # Nous blue marks the focused window
+

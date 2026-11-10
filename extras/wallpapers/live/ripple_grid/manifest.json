@@ -1,0 +1,36 @@
+{
+  "name": "Rejilla de ondas",
+  "component": "RippleGrid",
+  "description": "Rejilla fina que se dobla y se ilumina al paso de ondas concéntricas.",
+  "tags": ["rejilla", "ondas", "minimalista", "oscuro"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "color", "label": "Color", "type": "color", "default": "#ffffff"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "variant", "label": "Estilo", "type": "enum", "default": "lines",
+     "options": [
+       {"value": "lines", "label": "Líneas"},
+       {"value": "dots", "label": "Puntos en los cruces"},
+       {"value": "cross", "label": "Cruces"}
+     ]},
+    {"key": "cell_size", "label": "Tamaño de celda", "type": "float", "min": 12.0, "max": 160.0, "step": 1.0, "default": 48.0},
+    {"key": "line_width", "label": "Grosor de línea", "type": "float", "min": 0.25, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.6},
+    {"key": "strength", "label": "Fuerza de las ondas", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "ripple_speed", "label": "Velocidad de las ondas", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "ripple_size", "label": "Longitud de onda", "type": "float", "min": 0.2, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "auto_ripple", "label": "Origen de las ondas", "type": "enum", "default": "center",
+     "options": [
+       {"value": "center", "label": "Centro"},
+       {"value": "random", "label": "Puntos al azar"},
+       {"value": "none", "label": "Ninguno"}
+     ]},
+    {"key": "interval", "label": "Segundos entre ondas", "type": "float", "min": 0.3, "max": 8.0, "step": 0.1, "default": 2.6},
+    {"key": "tilt", "label": "Perspectiva (suelo)", "type": "float", "min": 0.0, "max": 80.0, "step": 1.0, "default": 0.0},
+    {"key": "rotation", "label": "Rotación", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": 0.0},
+    {"key": "fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.5},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false,
+     "description": "Dibuja la rejilla como tinta; si el fondo elegido es oscuro usa un papel claro."}
+  ],
+  "notes": "Las ondas automáticas se reconstruyen a partir del reloj (misma cadencia, vida y amortiguación que el original). Sin estela ni brillo del cursor, sin ondas al hacer clic ni intro."
+}

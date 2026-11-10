@@ -1,0 +1,247 @@
+#!/usr/bin/env bash
+# WonderUpdate: the WonderlandOS updater. Looks for updates in the pacman
+# repositories, the AUR, Flatpak and the Wonderland desktop itself, applies
+# them from a terminal and takes care of what an upgrade leaves behind.
+# shellcheck disable=SC2034,SC2154  # set here and read by the libraries, or the other way round
+
+set -uo pipefail
+
+name=wonderupdate
+version=1.0.0
+
+self="$(realpath "${BASH_SOURCE[0]}")"
+bindir="$(dirname "$self")"
+if [[ -f $bindir/lib/common.sh ]]; then
+    libdir="$bindir/lib"
+    datadir="$(dirname "$bindir")"
+else
+    datadir="$(dirname "$bindir")/share/$name"
+    libdir="$datadir/lib"
+fi
+
+for lib in common sources check news upgrade maintenance; do
+    # shellcheck source=/dev/null
+    source "$libdir/$lib.sh" || exit 1
+done
+
+usage() {
+    if [[ $lang == es ]]; then
+        cat <<EOF
+WonderUpdate $version, el actualizador de WonderlandOS
+
+Uso: $name [opción]
+
+Sin opciones busca actualizaciones (repositorios, AUR, Flatpak y Wonderland),
+muestra las noticias recientes de Arch, pide confirmación, actualiza y después
+ofrece limpiar huérfanos y caché, procesar los archivos pacnew, reiniciar
+servicios y reiniciar el equipo si el kernel ha cambiado.
+
+Opciones:
+  -c, --check          comprueba sin preguntar nada: guarda el estado para la
+                       barra y avisa con una notificación si hay novedades
+  -l, --list           muestra las actualizaciones pendientes
+  -d, --devel          incluye los paquetes de desarrollo de AUR (-git, ...)
+  -n, --news [N]       muestra las últimas N noticias de Arch (5 por defecto)
+  -s, --services       busca servicios que necesitan reiniciarse
+  -j, --json           con --check o --status, escribe el estado en JSON
+      --status         muestra el resultado de la última comprobación
+      --terminal       abre una terminal y actualiza en ella
+      --enable         activa la comprobación automática (timer de systemd)
+      --disable        desactiva la comprobación automática
+      --gen-config     crea el archivo de configuración (--force lo sobrescribe)
+      --show-config    muestra el archivo de configuración
+      --edit-config    abre el archivo de configuración en \$EDITOR
+  -h, --help           esta ayuda
+  -V, --version        la versión
+
+Configuración: $config_file
+EOF
+    else
+        cat <<EOF
+WonderUpdate $version, the WonderlandOS updater
+
+Usage: $name [option]
+
+Without options it looks for updates (repositories, AUR, Flatpak and
+Wonderland), shows the recent Arch News, asks for confirmation, upgrades and
+then offers to clean orphans and the cache, process pacnew files, restart
+services and reboot if the kernel changed.
+
+Options:
+  -c, --check          check without asking anything: save the status for the
+                       bar and send a notification if there is something new
+  -l, --list           print the pending updates
+  -d, --devel          include AUR development packages (-git, ...)
+  -n, --news [N]       show the latest N Arch News (5 by default)
+  -s, --services       look for services that need a restart
+  -j, --json           with --check or --status, print the status as JSON
+      --status         print the result of the last check
+      --terminal       open a terminal and update in it
+      --enable         enable the automatic check (systemd timer)
+      --disable        disable the automatic check
+      --gen-config     create the configuration file (--force overwrites it)
+      --show-config    print the configuration file
+      --edit-config    open the configuration file in \$EDITOR
+  -h, --help           this help
+  -V, --version        the version
+
+Configuration: $config_file
+EOF
+    fi
+}
+
+action=update
+json_output=""
+force=""
+devel_flag=()
+news_arg=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    -c | --check) action=check ;;
+    -l | --list) action=list ;;
+    -d | --devel) devel_flag=(--devel) ;;
+    -n | --news)
+        action=news
+        if [[ ${2:-} =~ ^[0-9]+$ ]]; then
+            news_arg=$2
+            shift
+        fi
+        ;;
+    -s | --services) action=services ;;
+    -j | --json) json_output=1 ;;
+    --status) action=status ;;
+    --terminal) action=terminal ;;
+    --enable) action=enable ;;
+    --disable) action=disable ;;
+    --gen-config) action=gen-config ;;
+    --show-config) action=show-config ;;
+    --edit-config) action=edit-config ;;
+    --force) force=1 ;;
+    -h | --help) action=help ;;
+    -V | --version) action=version ;;
+    *)
+        setup_colors
+        error_msg "$(t "Unknown option: %s" "$1")"
+        t "Try '%s --help'" "$name" >&2
+        echo >&2
+        exit 1
+        ;;
+    esac
+    shift
+done
+
+load_config
+setup_colors
+mkdir -p "$statedir" "$cachedir" "$tmpdir" || exit 1
+
+if [[ $action != check && $action != status ]]; then
+    for bad in "${config_warnings[@]}"; do
+        warning_msg "$(t "Ignored in %s: %s" "$config_file" "$bad")" >&2
+    done
+fi
+
+full_update() {
+    if ! take_lock update; then
+        error_msg "$(t "There's already a running instance of %s" "WonderUpdate")"
+        quit_msg
+        exit 5
+    fi
+    check_su_cmd
+    check_aur_helper
+
+    if ! list_updates; then
+        info_msg "$(t "No update available")"
+        echo
+    else
+        if ! confirm_default_yes "$(t "Proceed with update?")"; then
+            echo
+            error_msg "$(t "The update has been aborted")"
+            quit_msg
+            exit 4
+        fi
+        echo
+        show_news "$news_num" update
+        if ! apply_updates; then
+            refresh_status
+            quit_msg
+            exit 6
+        fi
+        refresh_status
+    fi
+
+    orphan_packages
+    packages_cache
+    pacnew_files
+    restart_services
+    session_notice
+    kernel_reboot
+    quit_msg
+    [[ ${#failed_sources[@]} -eq 0 ]] || exit 6
+}
+
+example_config="$datadir/$name.conf.example"
+
+case $action in
+help) usage ;;
+version) echo "$name $version" ;;
+update) full_update ;;
+check) run_check ;;
+list)
+    check_aur_helper
+    if ! take_lock check; then
+        wait_lock check $((update_check_timeout * 4)) || true
+    fi
+    if ! list_updates; then
+        info_msg "$(t "No update available")"
+        exit 7
+    fi
+    ;;
+status)
+    if [[ -n $json_output ]]; then
+        if [[ -f $status_file ]]; then cat "$status_file"; else echo '{}'; fi
+    elif [[ -f $last_updates_file && -s $last_updates_file ]]; then
+        cat "$last_updates_file"
+    else
+        info_msg "$(t "No update available")"
+    fi
+    ;;
+news) show_news "${news_arg:-$news_num}" || exit 8 ;;
+services)
+    check_su_cmd
+    restart_services standalone
+    ;;
+terminal) open_in_terminal "${devel_flag[@]}" ;;
+enable)
+    systemctl --user enable --now "$name.timer" || exit 9
+    info_msg "$(t "Automatic update checks enabled (at login, then every hour)")"
+    ;;
+disable)
+    systemctl --user disable --now "$name.timer" || exit 9
+    info_msg "$(t "Automatic update checks disabled")"
+    ;;
+gen-config)
+    if [[ ! -f $example_config ]]; then
+        error_msg "$(t "Example configuration not found")"
+        exit 10
+    fi
+    if [[ -f $config_file && -z $force ]]; then
+        error_msg "$(t "%s already exists (use --gen-config --force to overwrite it)" "$config_file")"
+        exit 10
+    fi
+    mkdir -p "$(dirname "$config_file")"
+    cp "$example_config" "$config_file" || exit 10
+    info_msg "$(t "%s has been created" "$config_file")"
+    ;;
+show-config | edit-config)
+    if [[ ! -f $config_file ]]; then
+        error_msg "$(t "No configuration file yet; create one with: %s --gen-config" "$name")"
+        exit 10
+    fi
+    if [[ $action == show-config ]]; then
+        cat "$config_file"
+    else
+        "${EDITOR:-nano}" "$config_file"
+    fi
+    ;;
+esac

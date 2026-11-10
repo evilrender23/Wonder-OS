@@ -1,0 +1,17 @@
+# Hermetic config for the Phase-0 baseline: no session restore, no X11, no
+# autostart, defaults everywhere else (dot-grid background, CSD, shadows on).
+window_placement = "auto"
+autostart = []
+
+[session]
+suspend_on_close = false
+restore_windows = false
+restore_camera = false
+restore_bookmarks = false
+
+[xwayland]
+enabled = false
+
+[background]
+type = "shader"
+path = "/mnt/datos2/Hermes/apps/escritorio/wonderlandwm/extras/themes/hermes/hermes-light-zoomaware.glsl"

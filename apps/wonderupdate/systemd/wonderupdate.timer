@@ -1,0 +1,9 @@
+[Unit]
+Description=WonderUpdate: check for updates at login and every hour
+
+[Timer]
+OnStartupSec=1min
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

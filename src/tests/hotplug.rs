@@ -1,0 +1,487 @@
+//! Output hotplug (connect/disconnect) policy driven through real clients.
+//! Every server dispatch runs the stage invariant check, so a leaked stage
+//! entry against a dead output aborts the scenario even without an explicit
+//! assert. Client-side `wl_surface` enter/leave aren't recorded, so window
+//! membership is asserted server-side via `output_for_window`.
+
+use smithay::utils::Point;
+
+use super::{Fixture, config, map_window, window_by_app_id};
+
+/// A window on the surviving output keeps its stage entry when a different
+/// output is unplugged.
+#[test]
+fn window_survives_output_removal() {
+    let mut f = Fixture::new();
+    let out1 = f.add_output(1, (1920, 1080));
+    let out2 = f.add_output(2, (1280, 720));
+    let id = f.add_client();
+
+    map_window(&mut f, id, "app", (400, 300));
+    let window = window_by_app_id(&mut f, "app").unwrap();
+    assert_eq!(f.state().stage.windows().count(), 1);
+
+    f.remove_output(&out2);
+
+    assert_eq!(f.state().stage.windows().count(), 1);
+    assert!(window_by_app_id(&mut f, "app").is_some());
+    assert!(f.state().stage.position_of(&window).is_some());
+    assert_eq!(
+        f.state().output_for_window(&window).map(|o| o.name()),
+        Some(out1.name())
+    );
+}
+
+/// A window fullscreen on the removed output exits fullscreen and lands on the
+/// survivor; the client sees a configure without the Fullscreen state.
+#[test]
+fn fullscreen_on_removed_output_exits_to_survivor() {
+    let mut f = Fixture::with_config(config(
+        r#"
+[[window_rules]]
+app_id = "fs"
+output = "HEADLESS-2"
+"#,
+    ));
+    let out1 = f.add_output(1, (1920, 1080));
+    let out2 = f.add_output(2, (1280, 720));
+    let id = f.add_client();
+
+    let surface = map_window(&mut f, id, "fs", (400, 300));
+    let window = window_by_app_id(&mut f, "fs").unwrap();
+
+    // Client requests fullscreen with no output; the rule directs it to HEADLESS-2.
+    f.client(id).window(&surface).set_fullscreen(None);
+    f.double_roundtrip(id);
+    assert_eq!(
+        f.state().stage.fullscreen_output_of(&window),
+        Some("HEADLESS-2")
+    );
+
+    // Discard configures seen so far so the post-removal ones stand alone.
+    let _ = f.client(id).window(&surface).format_recent_configures();
+
+    f.remove_output(&out2);
+    f.double_roundtrip(id);
+
+    assert!(!f.state().stage.has_fullscreen());
+    assert!(f.state().stage.fullscreen_output_of(&window).is_none());
+
+    let post = f.client(id).window(&surface).format_recent_configures();
+    assert!(
+        !post.is_empty(),
+        "expected an exit configure after the output was removed"
+    );
+    assert!(
+        !post.contains("Fullscreen"),
+        "exit configure must not carry Fullscreen, got:\n{post}"
+    );
+
+    assert_eq!(
+        f.state().output_for_window(&window).map(|o| o.name()),
+        Some(out1.name())
+    );
+}
+
+/// A screen-pinned window on the removed output reassigns to the survivor with
+/// its screen position clamped into the smaller survivor's bounds.
+#[test]
+fn pinned_on_removed_output_reassigns() {
+    let mut f = Fixture::with_config(config(
+        r#"
+[[window_rules]]
+app_id = "pin"
+pinned_to_screen = true
+size = [320, 240]
+"#,
+    ));
+    // Add HEADLESS-2 first so it's the focused/active output the pin binds to;
+    // HEADLESS-1 is the smaller survivor, forcing a clamp on reassignment.
+    let out2 = f.add_output(2, (1920, 1080));
+    let _out1 = f.add_output(1, (800, 600));
+    let id = f.add_client();
+
+    map_window(&mut f, id, "pin", (320, 240));
+    let window = window_by_app_id(&mut f, "pin").unwrap();
+    let site = f.state().stage.pin_of(&window).cloned().unwrap();
+    assert_eq!(site.output, "HEADLESS-2");
+    // Output center: (1920/2 - 320/2, 1080/2 - 240/2).
+    assert_eq!(site.screen_pos, Point::from((800, 420)));
+
+    f.remove_output(&out2);
+
+    let site = f.state().stage.pin_of(&window).cloned().unwrap();
+    assert_eq!(site.output, "HEADLESS-1");
+    // Clamped into the 800×600 survivor for the 320×240 window:
+    // x -> min(800, 800-320)=480, y -> min(420, 600-240)=360.
+    assert_eq!(site.screen_pos, Point::from((480, 360)));
+}
+
+/// Removing the last output keeps a virtual placeholder (so `active_output()`
+/// stays Some and the window survives); reconnecting a new output retires the
+/// placeholder and re-homes the window.
+#[test]
+fn last_output_removal_leaves_placeholder() {
+    let mut f = Fixture::new();
+    let out1 = f.add_output(1, (1920, 1080));
+    let id = f.add_client();
+
+    map_window(&mut f, id, "app", (400, 300));
+    let window = window_by_app_id(&mut f, "app").unwrap();
+    let pos_before = f.state().stage.position_of(&window).unwrap();
+
+    f.remove_output(&out1);
+
+    assert!(f.state().disconnected_outputs.contains("HEADLESS-1"));
+    assert!(f.state().active_output().is_some());
+    assert_eq!(f.state().stage.windows().count(), 1);
+    assert_eq!(f.state().stage.position_of(&window), Some(pos_before));
+
+    // Reconnect with a fresh name: the placeholder retires and the window
+    // re-homes onto the new output.
+    let out2 = f.add_output(2, (1280, 720));
+    f.roundtrip(id);
+
+    assert!(f.state().disconnected_outputs.is_empty());
+    assert_eq!(f.state().stage.windows().count(), 1);
+    assert_eq!(
+        f.state().output_for_window(&window).map(|o| o.name()),
+        Some(out2.name())
+    );
+}
+
+/// Fullscreen entered while only a placeholder is attached must not leak a stage
+/// entry against the dead output name: reconnecting exits it cleanly.
+#[test]
+fn fullscreen_survives_unplug_replug_without_leak() {
+    let mut f = Fixture::new();
+    let out1 = f.add_output(1, (1920, 1080));
+    let id = f.add_client();
+
+    let surface = map_window(&mut f, id, "app", (800, 600));
+    let window = window_by_app_id(&mut f, "app").unwrap();
+
+    f.client(id).window(&surface).set_fullscreen(None);
+    f.double_roundtrip(id);
+    f.client(id).window(&surface).ack_last_and_commit();
+    f.double_roundtrip(id);
+    assert!(f.state().stage.has_fullscreen());
+
+    // Unplug the only output: is_last exits fullscreen and keeps a placeholder.
+    f.remove_output(&out1);
+    assert!(!f.state().stage.has_fullscreen());
+    assert!(f.state().disconnected_outputs.contains("HEADLESS-1"));
+
+    // The window re-enters fullscreen while only the placeholder is attached.
+    f.client(id).window(&surface).set_fullscreen(None);
+    f.double_roundtrip(id);
+    assert!(f.state().stage.has_fullscreen());
+    assert_eq!(
+        f.state().stage.fullscreen_output_of(&window),
+        Some("HEADLESS-1")
+    );
+
+    // Reconnect: retiring the placeholder must exit the fullscreen held against
+    // the dead name — no stage entry, no stranded fullscreen_return.
+    let out2 = f.add_output(2, (1280, 720));
+    assert!(f.state().disconnected_outputs.is_empty());
+    assert!(!f.state().stage.has_fullscreen());
+    assert!(f.state().stage.fullscreen_output_of(&window).is_none());
+    for output in f.state().space.outputs().cloned().collect::<Vec<_>>() {
+        assert!(
+            crate::state::output_state(&output)
+                .fullscreen_return
+                .is_none()
+        );
+    }
+    assert_eq!(
+        f.state().output_for_window(&window).map(|o| o.name()),
+        Some(out2.name())
+    );
+}
+
+/// Removing the focused output transfers focus to a survivor.
+#[test]
+fn focus_and_pointer_move_to_survivor() {
+    let mut f = Fixture::new();
+    let out1 = f.add_output(1, (1920, 1080));
+    let out2 = f.add_output(2, (1280, 720));
+
+    // Simulate the pointer sitting on the second output; move it off the
+    // survivor's center so the disconnect warp is observable.
+    f.state().focused_output = Some(out2.clone());
+    f.state().warp_pointer((2400.0, 300.0).into());
+    assert_eq!(
+        f.state().active_output().map(|o| o.name()),
+        Some(out2.name())
+    );
+
+    f.remove_output(&out2);
+
+    assert_eq!(
+        f.state().focused_output.as_ref().map(|o| o.name()),
+        Some(out1.name())
+    );
+    // Warped to the survivor's viewport center: camera (-960, -540) at zoom 1
+    // over a 1920×1080 output.
+    let pointer = f.state().seat.get_pointer().unwrap().current_location();
+    assert_eq!((pointer.x, pointer.y), (0.0, 0.0));
+}
+
+/// A pin suspended by fullscreen rebinds by its *visual frame* too. The saved
+/// site is invisible to `pinned_windows()`, so it takes a pass of its own —
+/// clamped as content, the fullscreen exit would restore the pin with its title
+/// bar off the top of the survivor.
+#[test]
+fn a_fullscreen_suspended_pin_rebinds_with_its_whole_frame_on_screen() {
+    let mut f = Fixture::with_config(config(
+        r#"
+[decorations]
+border_width = 4
+
+[[window_rules]]
+app_id = "pin"
+pinned_to_screen = true
+decoration = "server"
+"#,
+    ));
+    // out1 is active, so the pin binds there; the window then fullscreens on
+    // out2, which parks the pin in out2's `fullscreen_return` where the ordinary
+    // orphan pass can't see it.
+    let out1 = f.add_output(1, (1920, 1080));
+    let _out2 = f.add_output(2, (800, 600));
+    let id = f.add_client();
+
+    let surface = map_window(&mut f, id, "pin", (320, 240));
+    let window = window_by_app_id(&mut f, "pin").unwrap();
+    let chrome = f.state().element_chrome(&window);
+    assert_eq!(
+        (chrome.bar, chrome.border),
+        (25, 4),
+        "precondition: the pin wears a bar and a border"
+    );
+    assert_eq!(
+        f.state().stage.pin_of(&window).unwrap().output,
+        "HEADLESS-1"
+    );
+
+    let target = f.client(id).output("HEADLESS-2");
+    f.client(id).window(&surface).set_fullscreen(Some(&target));
+    f.double_roundtrip(id);
+    assert_eq!(
+        f.state().stage.fullscreen_output_of(&window),
+        Some("HEADLESS-2")
+    );
+    assert!(
+        f.state().stage.pin_of(&window).is_none(),
+        "precondition: the fullscreen suspended the pin"
+    );
+
+    f.remove_output(&out1);
+
+    let survivor = f.state().space.outputs().next().cloned().unwrap();
+    let saved = crate::state::output_state(&survivor)
+        .fullscreen_return
+        .as_ref()
+        .and_then(|r| r.pinned.clone())
+        .expect("the suspended pin survives the unplug");
+    assert_eq!(saved.output, "HEADLESS-2");
+
+    // Clamped against the pre-fullscreen 320x240 size, so the frame is 328x273
+    // and fits the 800x600 survivor exactly at its bottom-right corner.
+    let frame = chrome.frame_loc(saved.screen_pos);
+    let frame_size = chrome.frame_size(smithay::utils::Size::from((320, 240)));
+    assert!(
+        frame.x >= 0 && frame.y >= 0,
+        "the frame's top-left stays on the survivor, got {frame:?}"
+    );
+    assert_eq!(
+        (frame.x + frame_size.w, frame.y + frame_size.h),
+        (800, 600),
+        "the whole frame stays inside the survivor"
+    );
+}
+
+/// The client is told a new `wp_fractional_scale_v1` scale when its window
+/// comes up on an output of a different density. Before the membership pass
+/// carried the scale, `set_preferred_scale` had a single call site at surface
+/// creation, so a window born on a 1.0 output rendered at 1.0 for the rest of
+/// its life and the compositor stretched its buffer onto the 1.5 panel.
+///
+/// Both outputs start with a camera on the canvas origin, so their viewports
+/// coincide; the sharp one is panned away first so each window belongs to one
+/// output at a time, the way separate panels behave.
+///
+/// The scale follows visibility, not the output set: unplugging the coarse
+/// output leaves the window off-canvas, where no scale is right and the client
+/// keeps the one it has. It is panning the survivor onto the window — the
+/// moment the window is actually shown at 1.5 — that re-sends.
+///
+/// Assertions are on the tail of the log, not the whole of it: the protocol
+/// makes the compositor send one `preferred_scale` as the object is created,
+/// and at that moment the surface has no geometry, so `new_fractional_scale`
+/// can only offer the active output's scale.
+#[test]
+fn window_shown_on_a_sharper_output_is_told_the_new_scale() {
+    let mut f = Fixture::new();
+    let coarse = f.add_output_scaled(1, (1920, 1080), 1.0);
+    let fine = f.add_output_scaled(2, (2880, 1800), 1.5);
+    crate::state::output_state(&fine).camera = Point::from((5000.0, 5000.0));
+    f.state().update_output_from_camera();
+    let id = f.add_client();
+
+    let surface = map_window(&mut f, id, "app", (400, 300));
+    f.client(id).get_fractional_scale(&surface);
+    f.double_roundtrip(id);
+
+    let window = window_by_app_id(&mut f, "app").unwrap();
+    assert_eq!(
+        f.state().output_for_window(&window).map(|o| o.name()),
+        Some(coarse.name()),
+        "the window opens on the coarse output"
+    );
+    let on_coarse = f.client(id).preferred_scales_for(&surface);
+    assert_eq!(
+        on_coarse.last(),
+        Some(&120),
+        "and is told to render 1:1 for it, got {on_coarse:?}"
+    );
+
+    f.remove_output(&coarse);
+    f.double_roundtrip(id);
+    assert_eq!(
+        f.client(id).preferred_scales_for(&surface),
+        on_coarse,
+        "off every viewport, the client is left alone rather than handed a \
+         scale for an output that does not show it"
+    );
+
+    // The survivor pans onto the window: now it really is on a 1.5 output.
+    crate::state::output_state(&fine).camera = Point::from((-960.0, -600.0));
+    f.state().update_output_from_camera();
+    f.state().refresh_window_outputs();
+    f.double_roundtrip(id);
+
+    let on_fine = f.client(id).preferred_scales_for(&surface);
+    assert_eq!(
+        on_fine.last(),
+        Some(&180),
+        "shown at 1.5, the client is told 1.5, got {on_fine:?}"
+    );
+    assert_eq!(
+        on_fine.len(),
+        on_coarse.len() + 1,
+        "re-sent exactly once, not once per frame: {on_fine:?}"
+    );
+}
+
+/// A layer surface is told the scale of the output it is anchored to even when
+/// it asks for its `wp_fractional_scale_v1` object *after* taking the
+/// layer-shell role. The client picks that order, and the creation-time event
+/// can only carry the active output's scale, so correcting the scale where the
+/// role is created loses the race: the guess lands after the correction. The
+/// correction therefore lives in the commit path, where every commit
+/// re-asserts it.
+#[test]
+fn layer_asking_for_the_scale_last_still_gets_its_own_output() {
+    let mut f = Fixture::new();
+    // The active output is the coarse one, so the scale the creation-time
+    // event can offer is the wrong one for a bar anchored to the sharp output.
+    let _coarse = f.add_output_scaled(1, (1920, 1080), 1.0);
+    let fine = f.add_output_scaled(2, (2880, 1800), 1.5);
+    let id = f.add_client();
+    f.roundtrip(id);
+    assert_eq!(
+        f.state().active_output().map(|o| o.name()),
+        Some("HEADLESS-1".to_owned()),
+        "the test needs the coarse output active to be able to tell the two apart"
+    );
+
+    let wl_output = f.client(id).output(&fine.name());
+    let layer = f.client(id).create_layer(
+        Some(&wl_output),
+        wayland_protocols_wlr::layer_shell::v1::client::zwlr_layer_shell_v1::Layer::Overlay,
+        "panel",
+    );
+    let surface = layer.surface.clone();
+    // Unanchored, so a non-zero requested size is required on every commit.
+    layer.set_configure_props(super::client::LayerConfigureProps {
+        size: Some((400, 300)),
+        ..Default::default()
+    });
+    layer.commit();
+    f.double_roundtrip(id);
+
+    // Only now, with the role already taken: the order this test is about.
+    f.client(id).get_fractional_scale(&surface);
+    let layer = f.client(id).layer(&surface);
+    layer.set_size(400, 300);
+    layer.attach_new_buffer();
+    layer.ack_last_and_commit();
+    f.double_roundtrip(id);
+
+    let scales = f.client(id).preferred_scales_for(&surface);
+    assert_eq!(
+        scales.last(),
+        Some(&180),
+        "the bar renders for its own 1.5 output, not the active 1.0 one, got {scales:?}"
+    );
+}
+
+/// A canvas layer surface — a layer whose namespace matched a window rule with
+/// a position, so it lives on the canvas instead of an output's layer map — is
+/// told its output's scale too. It takes an early return before the layer map
+/// and is in no output's layer map afterwards, so the layer-map path alone
+/// would leave it on whatever the creation-time event guessed.
+#[test]
+fn canvas_layer_is_told_its_own_output_scale() {
+    let mut f = Fixture::with_config(config(
+        r#"
+[[window_rules]]
+app_id = "widget"
+position = [0, 0]
+"#,
+    ));
+    let _coarse = f.add_output_scaled(1, (1920, 1080), 1.0);
+    let fine = f.add_output_scaled(2, (2880, 1800), 1.5);
+    let id = f.add_client();
+    f.roundtrip(id);
+    assert_eq!(
+        f.state().active_output().map(|o| o.name()),
+        Some("HEADLESS-1".to_owned()),
+        "the test needs the coarse output active to be able to tell the two apart"
+    );
+
+    let wl_output = f.client(id).output(&fine.name());
+    let layer = f.client(id).create_layer(
+        Some(&wl_output),
+        wayland_protocols_wlr::layer_shell::v1::client::zwlr_layer_shell_v1::Layer::Overlay,
+        "widget",
+    );
+    let surface = layer.surface.clone();
+    layer.set_configure_props(super::client::LayerConfigureProps {
+        size: Some((400, 300)),
+        ..Default::default()
+    });
+    layer.commit();
+    f.double_roundtrip(id);
+
+    f.client(id).get_fractional_scale(&surface);
+    let layer = f.client(id).layer(&surface);
+    layer.set_size(400, 300);
+    layer.attach_new_buffer();
+    layer.ack_last_and_commit();
+    f.double_roundtrip(id);
+
+    assert_eq!(
+        f.state().canvas_layers.len(),
+        1,
+        "the rule put it on the canvas, not in a layer map"
+    );
+    let scales = f.client(id).preferred_scales_for(&surface);
+    assert_eq!(
+        scales.last(),
+        Some(&180),
+        "the widget renders for its own 1.5 output, got {scales:?}"
+    );
+}

@@ -1,0 +1,28 @@
+{
+  "name": "Tramado",
+  "component": "Dither",
+  "description": "Ondas de ruido reducidas a pocos tonos con un tramado retro de píxeles.",
+  "tags": ["retro", "píxeles", "monocromo", "oscuro"],
+  "params": [
+    {"key": "wave_color", "label": "Color de las ondas", "type": "color", "default": "#bcbcbc"},
+    {"key": "background_color", "label": "Color de fondo", "type": "color", "default": "#000000"},
+    {"key": "dither_mode", "label": "Patrón de tramado", "type": "enum", "default": "bayer", "options": [
+      {"value": "bayer", "label": "Bayer 8×8"},
+      {"value": "bayer4", "label": "Bayer 4×4"},
+      {"value": "bayer2", "label": "Bayer 2×2"},
+      {"value": "halftone", "label": "Semitono"},
+      {"value": "lines", "label": "Líneas"},
+      {"value": "crosshatch", "label": "Trama cruzada"},
+      {"value": "noise", "label": "Ruido"},
+      {"value": "none", "label": "Ninguno"}
+    ]},
+    {"key": "color_num", "label": "Tonos por canal", "type": "int", "min": 2, "max": 16, "step": 1, "default": 4},
+    {"key": "pixel_size", "label": "Tamaño del píxel", "type": "int", "min": 1, "max": 12, "step": 1, "default": 2},
+    {"key": "scale", "label": "Tamaño de las ondas", "type": "float", "min": 0.2, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "wave_frequency", "label": "Finura del detalle", "type": "float", "min": 1.0, "max": 6.0, "step": 0.1, "default": 3.0},
+    {"key": "wave_amplitude", "label": "Fuerza del detalle", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.3},
+    {"key": "contrast", "label": "Contraste", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": -0.6, "max": 0.6, "step": 0.05, "default": 0.0}
+  ],
+  "notes": "Las dos pasadas (campo de ondas por celda y tramado) se funden en una. Sin estela del cursor, ondas al hacer clic ni intro; tampoco la paleta personalizada."
+}

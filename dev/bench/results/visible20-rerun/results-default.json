@@ -1,0 +1,103 @@
+[
+ {
+  "tag": "default-n200-pan@0.4",
+  "gpu": "default",
+  "windows": 200,
+  "windows_seen": 200,
+  "scenario": "pan@0.4",
+  "zoom": 0.4,
+  "frames": 959,
+  "visible_windows": {
+   "mean": 13.7,
+   "max": 35.0
+  },
+  "frame_ms": {
+   "p50": 3.371649,
+   "p99": 16.0853386,
+   "max": 18.619062
+  },
+  "compose_ms": {
+   "p50": 0.1201,
+   "p99": 1.0434544199999984,
+   "max": 2.964711
+  },
+  "gpu_render_ms": {
+   "p50": 4.635951,
+   "p99": 14.779376500000001,
+   "max": 16.150181,
+   "n": 666
+  },
+  "interval_ms": {
+   "p50": 19.40509,
+   "p99": 32.386767299999995
+  },
+  "mem_idle": {
+   "VmHWM": 148,
+   "VmRSS": 148,
+   "drm": {}
+  },
+  "mem_loaded": {
+   "VmHWM": 399,
+   "VmRSS": 399,
+   "drm": {}
+  },
+  "nvidia_mib_idle": null,
+  "nvidia_mib_loaded": null,
+  "debug_counters": {
+   "DebugCounters": {
+    "auto_anchor_snapshot": 0,
+    "background_last_animate": 0,
+    "bg_chunk_loads_in_flight": 0,
+    "blur_cache": 0,
+    "blur_scratch": 0,
+    "border_cache": 0,
+    "cached_bg": 1,
+    "cached_error_bar": 0,
+    "cached_outlines": 1,
+    "cached_shader_chunks": 0,
+    "cached_tile_chunks": 0,
+    "canvas_layers": 0,
+    "capture_state": 0,
+    "close_pixels": 0,
+    "closing_snapshots": 0,
+    "decorations": 0,
+    "deferred_adoptions": 0,
+    "disconnected_outputs": 0,
+    "idle_inhibiting_surfaces": 0,
+    "ipc_subscribers": 0,
+    "lock_surfaces": 0,
+    "pending_adopt_settle": 0,
+    "pending_adoptions": 0,
+    "pending_captures": 0,
+    "pending_center": 0,
+    "pending_fit": 0,
+    "pending_fullscreen": 0,
+    "pending_mode_changes": 0,
+    "pending_recenter": 0,
+    "pending_relaunches": 0,
+    "pending_resizes": 0,
+    "pending_screencopies": 0,
+    "pending_size": 0,
+    "pending_ssd": 0,
+    "real_close_marks": 0,
+    "resize_captures": 0,
+    "resize_crossfades": 0,
+    "shader_chunk_caches_pending": 0,
+    "shadow_cache": 99,
+    "shared_blur": 0,
+    "stable_snap_rects": 200,
+    "stage_entries": 200,
+    "stage_focus_history": 200,
+    "stage_fullscreen": 0,
+    "stage_pinned": 0,
+    "standin_fades": 0,
+    "state_file_cameras": 1,
+    "suspend_marks": 0,
+    "unmap_snapshots": 0,
+    "virtual_kb_bindings": 0,
+    "virtual_keymaps_held": 0,
+    "window_animations": 0
+   }
+  }
+ }
+]

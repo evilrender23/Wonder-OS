@@ -1,0 +1,37 @@
+{
+  "name": "Rayos de luz",
+  "component": "LightRays",
+  "description": "Haces de luz volumétrica que caen desde un foco y ondulan entre la neblina.",
+  "tags": ["luz", "rayos", "oscuro", "atmosférico"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "origin", "label": "Origen", "type": "enum", "options": [
+      {"value": "top-center", "label": "Arriba, centro"},
+      {"value": "top-left", "label": "Arriba, izquierda"},
+      {"value": "top-right", "label": "Arriba, derecha"},
+      {"value": "left", "label": "Izquierda"},
+      {"value": "right", "label": "Derecha"},
+      {"value": "bottom-center", "label": "Abajo, centro"},
+      {"value": "bottom-left", "label": "Abajo, izquierda"},
+      {"value": "bottom-right", "label": "Abajo, derecha"}
+    ], "default": "top-center"},
+    {"key": "color", "label": "Color de la luz", "type": "color", "default": "#ffffff"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "spread", "label": "Apertura del haz", "type": "float", "min": 0.05, "max": 2.0, "step": 0.05, "default": 0.5},
+    {"key": "ray_length", "label": "Alcance de los rayos", "type": "float", "min": 0.3, "max": 6.0, "step": 0.1, "default": 3.0},
+    {"key": "density", "label": "Densidad de rayos", "type": "float", "min": 0.1, "max": 6.0, "step": 0.1, "default": 1.0},
+    {"key": "tilt", "label": "Inclinación", "type": "float", "min": -90.0, "max": 90.0, "step": 1.0, "default": 0.0},
+    {"key": "sharpness", "label": "Nitidez", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.35},
+    {"key": "glow", "label": "Resplandor del foco", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.6},
+    {"key": "haze", "label": "Neblina", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.25},
+    {"key": "atmosphere", "label": "Atmósfera (azulado)", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 1.0},
+    {"key": "intensity", "label": "Intensidad", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "fade_distance", "label": "Distancia de atenuación", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "saturation", "label": "Saturación", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "pulsating", "label": "Pulsación", "type": "bool", "default": false},
+    {"key": "noise", "label": "Grano", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "distortion", "label": "Distorsión", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "El haz ya no gira hacia el cursor y se eliminan la sombra del cursor, los pulsos al hacer clic y la intro. En modo claro la tinta se imprime sobre un papel claro derivado del color de fondo."
+}

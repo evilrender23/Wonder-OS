@@ -1,0 +1,27 @@
+// The Wonderland greeting: the distro's logo beside a short system summary.
+// install.sh copies this directory to ~/.config/fastfetch.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file-raw",
+    "source": "~/.config/fastfetch/wonderland.txt",
+    "padding": { "top": 1, "left": 2, "right": 4 }
+  },
+  "display": { "separator": "  ", "color": { "keys": "cyan" } },
+  "modules": [
+    "title",
+    "separator",
+    { "type": "os", "key": "OS", "format": "wonderlandOS ({pretty-name} based)" },
+    { "type": "kernel", "key": "Kernel" },
+    { "type": "wm", "key": "WM" },
+    { "type": "terminal", "key": "Terminal" },
+    { "type": "shell", "key": "Shell" },
+    { "type": "packages", "key": "Packages" },
+    { "type": "cpu", "key": "CPU" },
+    { "type": "gpu", "key": "GPU" },
+    { "type": "memory", "key": "Memory" },
+    { "type": "uptime", "key": "Uptime" },
+    "break",
+    "colors"
+  ]
+}

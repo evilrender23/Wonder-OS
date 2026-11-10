@@ -1,0 +1,42 @@
+{
+  "name": "Partículas",
+  "component": "Particles",
+  "description": "Una nube 3D de partículas que flotan, titilan y giran despacio.",
+  "tags": ["partículas", "espacio", "minimalista", "oscuro"],
+  "params": [
+    {"key": "count", "label": "Número de partículas", "type": "int", "min": 20, "max": 2000, "step": 10, "default": 200},
+    {"key": "spread", "label": "Dispersión", "type": "float", "min": 1.0, "max": 30.0, "step": 0.5, "default": 10.0},
+    {"key": "color_count", "label": "Número de colores", "type": "int", "min": 1, "max": 3, "step": 1, "default": 1},
+    {"key": "color1", "label": "Color 1", "type": "color", "default": "#ffffff"},
+    {"key": "color2", "label": "Color 2", "type": "color", "default": "#5227ff"},
+    {"key": "color3", "label": "Color 3", "type": "color", "default": "#ff9ffc"},
+    {"key": "base_size", "label": "Tamaño base", "type": "float", "min": 30.0, "max": 400.0, "step": 5.0, "default": 100.0},
+    {"key": "size_randomness", "label": "Variación de tamaño", "type": "float", "min": 0.0, "max": 1.9, "step": 0.05, "default": 1.0},
+    {"key": "shape", "label": "Forma", "type": "enum", "default": "circle", "options": [
+      {"value": "circle", "label": "Círculo"},
+      {"value": "square", "label": "Cuadrado"},
+      {"value": "ring", "label": "Anillo"},
+      {"value": "sparkle", "label": "Destello"}
+    ]},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.5},
+    {"key": "twinkle", "label": "Titileo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.3},
+    {"key": "depth_of_field", "label": "Desenfoque de cercanía", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.0},
+    {"key": "connections", "label": "Conexiones", "type": "bool", "default": false},
+    {"key": "connection_distance", "label": "Distancia de conexión (px)", "type": "float", "min": 20.0, "max": 220.0, "step": 5.0, "default": 110.0},
+    {"key": "drift", "label": "Deriva", "type": "enum", "default": "none", "options": [
+      {"value": "none", "label": "Ninguna"},
+      {"value": "up", "label": "Hacia arriba (brasas)"},
+      {"value": "down", "label": "Hacia abajo (nieve)"},
+      {"value": "forward", "label": "Hacia ti (estrellas)"}
+    ]},
+    {"key": "drift_speed", "label": "Velocidad de la deriva", "type": "float", "min": 0.0, "max": 5.0, "step": 0.1, "default": 1.0},
+    {"key": "alpha_particles", "label": "Partículas translúcidas", "type": "bool", "default": false},
+    {"key": "camera_distance", "label": "Distancia de la cámara", "type": "float", "min": 2.0, "max": 60.0, "step": 0.5, "default": 20.0},
+    {"key": "rotation", "label": "Rotación lenta", "type": "bool", "default": true},
+    {"key": "variation", "label": "Variación", "type": "int", "min": 0, "max": 100, "step": 1, "default": 0},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "paper", "label": "Fondo en modo claro", "type": "color", "default": "#f5f5f7"}
+  ],
+  "notes": "La nube instanciada se aproxima con 12 capas de profundidad de celdas con una partícula aleatoria cada una (misma densidad, cámara y sprite); el vaivén de cada partícula queda limitado a su celda y las conexiones solo unen partículas vecinas de la misma capa. Sin cursor, sin destellos al hacer clic ni la entrada inicial."
+}

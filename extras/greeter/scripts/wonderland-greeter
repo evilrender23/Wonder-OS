@@ -1,0 +1,19 @@
+#!/bin/sh
+# wonderland-greeter — what greetd runs as the `greeter` user: the distro's
+# compositor with the greeter's own config (live wallpaper, no bindings), which
+# autostarts the login screen (wonderland-greeter-ui).
+set -u
+
+bin=$(dirname -- "$(readlink -f -- "$0")")
+etc=${WONDERLAND_GREETER_ETC:-/etc/wonderland-greeter}
+var=${WONDERLAND_GREETER_VAR:-/var/lib/wonderland-greeter}
+
+# greetd hands over a bare environment: the compositor lives next to this script.
+export PATH="$bin:$PATH"
+# The greeter user has no home of its own: everything it writes goes to $var.
+export HOME="$var"
+export XDG_CONFIG_HOME="$var/config" XDG_STATE_HOME="$var/state" XDG_CACHE_HOME="$var/cache"
+export XDG_CURRENT_DESKTOP=driftwm XDG_SESSION_TYPE=wayland
+mkdir -p "$XDG_CONFIG_HOME" "$XDG_STATE_HOME" "$XDG_CACHE_HOME" 2>/dev/null
+
+exec driftwm --config "$etc/driftwm.toml" "$@" >"$var/greeter.log" 2>&1

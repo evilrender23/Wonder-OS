@@ -1,0 +1,24 @@
+{
+  "name": "Ondas",
+  "component": "Waves",
+  "description": "Líneas finas que ondulan y se retuercen formando pliegues brillantes.",
+  "tags": ["líneas", "ondas", "minimalista", "oscuro"],
+  "params": [
+    {"key": "line_color", "label": "Color de las líneas", "type": "color", "default": "#ffffff"},
+    {"key": "line_style", "label": "Estilo de línea", "type": "enum", "default": "solid", "options": [
+      {"value": "solid", "label": "Continua"},
+      {"value": "dashed", "label": "Discontinua en movimiento"}
+    ]},
+    {"key": "spacing", "label": "Separación entre líneas (px)", "type": "float", "min": 4.0, "max": 40.0, "step": 0.5, "default": 10.0},
+    {"key": "line_width", "label": "Grosor de línea (px)", "type": "float", "min": 0.25, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "rotation", "label": "Rotación (grados)", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": 0.0},
+    {"key": "amplitude", "label": "Amplitud (px)", "type": "float", "min": 0.0, "max": 100.0, "step": 1.0, "default": 32.0},
+    {"key": "scale", "label": "Tamaño de las ondas", "type": "float", "min": 0.2, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "twist", "label": "Torsión", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "variation", "label": "Variación", "type": "int", "min": 0, "max": 100, "step": 1, "default": 0},
+    {"key": "fade", "label": "Difuminar bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "Las líneas instanciadas se localizan por píxel invirtiendo la deformación de Perlin con unos pasos de Newton; en los pliegues donde se amontonan se promedia su cobertura. Sin arrastre con el ratón, ondas al hacer clic ni intro (por eso no hay color de acento)."
+}

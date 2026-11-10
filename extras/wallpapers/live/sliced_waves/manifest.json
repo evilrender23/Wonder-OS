@@ -1,0 +1,31 @@
+{
+  "name": "Ondas en láminas",
+  "component": "SlicedWaves",
+  "description": "Ondas de luz de colores cortadas en barras verticales que giran en perspectiva.",
+  "tags": ["barras", "ondas", "neón", "colores", "oscuro"],
+  "params": [
+    {"key": "color1", "label": "Color 1", "type": "color", "default": "#ffd9a8"},
+    {"key": "color2", "label": "Color 2", "type": "color", "default": "#ff5fa2"},
+    {"key": "color3", "label": "Color 3", "type": "color", "default": "#5b8cff"},
+    {"key": "ribbons", "label": "Ondas", "type": "int", "min": 1, "max": 6, "step": 1, "default": 3},
+    {"key": "spacing", "label": "Separación de las barras (px)", "type": "float", "min": 4.0, "max": 200.0, "step": 1.0, "default": 28.0},
+    {"key": "bar_width", "label": "Anchura de las barras", "type": "float", "min": 0.05, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "ribbon_height", "label": "Altura de las ondas", "type": "float", "min": 0.02, "max": 1.0, "step": 0.01, "default": 0.26},
+    {"key": "spread", "label": "Distancia entre ondas", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.1},
+    {"key": "amplitude", "label": "Oscilación", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.1},
+    {"key": "frequency", "label": "Frecuencia", "type": "float", "min": 0.0, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "perspective", "label": "Perspectiva", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.45},
+    {"key": "curve", "label": "Curvatura", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.5},
+    {"key": "blur", "label": "Profundidad de campo", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.6},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.1, "max": 3.0, "step": 0.05, "default": 1.25},
+    {"key": "position", "label": "Posición vertical", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.78},
+    {"key": "rotation", "label": "Rotación", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": 0.0},
+    {"key": "slices", "label": "Cortes tipo LED", "type": "int", "min": 0, "max": 40, "step": 1, "default": 0},
+    {"key": "grain", "label": "Grano", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.08},
+    {"key": "fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"}
+  ],
+  "notes": "Las barras instanciadas se evalúan por píxel: se invierte la proyección de la tira para hallar la barra bajo el píxel y se suman las vecinas (±7) de cada onda. Sin foco ni realce del cursor ni intro; en modo claro se usa fondo blanco salvo que el fondo elegido ya sea claro."
+}

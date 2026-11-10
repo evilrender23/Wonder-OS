@@ -1,0 +1,478 @@
+[
+ {
+  "tag": "amd-n10-pan",
+  "gpu": "amd",
+  "windows": 10,
+  "windows_seen": 10,
+  "scenario": "pan",
+  "zoom": 1.0,
+  "frames": 1188,
+  "visible_windows": {
+   "mean": 3.0,
+   "max": 8.0
+  },
+  "frame_ms": {
+   "p50": 0.265939,
+   "p99": 0.7094879000000025,
+   "max": 5.890682
+  },
+  "compose_ms": {
+   "p50": 0.024995,
+   "p99": 0.08034640000000014,
+   "max": 4.716853
+  },
+  "gpu_render_ms": {
+   "p50": 1.7893750000000002,
+   "p99": 2.7942121,
+   "max": 2.88137,
+   "n": 954
+  },
+  "interval_ms": {
+   "p50": 16.290056,
+   "p99": 16.77015766
+  },
+  "mem_idle": {
+   "VmHWM": 116,
+   "VmRSS": 116,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 27.8,
+    "vram": 64.9,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "mem_loaded": {
+   "VmHWM": 144,
+   "VmRSS": 144,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 47.8,
+    "vram": 95.6,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "nvidia_mib_idle": null,
+  "nvidia_mib_loaded": null,
+  "debug_counters": {
+   "DebugCounters": {
+    "auto_anchor_snapshot": 0,
+    "background_last_animate": 0,
+    "bg_chunk_loads_in_flight": 0,
+    "blur_cache": 0,
+    "blur_scratch": 0,
+    "border_cache": 9,
+    "cached_bg": 1,
+    "cached_error_bar": 0,
+    "cached_outlines": 1,
+    "cached_shader_chunks": 0,
+    "cached_tile_chunks": 0,
+    "canvas_layers": 0,
+    "capture_state": 0,
+    "close_pixels": 0,
+    "closing_snapshots": 0,
+    "decorations": 0,
+    "deferred_adoptions": 0,
+    "disconnected_outputs": 0,
+    "idle_inhibiting_surfaces": 0,
+    "ipc_subscribers": 0,
+    "lock_surfaces": 0,
+    "pending_adopt_settle": 0,
+    "pending_adoptions": 0,
+    "pending_captures": 0,
+    "pending_center": 0,
+    "pending_fit": 0,
+    "pending_fullscreen": 0,
+    "pending_mode_changes": 0,
+    "pending_recenter": 0,
+    "pending_relaunches": 0,
+    "pending_resizes": 0,
+    "pending_screencopies": 0,
+    "pending_size": 0,
+    "pending_ssd": 0,
+    "real_close_marks": 0,
+    "resize_captures": 0,
+    "resize_crossfades": 0,
+    "shader_chunk_caches_pending": 0,
+    "shadow_cache": 9,
+    "shared_blur": 0,
+    "stable_snap_rects": 10,
+    "stage_entries": 10,
+    "stage_focus_history": 10,
+    "stage_fullscreen": 0,
+    "stage_pinned": 0,
+    "standin_fades": 0,
+    "state_file_cameras": 1,
+    "suspend_marks": 0,
+    "unmap_snapshots": 0,
+    "virtual_kb_bindings": 0,
+    "virtual_keymaps_held": 0,
+    "window_animations": 0
+   }
+  }
+ },
+ {
+  "tag": "amd-n10-overview",
+  "gpu": "amd",
+  "windows": 10,
+  "windows_seen": 10,
+  "scenario": "overview",
+  "zoom": 0.311,
+  "frames": 1279,
+  "visible_windows": {
+   "mean": 9.2,
+   "max": 10.0
+  },
+  "frame_ms": {
+   "p50": 0.321159,
+   "p99": 0.8700559999999999,
+   "max": 4.033454
+  },
+  "compose_ms": {
+   "p50": 0.0361,
+   "p99": 0.12122480000000012,
+   "max": 3.209236
+  },
+  "gpu_render_ms": {
+   "p50": 1.9243999999999999,
+   "p99": 2.3182313,
+   "max": 2.38926,
+   "n": 924
+  },
+  "interval_ms": {
+   "p50": 16.351291,
+   "p99": 16.9153489
+  },
+  "mem_idle": {
+   "VmHWM": 108,
+   "VmRSS": 108,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 31.7,
+    "vram": 77.6,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "mem_loaded": {
+   "VmHWM": 153,
+   "VmRSS": 153,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 59.8,
+    "vram": 98.2,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "nvidia_mib_idle": null,
+  "nvidia_mib_loaded": null,
+  "debug_counters": {
+   "DebugCounters": {
+    "auto_anchor_snapshot": 0,
+    "background_last_animate": 0,
+    "bg_chunk_loads_in_flight": 0,
+    "blur_cache": 0,
+    "blur_scratch": 0,
+    "border_cache": 10,
+    "cached_bg": 1,
+    "cached_error_bar": 0,
+    "cached_outlines": 1,
+    "cached_shader_chunks": 0,
+    "cached_tile_chunks": 0,
+    "canvas_layers": 0,
+    "capture_state": 0,
+    "close_pixels": 0,
+    "closing_snapshots": 0,
+    "decorations": 0,
+    "deferred_adoptions": 0,
+    "disconnected_outputs": 0,
+    "idle_inhibiting_surfaces": 0,
+    "ipc_subscribers": 0,
+    "lock_surfaces": 0,
+    "pending_adopt_settle": 0,
+    "pending_adoptions": 0,
+    "pending_captures": 0,
+    "pending_center": 0,
+    "pending_fit": 0,
+    "pending_fullscreen": 0,
+    "pending_mode_changes": 0,
+    "pending_recenter": 0,
+    "pending_relaunches": 0,
+    "pending_resizes": 0,
+    "pending_screencopies": 0,
+    "pending_size": 0,
+    "pending_ssd": 0,
+    "real_close_marks": 0,
+    "resize_captures": 0,
+    "resize_crossfades": 0,
+    "shader_chunk_caches_pending": 0,
+    "shadow_cache": 10,
+    "shared_blur": 0,
+    "stable_snap_rects": 10,
+    "stage_entries": 10,
+    "stage_focus_history": 10,
+    "stage_fullscreen": 0,
+    "stage_pinned": 0,
+    "standin_fades": 0,
+    "state_file_cameras": 1,
+    "suspend_marks": 0,
+    "unmap_snapshots": 0,
+    "virtual_kb_bindings": 0,
+    "virtual_keymaps_held": 0,
+    "window_animations": 0
+   }
+  }
+ },
+ {
+  "tag": "amd-n200-pan",
+  "gpu": "amd",
+  "windows": 200,
+  "windows_seen": 200,
+  "scenario": "pan",
+  "zoom": 1.0,
+  "frames": 1161,
+  "visible_windows": {
+   "mean": 5.2,
+   "max": 10.0
+  },
+  "frame_ms": {
+   "p50": 0.596719,
+   "p99": 1.7272476000000005,
+   "max": 6.004181
+  },
+  "compose_ms": {
+   "p50": 0.12448,
+   "p99": 0.5839296000000013,
+   "max": 5.042463
+  },
+  "gpu_render_ms": {
+   "p50": 2.295345,
+   "p99": 2.9532377999999997,
+   "max": 3.03822,
+   "n": 938
+  },
+  "interval_ms": {
+   "p50": 16.6235655,
+   "p99": 17.754138
+  },
+  "mem_idle": {
+   "VmHWM": 112,
+   "VmRSS": 112,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 27.8,
+    "vram": 64.9,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "mem_loaded": {
+   "VmHWM": 212,
+   "VmRSS": 212,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 51.8,
+    "vram": 257.1,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "nvidia_mib_idle": null,
+  "nvidia_mib_loaded": null,
+  "debug_counters": {
+   "DebugCounters": {
+    "auto_anchor_snapshot": 0,
+    "background_last_animate": 0,
+    "bg_chunk_loads_in_flight": 0,
+    "blur_cache": 0,
+    "blur_scratch": 0,
+    "border_cache": 74,
+    "cached_bg": 1,
+    "cached_error_bar": 0,
+    "cached_outlines": 1,
+    "cached_shader_chunks": 0,
+    "cached_tile_chunks": 0,
+    "canvas_layers": 0,
+    "capture_state": 0,
+    "close_pixels": 0,
+    "closing_snapshots": 0,
+    "decorations": 0,
+    "deferred_adoptions": 0,
+    "disconnected_outputs": 0,
+    "idle_inhibiting_surfaces": 0,
+    "ipc_subscribers": 0,
+    "lock_surfaces": 0,
+    "pending_adopt_settle": 0,
+    "pending_adoptions": 0,
+    "pending_captures": 0,
+    "pending_center": 0,
+    "pending_fit": 0,
+    "pending_fullscreen": 0,
+    "pending_mode_changes": 0,
+    "pending_recenter": 0,
+    "pending_relaunches": 0,
+    "pending_resizes": 0,
+    "pending_screencopies": 0,
+    "pending_size": 0,
+    "pending_ssd": 0,
+    "real_close_marks": 0,
+    "resize_captures": 0,
+    "resize_crossfades": 0,
+    "shader_chunk_caches_pending": 0,
+    "shadow_cache": 74,
+    "shared_blur": 0,
+    "stable_snap_rects": 200,
+    "stage_entries": 200,
+    "stage_focus_history": 200,
+    "stage_fullscreen": 0,
+    "stage_pinned": 0,
+    "standin_fades": 0,
+    "state_file_cameras": 1,
+    "suspend_marks": 0,
+    "unmap_snapshots": 0,
+    "virtual_kb_bindings": 0,
+    "virtual_keymaps_held": 0,
+    "window_animations": 0
+   }
+  }
+ },
+ {
+  "tag": "amd-n200-overview",
+  "gpu": "amd",
+  "windows": 200,
+  "windows_seen": 200,
+  "scenario": "overview",
+  "zoom": 0.077,
+  "frames": 1163,
+  "visible_windows": {
+   "mean": 176.3,
+   "max": 200.0
+  },
+  "frame_ms": {
+   "p50": 2.073058,
+   "p99": 3.8475286000000235,
+   "max": 17.160856
+  },
+  "compose_ms": {
+   "p50": 0.495359,
+   "p99": 1.6638208200000124,
+   "max": 14.743549
+  },
+  "gpu_render_ms": {
+   "p50": 3.176305,
+   "p99": 3.8343675999999998,
+   "max": 4.11168,
+   "n": 834
+  },
+  "interval_ms": {
+   "p50": 18.1002095,
+   "p99": 20.464756600000023
+  },
+  "mem_idle": {
+   "VmHWM": 116,
+   "VmRSS": 116,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 27.8,
+    "vram": 64.9,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "mem_loaded": {
+   "VmHWM": 351,
+   "VmRSS": 351,
+   "drm": {
+    "cpu": 0.0,
+    "gtt": 67.8,
+    "vram": 577.6,
+    "gds": 0.0,
+    "gws": 0.0,
+    "oa": 0.0,
+    "doorbell": 0.0,
+    "mmioremap": 0.0
+   }
+  },
+  "nvidia_mib_idle": null,
+  "nvidia_mib_loaded": null,
+  "debug_counters": {
+   "DebugCounters": {
+    "auto_anchor_snapshot": 0,
+    "background_last_animate": 0,
+    "bg_chunk_loads_in_flight": 0,
+    "blur_cache": 0,
+    "blur_scratch": 0,
+    "border_cache": 200,
+    "cached_bg": 1,
+    "cached_error_bar": 0,
+    "cached_outlines": 1,
+    "cached_shader_chunks": 0,
+    "cached_tile_chunks": 0,
+    "canvas_layers": 0,
+    "capture_state": 0,
+    "close_pixels": 0,
+    "closing_snapshots": 0,
+    "decorations": 0,
+    "deferred_adoptions": 0,
+    "disconnected_outputs": 0,
+    "idle_inhibiting_surfaces": 0,
+    "ipc_subscribers": 0,
+    "lock_surfaces": 0,
+    "pending_adopt_settle": 0,
+    "pending_adoptions": 0,
+    "pending_captures": 0,
+    "pending_center": 0,
+    "pending_fit": 0,
+    "pending_fullscreen": 0,
+    "pending_mode_changes": 0,
+    "pending_recenter": 0,
+    "pending_relaunches": 0,
+    "pending_resizes": 0,
+    "pending_screencopies": 0,
+    "pending_size": 0,
+    "pending_ssd": 0,
+    "real_close_marks": 0,
+    "resize_captures": 0,
+    "resize_crossfades": 0,
+    "shader_chunk_caches_pending": 0,
+    "shadow_cache": 200,
+    "shared_blur": 0,
+    "stable_snap_rects": 200,
+    "stage_entries": 200,
+    "stage_focus_history": 200,
+    "stage_fullscreen": 0,
+    "stage_pinned": 0,
+    "standin_fades": 0,
+    "state_file_cameras": 1,
+    "suspend_marks": 0,
+    "unmap_snapshots": 0,
+    "virtual_kb_bindings": 0,
+    "virtual_keymaps_held": 0,
+    "window_animations": 0
+   }
+  }
+ }
+]

@@ -1,0 +1,440 @@
+#!/usr/bin/python3
+"""Global-menu bridge for the WonderlandWM bar.
+
+Apps that export their menu bar over D-Bus (Qt/KDE apps under the KDE platform
+theme, anything else speaking com.canonical.dbusmenu) look for the
+`com.canonical.AppMenu.Registrar` service and hand it their menu instead of
+drawing it inside the window. This script is that registrar, plus a line
+protocol for the bar (extras/quickshell/services/AppMenu.qml):
+
+  stdin   {"cmd":"focus","window":7,"pid":1234,"windows":[5,7]}
+          {"cmd":"open","id":42}        a submenu is about to be shown
+          {"cmd":"close"}               the menu was dismissed
+          {"cmd":"activate","id":43}    an entry was clicked
+  stdout  {"event":"menu","window":7,"items":[{"id":42,"label":"File"},…]}
+          {"event":"submenu","id":42,"items":[{…,"children":[…]}]}
+
+`windows` are the compositor ids of every window of that pid, oldest first: a
+process with one menu bar per window (Dolphin, Kate) registers them in the
+order it opens the windows, which is how a menu is matched to its window.
+
+`wonderland-appmenu --dump` prints what is registered on a running bridge's
+bus name and exits; it is the quick check that an app exported its menu.
+"""
+
+import json
+import os
+import sys
+
+import gi
+
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio, GLib  # noqa: E402
+
+REGISTRAR_NAME = "com.canonical.AppMenu.Registrar"
+REGISTRAR_PATH = "/com/canonical/AppMenu/Registrar"
+MENU_IFACE = "com.canonical.dbusmenu"
+DEBUG_IFACE = "org.wonderlandwm.AppMenu"
+
+REGISTRAR_XML = f"""
+<node>
+  <interface name="{REGISTRAR_NAME}">
+    <method name="RegisterWindow">
+      <arg type="u" name="windowId" direction="in"/>
+      <arg type="o" name="menuObjectPath" direction="in"/>
+    </method>
+    <method name="UnregisterWindow">
+      <arg type="u" name="windowId" direction="in"/>
+    </method>
+    <method name="GetMenuForWindow">
+      <arg type="u" name="windowId" direction="in"/>
+      <arg type="s" name="service" direction="out"/>
+      <arg type="o" name="menuObjectPath" direction="out"/>
+    </method>
+  </interface>
+  <interface name="{DEBUG_IFACE}">
+    <method name="Dump">
+      <arg type="s" name="json" direction="out"/>
+    </method>
+  </interface>
+</node>
+"""
+
+PROPS = ["label", "enabled", "visible", "type", "toggle-type", "toggle-state",
+         "shortcut", "children-display"]
+
+KEY_NAMES = {
+    "Control": "⌃", "Shift": "⇧", "Alt": "⌥", "Super": "❖",
+    "Return": "↩", "Delete": "⌦", "BackSpace": "⌫", "Escape": "Esc",
+    "Left": "←", "Right": "→", "Up": "↑", "Down": "↓",
+    "plus": "+", "minus": "−", "space": "Espacio", "Tab": "⇥",
+    "PageUp": "Re Pág", "PageDown": "Av Pág", "Home": "Inicio", "End": "Fin",
+}
+
+
+def strip_mnemonic(label):
+    """`_File` -> `File`, `Save __As` -> `Save _As`."""
+    out, i = [], 0
+    while i < len(label):
+        if label[i] == "_":
+            if i + 1 < len(label) and label[i + 1] == "_":
+                out.append("_")
+                i += 2
+                continue
+            i += 1
+            continue
+        out.append(label[i])
+        i += 1
+    return "".join(out)
+
+
+def shortcut_text(value):
+    """dbusmenu `shortcut` (aas, first alternative) as a short hint."""
+    if not value:
+        return ""
+    keys = value[0]
+    mods = [KEY_NAMES.get(k, k) for k in keys[:-1]]
+    last = KEY_NAMES.get(keys[-1], keys[-1])
+    if len(last) == 1:
+        last = last.upper()
+    return ("".join(mods) + " " + last).strip()
+
+
+def simplify(node, depth=-1):
+    """A dbusmenu layout node (ia{sv}av) as the JSON the bar draws."""
+    item_id, props, children = node
+    kind = props.get("type", "standard")
+    item = {"id": item_id}
+    if kind == "separator":
+        item["separator"] = True
+    else:
+        item["label"] = strip_mnemonic(props.get("label", ""))
+    if not props.get("enabled", True):
+        item["enabled"] = False
+    if not props.get("visible", True):
+        item["visible"] = False
+    toggle = props.get("toggle-type", "")
+    if toggle:
+        item["toggle"] = toggle
+        item["checked"] = props.get("toggle-state", 0) == 1
+    hint = shortcut_text(props.get("shortcut"))
+    if hint:
+        item["shortcut"] = hint
+    if props.get("children-display", "") == "submenu" or children:
+        item["submenu"] = True
+        if depth != 0:
+            item["children"] = [simplify(c, depth - 1) for c in children]
+    return item
+
+
+def emit(obj):
+    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+    sys.stdout.flush()
+
+
+class Bridge:
+    def __init__(self, loop):
+        self.loop = loop
+        self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+        self.entries = []        # registered menus, oldest first
+        self.assigned = {}       # compositor window id -> entry
+        self.seq = 0
+        self.focus = None        # last focus command
+        self.current = None      # entry shown in the bar
+        self.open_ids = set()    # submenus the bar has open
+        self.signal_subs = []
+        self.pending = b""
+        self.name_pids = {}      # unique bus name -> pid
+        self.retries = []
+
+        info = Gio.DBusNodeInfo.new_for_xml(REGISTRAR_XML)
+        for iface in info.interfaces:
+            self.bus.register_object(REGISTRAR_PATH, iface, self.on_method, None, None)
+        Gio.bus_own_name_on_connection(
+            self.bus, REGISTRAR_NAME, Gio.BusNameOwnerFlags.NONE,
+            None, self.on_name_lost)
+        self.bus.signal_subscribe(
+            "org.freedesktop.DBus", "org.freedesktop.DBus", "NameOwnerChanged",
+            "/org/freedesktop/DBus", None, Gio.DBusSignalFlags.NONE,
+            self.on_owner_changed)
+
+        stdin = GLib.IOChannel.unix_new(sys.stdin.fileno())
+        GLib.io_add_watch(stdin, GLib.PRIORITY_DEFAULT,
+                          GLib.IOCondition.IN | GLib.IOCondition.HUP, self.on_stdin)
+
+    # ── registrar ──────────────────────────────────────────────────────
+    def on_name_lost(self, _conn, _name):
+        # Another registrar (Plasma's kded, a second bar): apps still export
+        # their menus for it, and discover() finds them all the same.
+        print("wonderland-appmenu: another registrar owns the bus name", file=sys.stderr)
+
+    def on_method(self, _conn, sender, _path, _iface, method, params, invocation):
+        if method == "RegisterWindow":
+            wid, path = params.unpack()
+            self.register(sender, wid, path)
+            invocation.return_value(None)
+        elif method == "UnregisterWindow":
+            (wid,) = params.unpack()
+            self.drop([e for e in self.entries if e["sender"] == sender and e["wid"] == wid])
+            invocation.return_value(None)
+        elif method == "GetMenuForWindow":
+            (wid,) = params.unpack()
+            for e in self.entries:
+                if e["wid"] == wid:
+                    invocation.return_value(GLib.Variant("(so)", (e["sender"], e["path"])))
+                    return
+            invocation.return_dbus_error(
+                "org.freedesktop.DBus.Error.Failed", "no menu for that window")
+        elif method == "Dump":
+            data = [{k: e[k] for k in ("sender", "path", "wid", "pid")} for e in self.entries]
+            invocation.return_value(GLib.Variant("(s)", (json.dumps(data),)))
+
+    def register(self, sender, wid, path):
+        for e in self.entries:
+            if e["sender"] == sender and e["path"] == path:
+                e["wid"] = wid
+                return
+        try:
+            pid = self.bus.call_sync(
+                "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
+                "GetConnectionUnixProcessID", GLib.Variant("(s)", (sender,)),
+                None, Gio.DBusCallFlags.NONE, 1000, None).unpack()[0]
+        except GLib.Error:
+            return
+        self.seq += 1
+        self.entries.append({"sender": sender, "path": path, "wid": wid, "pid": pid, "seq": self.seq})
+        self.refocus()
+
+    def on_owner_changed(self, _conn, _sender, _path, _iface, _signal, params):
+        name, _old, new = params.unpack()
+        if new == "":
+            self.name_pids.pop(name, None)
+            self.drop([e for e in self.entries if e["sender"] == name])
+
+    def drop(self, gone):
+        if not gone:
+            return
+        self.entries = [e for e in self.entries if e not in gone]
+        self.assigned = {w: e for w, e in self.assigned.items() if e not in gone}
+        self.refocus()
+
+    # ── menus an app exports without telling the registrar ────────────
+    def bus_names_of(self, pid):
+        """Unique bus names owned by `pid` (cached; the bus forgets for us)."""
+        try:
+            names = self.bus.call_sync(
+                "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
+                "ListNames", None, None, Gio.DBusCallFlags.NONE, 1000, None).unpack()[0]
+        except GLib.Error:
+            return []
+        for name in names:
+            if not name.startswith(":") or name in self.name_pids:
+                continue
+            try:
+                self.name_pids[name] = self.bus.call_sync(
+                    "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
+                    "GetConnectionUnixProcessID", GLib.Variant("(s)", (name,)),
+                    None, Gio.DBusCallFlags.NONE, 500, None).unpack()[0]
+            except GLib.Error:
+                self.name_pids[name] = None
+        return [n for n in names if self.name_pids.get(n) == pid]
+
+    def discover(self, pid):
+        """Qt on Wayland exports its menu bars as /MenuBar/<n> and expects the
+        compositor to say which window each belongs to (org_kde_kwin_appmenu);
+        without that, find them on the app's own bus connection."""
+        found = []
+        for name in self.bus_names_of(pid):
+            try:
+                xml = self.bus.call_sync(
+                    name, "/MenuBar", "org.freedesktop.DBus.Introspectable", "Introspect",
+                    None, None, Gio.DBusCallFlags.NONE, 400, None).unpack()[0]
+                children = [n.path for n in Gio.DBusNodeInfo.new_for_xml(xml).nodes]
+            except GLib.Error:
+                continue
+            for child in sorted((c for c in children if c and c.isdigit()), key=int):
+                found.append((name, f"/MenuBar/{child}", int(child)))
+        known = {(e["sender"], e["path"]) for e in self.entries}
+        live = {(n, p) for n, p, _ in found}
+        self.entries = [e for e in self.entries
+                        if not e.get("found") or e["pid"] != pid or (e["sender"], e["path"]) in live]
+        self.assigned = {w: e for w, e in self.assigned.items() if e in self.entries}
+        for name, path, order in found:
+            if (name, path) not in known:
+                self.entries.append({"sender": name, "path": path, "wid": 0, "pid": pid,
+                                     "seq": order, "found": True})
+
+    # ── which menu belongs to the focused window ───────────────────────
+    def pick(self, focus):
+        pid, window = focus.get("pid"), focus.get("window")
+        if pid is None or window is None:
+            return None
+        self.discover(pid)
+        mine = sorted((e for e in self.entries if e["pid"] == pid),
+                      key=lambda e: (not e.get("found"), e["seq"]))
+        if not mine:
+            return None
+        live = set(focus.get("windows") or [window])
+        self.assigned = {w: e for w, e in self.assigned.items()
+                         if e["pid"] != pid or w in live}
+        # Windows and menu bars of one process pair up in creation order.
+        taken = [e for w, e in self.assigned.items() if e["pid"] == pid]
+        free = [e for e in mine if e not in taken]
+        for w in sorted(live):
+            if w not in self.assigned and free:
+                self.assigned[w] = free.pop(0)
+        return self.assigned.get(window) or mine[-1]
+
+    def refocus(self):
+        if self.focus is not None:
+            self.set_focus(self.focus, retry=False)
+        return False
+
+    def set_focus(self, focus, retry=True):
+        self.focus = focus
+        entry = self.pick(focus)
+        if retry:
+            # A window is focused before its menu bar is exported: look again.
+            for timer in self.retries:
+                GLib.source_remove(timer)
+            self.retries = []
+            if entry is None and focus.get("pid") is not None:
+                for delay in (400, 1200, 3000):
+                    self.retries.append(GLib.timeout_add(delay, self.retry, delay))
+        if entry is not self.current:
+            for sub in self.signal_subs:
+                self.bus.signal_unsubscribe(sub)
+            self.signal_subs = []
+            self.current = entry
+            self.open_ids = set()
+            if entry is not None:
+                for signal in ("LayoutUpdated", "ItemsPropertiesUpdated"):
+                    self.signal_subs.append(self.bus.signal_subscribe(
+                        entry["sender"], MENU_IFACE, signal, entry["path"], None,
+                        Gio.DBusSignalFlags.NONE, self.on_menu_changed))
+            self.send_top()
+        elif retry:
+            self.send_top()
+
+    def retry(self, _delay):
+        self.retries.pop(0)
+        if self.current is None:
+            self.refocus()
+        return False
+
+    # ── dbusmenu ───────────────────────────────────────────────────────
+    def call(self, entry, method, params, callback=None):
+        def done(conn, result):
+            try:
+                reply = conn.call_finish(result)
+            except GLib.Error:
+                reply = None
+            if callback is not None:
+                callback(reply)
+        self.bus.call(entry["sender"], entry["path"], MENU_IFACE, method, params,
+                      None, Gio.DBusCallFlags.NONE, 2000, None, done)
+
+    def send_top(self):
+        entry, focus = self.current, self.focus or {}
+        window = focus.get("window")
+        if entry is None:
+            emit({"event": "menu", "window": window, "items": []})
+            return
+
+        def got(reply):
+            if entry is not self.current:
+                return
+            items = []
+            if reply is not None:
+                _rev, root = reply.unpack()
+                items = [i for i in (simplify(c, 0) for c in root[2])
+                         if not i.get("separator") and i.get("visible", True) and i.get("label")]
+            emit({"event": "menu", "window": window, "items": items})
+
+        self.call(entry, "GetLayout", GLib.Variant("(iias)", (0, 1, PROPS)), got)
+
+    def send_submenu(self, item_id):
+        entry = self.current
+        if entry is None:
+            return
+
+        def got(reply):
+            if entry is not self.current or reply is None:
+                return
+            _rev, node = reply.unpack()
+            emit({"event": "submenu", "id": item_id,
+                  "items": [simplify(c) for c in node[2]]})
+
+        self.call(entry, "GetLayout", GLib.Variant("(iias)", (item_id, -1, PROPS)), got)
+
+    def open(self, item_id):
+        entry = self.current
+        if entry is None:
+            return
+        self.open_ids.add(item_id)
+        # Qt fills a menu on aboutToShow; ask, then read whatever it has.
+        self.call(entry, "AboutToShow", GLib.Variant("(i)", (item_id,)),
+                  lambda _reply: self.send_submenu(item_id))
+
+    def activate(self, item_id):
+        entry = self.current
+        if entry is None:
+            return
+        self.call(entry, "Event", GLib.Variant(
+            "(isvu)", (item_id, "clicked", GLib.Variant("i", 0), 0)))
+
+    def on_menu_changed(self, *_args):
+        self.send_top()
+        for item_id in sorted(self.open_ids):
+            self.send_submenu(item_id)
+
+    # ── bar protocol ───────────────────────────────────────────────────
+    def on_stdin(self, _channel, condition):
+        data = b""
+        if condition & GLib.IOCondition.IN:
+            data = os.read(sys.stdin.fileno(), 65536)
+        if data == b"":
+            self.loop.quit()        # the bar went away
+            return False
+        self.pending += data
+        *lines, self.pending = self.pending.split(b"\n")
+        for line in lines:
+            try:
+                msg = json.loads(line)
+                cmd = msg.get("cmd")
+                if cmd == "focus":
+                    self.set_focus(msg)
+                elif cmd == "open":
+                    self.open(int(msg["id"]))
+                elif cmd == "close":
+                    self.open_ids = set()
+                elif cmd == "activate":
+                    self.activate(int(msg["id"]))
+            except (ValueError, KeyError, TypeError, AttributeError):
+                pass
+        return True
+
+
+def dump():
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    try:
+        reply = bus.call_sync(REGISTRAR_NAME, REGISTRAR_PATH, DEBUG_IFACE, "Dump",
+                              None, None, Gio.DBusCallFlags.NONE, 2000, None)
+    except GLib.Error as err:
+        print(f"wonderland-appmenu: no bridge running ({err.message})", file=sys.stderr)
+        return 1
+    print(reply.unpack()[0])
+    return 0
+
+
+def main():
+    if "--dump" in sys.argv[1:]:
+        return dump()
+    loop = GLib.MainLoop()
+    Bridge(loop)
+    loop.run()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

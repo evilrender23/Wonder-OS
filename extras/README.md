@@ -1,0 +1,78 @@
+# Extras
+
+A curated, install-and-go starting point for driftwm: a
+[Quickshell](https://quickshell.org/) top bar and the shell around it. It's an alternative to bare driftwm
+rather than a copy of the built-in defaults — tweak or strip freely.
+
+## Install
+
+```sh
+./install.sh
+```
+
+Backs up any existing config (timestamped), then copies the config, helper
+scripts, shader wallpapers, and the Quickshell shell into `~/.config/driftwm`, plus
+matching fuzzel and swaync themes into `~/.config/fuzzel` and
+`~/.config/swaync`. Safe to re-run.
+
+## The shell
+
+A top bar on every monitor with the clock, keyboard layout, network,
+Bluetooth, battery, volume, brightness, CPU/RAM, media controls, the system
+tray, notifications, and a power menu; see `quickshell/README.md`. Tested with
+Quickshell 0.3; run it by hand with `qs -p ~/.config/driftwm/quickshell`.
+
+## Contents
+
+- `config.toml` — the compositor config (installed)
+- `quickshell/` — the bar and shell (installed)
+- `scripts/` — spotlight (open windows, suspended windows, and apps in one
+  fuzzel search), the low-battery alert, and `driftwm-decal` for pinning
+  transparent images to the canvas, and the helpers the shell calls
+  (`wonderland-desktop` for the desktop icons, `wonderland-capture` for the
+  capture overlay, …) (installed). A folder on
+  the desktop is customized (colour, symbol or emoji) from its right-click
+  menu, in Wonderland Finder's "Customize Folder" window; the others take
+  the folder tint chosen in Sistema («Carpetas»,
+  `~/.config/wonderland/appearance.json`), painted by Wonderland Finder too
+- `scripts/wonderland-icons` — the default app icons: fetches
+  [WhiteSur](https://github.com/vinceliuice/WhiteSur-icon-theme) (macOS style,
+  GPL-3.0, downloaded at install time, not shipped here) into
+  `~/.local/share/icons` and makes it the icon theme of the bar, the dock and
+  Qt/GTK apps. `QS_ICON_THEME` under `[env]` picks the bar's theme
+- `wallpapers/` — GLSL shader wallpapers (installed; point `[background]` at
+  one to use it)
+- `fuzzel/` — minimal launcher theme (swaync's gray, no icons), frosted via blur
+  (installed to `~/.config/fuzzel`)
+- `fastfetch/` — the terminal greeting: the Wonderland logo beside a short
+  system summary (installed to `~/.config/fastfetch`)
+- `swaync/` — swaync's defaults, with the panel's outer corners squared
+  (installed to `~/.config/swaync`)
+- `waybar/` — an optional touchscreen bar with an on-screen-keyboard toggle
+  (not installed; the launch line is at the top of `touchbar.jsonc`)
+
+## Dependencies
+
+The config wires up standard Wayland tools and degrades gracefully if any are
+missing. For the full experience:
+
+- **[Quickshell](https://quickshell.org/)** (`qs`) — renders the bar;
+  its widgets talk to NetworkManager (`nmcli`), BlueZ, UPower, and PipeWire
+- **swaync** — notifications · **swayosd** — volume/brightness OSD ·
+  **fuzzel** + **jq** — spotlight
+- **swaylock** — lock · **swayidle** — lock before sleep
+- **brightnessctl** — brightness slider · **playerctl** — media keys ·
+  **grim** + **wl-clipboard** — the capture overlay (`Print`) ·
+  **wf-recorder** — its recordings (without it, `grim` + `ffmpeg`, at a lower
+  frame rate) · **libnotify**
+  (`notify-send`) — battery alerts
+
+swaync keeps its default look (just the panel's outer corners squared); fuzzel
+uses a minimal gray theme matching swaync's panel. Both are frosted via the
+compositor's blur. swayosd runs on its own defaults.
+
+## Customizing
+
+`config.toml` is a starting point. Every option is documented in
+[`config.reference.toml`](../config.reference.toml), and partial configs merge
+with built-in defaults, so trim to taste.

@@ -1,0 +1,43 @@
+{
+  "name": "Líneas magnéticas",
+  "component": "MagnetLines",
+  "description": "Rejilla de agujas que se orientan como limaduras alrededor de un imán errante.",
+  "tags": ["rejilla", "líneas", "campo", "minimalista", "oscuro"],
+  "params": [
+    {"key": "line_color", "label": "Color de las líneas", "type": "color", "default": "#efefef"},
+    {"key": "use_accent", "label": "Acento cerca del imán", "type": "bool", "default": false},
+    {"key": "accent_color", "label": "Color de acento", "type": "color", "default": "#f43f5e",
+     "description": "También colorea la mitad norte de las brújulas."},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "spacing", "label": "Separación", "type": "float", "min": 10.0, "max": 120.0, "step": 1.0, "default": 30.0},
+    {"key": "line_width", "label": "Grosor", "type": "float", "min": 0.5, "max": 8.0, "step": 0.25, "default": 2.0},
+    {"key": "line_height", "label": "Longitud", "type": "float", "min": 4.0, "max": 60.0, "step": 1.0, "default": 18.0},
+    {"key": "base_angle", "label": "Ángulo de reposo", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": -10.0},
+    {"key": "mode", "label": "Campo", "type": "enum", "default": "orbit",
+     "options": [
+       {"value": "orbit", "label": "Órbita"},
+       {"value": "attract", "label": "Atracción"},
+       {"value": "spiral", "label": "Espiral"},
+       {"value": "dipole", "label": "Dipolo (imán de barra)"}
+     ]},
+    {"key": "shape", "label": "Forma", "type": "enum", "default": "line",
+     "options": [
+       {"value": "line", "label": "Barra"},
+       {"value": "arrow", "label": "Flecha"},
+       {"value": "needle", "label": "Aguja de brújula"}
+     ]},
+    {"key": "rainbow", "label": "Arcoíris por dirección", "type": "bool", "default": false},
+    {"key": "radius", "label": "Radio de influencia", "type": "float", "min": 20.0, "max": 1000.0, "step": 10.0, "default": 200.0},
+    {"key": "fade", "label": "Atenuación lejana", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.65},
+    {"key": "edge_fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "stretch", "label": "Estiramiento", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.4},
+    {"key": "reach", "label": "Alcance (0 = todas)", "type": "float", "min": 0.0, "max": 1500.0, "step": 10.0, "default": 0.0},
+    {"key": "scatter", "label": "Dispersión en reposo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "ripple", "label": "Retardo en onda", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.3},
+    {"key": "idle", "label": "Imán errante", "type": "bool", "default": true,
+     "description": "Sin cursor, el campo sigue la trayectoria autónoma del componente; apagado queda fijo en el centro."},
+    {"key": "tilt_x", "label": "Inclinación vertical", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0},
+    {"key": "tilt_y", "label": "Inclinación lateral", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0}
+  ],
+  "notes": "Las instancias se evalúan por píxel sobre las celdas vecinas. Sin cursor el imán recorre la trayectoria «idle» del componente (activada por defecto); se omiten el muelle de inercia/rebote, los pulsos de clic y la intro."
+}

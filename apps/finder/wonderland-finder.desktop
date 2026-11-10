@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Finder
+Name[es]=Finder
+GenericName=File Manager
+GenericName[es]=Gestor de archivos
+Comment=Browse and organise your files
+Comment[es]=Explora y organiza tus archivos
+Exec=wonderland-finder %U
+Icon=wonderland-finder
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-finder
+MimeType=inode/directory;
+Categories=System;FileTools;FileManager;Qt;
+Keywords=files;folders;finder;archivos;carpetas;

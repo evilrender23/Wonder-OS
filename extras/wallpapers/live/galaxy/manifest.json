@@ -1,0 +1,33 @@
+{
+  "name": "Galaxia",
+  "component": "Galaxy",
+  "description": "Viaje entre capas de estrellas con destellos en cruz que giran lentamente.",
+  "tags": ["estrellas", "espacio", "oscuro"],
+  "heavy": true,
+  "params": [
+    {"key": "hue_shift", "label": "Tono", "type": "float", "min": 0.0, "max": 360.0, "step": 1.0, "default": 140.0},
+    {"key": "saturation", "label": "Saturación", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "density", "label": "Densidad", "type": "float", "min": 0.3, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "glow", "label": "Brillo del halo", "type": "float", "min": 0.05, "max": 1.5, "step": 0.05, "default": 0.3},
+    {"key": "star_size", "label": "Tamaño de las estrellas", "type": "float", "min": 0.2, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "flare", "label": "Destellos en cruz", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "twinkle", "label": "Parpadeo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.3},
+    {"key": "star_speed", "label": "Velocidad de viaje", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.5},
+    {"key": "rotation_speed", "label": "Giro", "type": "float", "min": -1.0, "max": 1.0, "step": 0.01, "default": 0.1},
+    {"key": "layers", "label": "Capas", "type": "int", "min": 2, "max": 8, "step": 1, "default": 4},
+    {"key": "direction", "label": "Sentido", "type": "enum", "default": "forward", "options": [
+      {"value": "forward", "label": "Hacia dentro"},
+      {"value": "backward", "label": "Hacia fuera"}
+    ]},
+    {"key": "center_repulsion", "label": "Hueco central", "type": "float", "min": 0.0, "max": 5.0, "step": 0.1, "default": 0.0},
+    {"key": "use_palette", "label": "Usar paleta propia", "type": "bool", "default": false},
+    {"key": "palette_size", "label": "Colores de la paleta", "type": "int", "min": 1, "max": 4, "step": 1, "default": 4},
+    {"key": "color_1", "label": "Color 1", "type": "color", "default": "#ffffff"},
+    {"key": "color_2", "label": "Color 2", "type": "color", "default": "#a5b4fc"},
+    {"key": "color_3", "label": "Color 3", "type": "color", "default": "#f0abfc"},
+    {"key": "color_4", "label": "Color 4", "type": "color", "default": "#fde68a"},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#000000"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false, "description": "Estrellas en tinta sobre papel; si el fondo es oscuro se usa blanco."}
+  ],
+  "notes": "Sin repulsión del ratón, salto warp al hacer clic ni intro; la paleta propia sustituye a starColors y el hueco central conserva autoCenterRepulsion."
+}

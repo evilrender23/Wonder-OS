@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Wonder Mirror
+GenericName=Windows Apps
+GenericName[es]=Aplicaciones de Windows
+Comment=The whole Windows desktop in a window
+Comment[es]=El escritorio de Windows completo en una ventana
+Exec=wondermirror desktop
+Icon=wondermirror
+Terminal=false
+Categories=System;Emulator;
+Keywords=windows;virtual machine;coherence;máquina virtual;

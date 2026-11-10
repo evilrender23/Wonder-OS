@@ -1,0 +1,461 @@
+#!/usr/bin/env python3
+"""The Desktop folder, for WonderlandWM's desktop icons (extras/quickshell/desktop).
+
+    wonderland-desktop watch            one JSON line now and after every change
+    wonderland-desktop list             that line, once
+    wonderland-desktop open [NAME...]   open entries (no name: the folder itself)
+    wonderland-desktop reveal NAME      show the entry in the file manager
+    wonderland-desktop customize NAME   "Customize Folder" (colour, symbol or
+                                        emoji) for a folder, in Wonderland Finder
+    wonderland-desktop look NAME...     Quick Look: preview the entries, or put
+                                        the preview away if it shows them
+    wonderland-desktop look-update NAME...  show the entries in an open preview
+    wonderland-desktop trash NAME...    move entries to the trash
+    wonderland-desktop rename OLD NEW   rename, never over an existing entry
+    wonderland-desktop mkdir            a new, uniquely named folder
+    wonderland-desktop move DIR PATH... move files (absolute paths) into the
+                                        Desktop folder DIR, never over an entry
+    wonderland-desktop take PATH...     move files (absolute paths) onto the
+                                        Desktop itself, never over an entry
+
+Names are entries of the Desktop folder (`xdg-user-dir DESKTOP`), never paths.
+Only `move` and `take` take paths, and only as what to move: where to is a name
+or the Desktop. `rename`, `mkdir`, `move` and `take` answer with one JSON line:
+{"ok": true, "name": ...} or {"ok": false, "error": ...}; `take` also lists the
+"names" the files got. Standard library only.
+"""
+import ctypes
+import hashlib
+import json
+import os
+import select
+import shutil
+import subprocess
+import sys
+import time
+
+IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif", "image/bmp", "image/svg+xml"}
+THUMB_MAX_BYTES = 25 * 1024 * 1024
+NEW_FOLDER = "Carpeta sin título"
+
+
+def desktop_dir():
+    override = os.environ.get("WONDERLAND_DESKTOP_DIR")
+    if override:
+        return override
+    home = os.path.expanduser("~")
+    path = ""
+    try:
+        path = subprocess.run(["xdg-user-dir", "DESKTOP"], capture_output=True, text=True,
+                              timeout=5).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    # xdg-user-dir answers $HOME when the folder isn't configured.
+    if not path or os.path.realpath(path) == os.path.realpath(home):
+        path = os.path.join(home, "Desktop")
+    return path
+
+
+def data_dirs():
+    home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    return [home] + (os.environ.get("XDG_DATA_DIRS") or "/usr/local/share:/usr/share").split(":")
+
+
+class Mime:
+    """Type by file name from shared-mime-info's glob tables, no content sniffing."""
+
+    def __init__(self):
+        self.literal, self.suffix, self.generic = {}, [], {}
+        for base in reversed(data_dirs()):
+            self._globs(os.path.join(base, "mime/globs2"))
+            self._generic(os.path.join(base, "mime/generic-icons"))
+        self.suffix.sort(key=lambda s: (-len(s[0]), -s[1]))
+
+    def _globs(self, path):
+        try:
+            with open(path, encoding="utf-8", errors="replace") as f:
+                for line in f:
+                    parts = line.rstrip("\n").split(":")
+                    if line.startswith("#") or len(parts) < 3:
+                        continue
+                    weight, mime, glob = parts[0], parts[1], parts[2]
+                    if glob.startswith("*.") and not any(c in glob[2:] for c in "*?["):
+                        self.suffix.append((glob[1:].lower(), int(weight or 50), mime))
+                    elif not any(c in glob for c in "*?["):
+                        self.literal[glob.lower()] = mime
+        except OSError:
+            pass
+
+    def _generic(self, path):
+        try:
+            with open(path, encoding="utf-8", errors="replace") as f:
+                for line in f:
+                    mime, _, icon = line.strip().partition(":")
+                    if icon:
+                        self.generic[mime] = icon
+        except OSError:
+            pass
+
+    def of(self, name):
+        low = name.lower()
+        if low in self.literal:
+            return self.literal[low]
+        for suffix, _, mime in self.suffix:
+            if low.endswith(suffix):
+                return mime
+        return "application/octet-stream"
+
+    def icons(self, mime):
+        out = [mime.replace("/", "-")]
+        if mime in self.generic:
+            out.append(self.generic[mime])
+        out += [mime.split("/")[0] + "-x-generic", "unknown"]
+        return out
+
+
+def desktop_entry(path):
+    """Name and Icon of a .desktop file, the Name in the session's language."""
+    langs = []
+    lang = (os.environ.get("LC_MESSAGES") or os.environ.get("LANG") or "").split(".")[0]
+    if lang:
+        langs = [lang, lang.split("_")[0]]
+    found, in_entry = {}, False
+    try:
+        with open(path, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("["):
+                    in_entry = line == "[Desktop Entry]"
+                    continue
+                if in_entry and "=" in line and not line.startswith("#"):
+                    key, _, value = line.partition("=")
+                    found[key.strip()] = value.strip()
+    except OSError:
+        return None, None
+    name = next((found[f"Name[{code}]"] for code in langs if f"Name[{code}]" in found), found.get("Name"))
+    return name, found.get("Icon")
+
+
+FOLDER_LOOK = "user.wonderland.folder"
+
+
+def appearance_file():
+    config = os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config")
+    return os.path.join(config, "wonderland/appearance.json")
+
+
+def folder_tint():
+    """The colour of every folder with none of its own: "rrggbb", or "" for the usual blue.
+
+    Chosen in Sistema («Carpetas»), which keeps it in appearance.json.
+    """
+    try:
+        with open(appearance_file(), encoding="utf-8") as f:
+            tint = json.load(f).get("folder_tint")
+    except (OSError, ValueError, AttributeError):
+        return ""
+    if not isinstance(tint, str):
+        return ""
+    tint = tint.strip().removeprefix("#").lower()
+    return tint if len(tint) == 6 and all(c in "0123456789abcdef" for c in tint) else ""
+
+
+def folder_picture(path, tint="", asked=None):
+    """The picture of a folder that isn't the plain blue one ("" for that one).
+
+    Wonderland Finder keeps the look on the folder itself, as an attribute, and
+    paints it into the cache under the hash of that attribute (and of the tint,
+    when there is one) before setting it. A picture missing all the same (a
+    cleared cache, a new tint) is asked for, once per listing: `asked` holds
+    the ones already tried.
+    """
+    try:
+        look = os.getxattr(path, FOLDER_LOOK)
+    except (OSError, AttributeError):
+        look = b""
+    if not look and not tint:
+        return ""
+    named = look + b"\ntint=" + tint.encode() if tint else look
+    cache = os.environ.get("XDG_CACHE_HOME") or os.path.expanduser("~/.cache")
+    picture = os.path.join(cache, "wonderland/folder-looks", hashlib.sha1(named).hexdigest() + ".png")
+    if os.path.isfile(picture):
+        return picture
+    if asked is not None:
+        if picture in asked:
+            return ""
+        asked.add(picture)
+    finder = shutil.which("wonderland-finder")
+    if not finder:
+        return ""
+    try:
+        subprocess.run([finder, "--folder-icon", path], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL, timeout=10, env={**os.environ, "QT_QPA_PLATFORM": "offscreen"})
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    # Only where we expect it: what the look says never chooses the file shown.
+    return picture if os.path.isfile(picture) else ""
+
+
+def listing(directory, mime):
+    items = []
+    tint = folder_tint()
+    asked = set()
+    try:
+        names = os.listdir(directory)
+    except OSError as e:
+        return {"error": f"{directory}: {e.strerror}"}
+    for name in sorted(names, key=str.casefold):
+        if name.startswith("."):
+            continue
+        path = os.path.join(directory, name)
+        item = {"name": name, "label": name, "kind": "file", "icons": [], "thumb": ""}
+        if os.path.isdir(path):
+            item["kind"] = "dir"
+            item["icons"] = ["folder", "inode-directory"]
+            item["thumb"] = folder_picture(path, tint, asked)
+        elif name.endswith(".desktop"):
+            label, icon = desktop_entry(path)
+            item["kind"] = "app"
+            item["label"] = label or name[: -len(".desktop")]
+            item["icons"] = ([icon] if icon else []) + ["application-x-executable"]
+        else:
+            kind = mime.of(name)
+            item["icons"] = mime.icons(kind)
+            try:
+                if kind in IMAGE_TYPES and os.path.getsize(path) <= THUMB_MAX_BYTES:
+                    item["thumb"] = path
+            except OSError:
+                pass
+        items.append(item)
+    return {"dir": directory, "items": items}
+
+
+def emit(obj):
+    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+    sys.stdout.flush()
+
+
+IN_EVENTS = 0x2 | 0x4 | 0x8 | 0x40 | 0x80 | 0x100 | 0x200 | 0x400 | 0x800  # modify … move_self
+IN_GONE = 0x400 | 0x800 | 0x8000  # delete_self, move_self, ignored
+
+
+def watch(directory, mime):
+    os.makedirs(directory, exist_ok=True)
+    last = None
+
+    def publish():
+        nonlocal last
+        now = listing(directory, mime)
+        if now != last:
+            last = now
+            emit(now)
+
+    publish()
+    libc = fd = None
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        fd = libc.inotify_init1(os.O_NONBLOCK | os.O_CLOEXEC)
+    except (OSError, AttributeError):
+        fd = -1
+
+    def add_watch():
+        if fd < 0 or libc.inotify_add_watch(fd, os.fsencode(directory), IN_EVENTS) < 0:
+            return False
+        # The folders' tint too. Its folder, not the file: Sistema replaces the file.
+        # Without it the icons are still listed; only a new tint goes unseen.
+        try:
+            look_dir = os.path.dirname(appearance_file())
+            os.makedirs(look_dir, exist_ok=True)
+            libc.inotify_add_watch(fd, os.fsencode(look_dir), IN_EVENTS)
+        except OSError:
+            pass
+        return True
+
+    watching = add_watch()
+    # A closed stdout means nobody reads the listings any more: the shell that
+    # started us reloaded or quit, and it doesn't take its children with it.
+    reader = select.poll()
+    reader.register(sys.stdout.fileno(), 0)
+    while True:
+        if reader.poll(0):
+            return
+        if not watching:
+            time.sleep(2)
+            os.makedirs(directory, exist_ok=True)
+            watching = add_watch()
+            publish()
+            continue
+        if not select.select([fd], [], [], 2)[0]:
+            continue
+        # Let a burst (an archive unpacking, a download finishing) settle.
+        time.sleep(0.15)
+        gone = False
+        try:
+            while True:
+                buf = os.read(fd, 65536)
+                offset = 0
+                while offset + 16 <= len(buf):
+                    mask = int.from_bytes(buf[offset + 4: offset + 8], sys.byteorder)
+                    length = int.from_bytes(buf[offset + 12: offset + 16], sys.byteorder)
+                    gone = gone or bool(mask & IN_GONE)
+                    offset += 16 + length
+        except BlockingIOError:
+            pass
+        if gone:
+            watching = False
+        publish()
+
+
+def entry_path(directory, name):
+    if not name or "/" in name or name in (".", ".."):
+        raise ValueError(f"not an entry of the Desktop folder: {name!r}")
+    return os.path.join(directory, name)
+
+
+def detach(argv):
+    subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+
+
+def open_entries(directory, names):
+    if not names:
+        detach(["xdg-open", directory])
+    for name in names:
+        path = entry_path(directory, name)
+        # An executable launcher runs; anything else goes to its default app.
+        if name.endswith(".desktop") and os.access(path, os.X_OK) and shutil.which("gio"):
+            detach(["gio", "launch", path])
+        else:
+            detach(["xdg-open", path])
+
+
+def quick_look(directory, names, update):
+    """Hands the entries to the Finder's Quick Look, the one preview there is."""
+    finder = shutil.which("wonderland-finder") or os.path.expanduser("~/.local/bin/wonderland-finder")
+    if not os.access(finder, os.X_OK):
+        raise OSError("Quick Look needs wonderland-finder (apps/finder)")
+    paths = [entry_path(directory, name) for name in names]
+    detach([finder, "--look-update" if update else "--look", "--"] + paths)
+
+
+def reveal(directory, name):
+    path = entry_path(directory, name)
+    if shutil.which("dolphin"):
+        detach(["dolphin", "--select", path])
+    else:
+        detach(["xdg-open", directory])
+
+
+def customize(directory, name):
+    path = entry_path(directory, name)
+    finder = shutil.which("wonderland-finder")
+    if finder and os.path.isdir(path):
+        detach([finder, "--customize", path])
+
+
+def rename(directory, old, new):
+    new = new.strip()
+    src, dst = entry_path(directory, old), entry_path(directory, new)
+    if new.startswith("."):
+        return {"ok": False, "error": "Un nombre que empieza por punto quedaría oculto"}
+    if not os.path.lexists(src):
+        return {"ok": False, "error": f"«{old}» ya no existe"}
+    if old == new:
+        return {"ok": True, "name": new}
+    if os.path.lexists(dst):
+        return {"ok": False, "error": f"Ya existe «{new}»"}
+    os.rename(src, dst)
+    return {"ok": True, "name": new}
+
+
+def mkdir(directory):
+    os.makedirs(directory, exist_ok=True)
+    n = 1
+    while True:
+        name = NEW_FOLDER if n == 1 else f"{NEW_FOLDER} {n}"
+        try:
+            os.mkdir(os.path.join(directory, name))
+            return {"ok": True, "name": name}
+        except FileExistsError:
+            n += 1
+
+
+def move_into(directory, folder, paths):
+    """Into the Desktop folder `folder`, or onto the Desktop itself (None)."""
+    if folder is None:
+        os.makedirs(directory, exist_ok=True)
+        dest = os.path.realpath(directory)
+    else:
+        dest = os.path.realpath(entry_path(directory, folder))
+        if not os.path.isdir(dest):
+            return {"ok": False, "error": f"«{folder}» no es una carpeta"}
+    names, problems = [], []
+    for src in paths:
+        if not os.path.isabs(src) or not os.path.lexists(src):
+            problems.append(f"«{src}» no existe")
+            continue
+        real = os.path.realpath(src)
+        base = os.path.basename(os.path.normpath(src))
+        # Already there, the folder itself, or a folder into its own inside.
+        if os.path.realpath(os.path.dirname(os.path.normpath(src))) == dest or real == dest \
+                or dest.startswith(real.rstrip("/") + "/"):
+            continue
+        stem, ext = os.path.splitext(base) if not os.path.isdir(src) else (base, "")
+        name, n = base, 2
+        while os.path.lexists(os.path.join(dest, name)):
+            name = f"{stem} {n}{ext}"
+            n += 1
+        try:
+            shutil.move(src, os.path.join(dest, name))
+            names.append(name)
+        except OSError as e:
+            problems.append(f"{base}: {e.strerror or e}")
+    return {"ok": not problems, "moved": len(names), "names": names, "error": "; ".join(problems)}
+
+
+def main(argv):
+    if len(argv) < 2 or argv[1] in ("-h", "--help"):
+        print(__doc__.strip())
+        return 0 if len(argv) > 1 else 2
+    cmd, args = argv[1], argv[2:]
+    directory = desktop_dir()
+    try:
+        if cmd == "watch":
+            watch(directory, Mime())
+        elif cmd == "list":
+            emit(listing(directory, Mime()))
+        elif cmd == "open":
+            open_entries(directory, args)
+        elif cmd == "reveal" and len(args) == 1:
+            reveal(directory, args[0])
+        elif cmd == "customize" and len(args) == 1:
+            customize(directory, args[0])
+        elif cmd in ("look", "look-update") and args:
+            quick_look(directory, args, cmd == "look-update")
+        elif cmd == "trash" and args:
+            paths = [entry_path(directory, name) for name in args]
+            return subprocess.run(["gio", "trash", "--"] + paths).returncode
+        elif cmd == "rename" and len(args) == 2:
+            emit(rename(directory, args[0], args[1]))
+        elif cmd == "move" and len(args) >= 2:
+            emit(move_into(directory, args[0], args[1:]))
+        elif cmd == "take" and args:
+            emit(move_into(directory, None, args))
+        elif cmd == "mkdir" and not args:
+            emit(mkdir(directory))
+        else:
+            print(__doc__.strip(), file=sys.stderr)
+            return 2
+    except (ValueError, OSError) as e:
+        if cmd in ("rename", "mkdir", "move", "take"):
+            emit({"ok": False, "error": str(e)})
+            return 0
+        print(f"wonderland-desktop: {e}", file=sys.stderr)
+        return 1
+    except (BrokenPipeError, KeyboardInterrupt):
+        return 0
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

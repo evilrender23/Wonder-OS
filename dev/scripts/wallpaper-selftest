@@ -1,0 +1,211 @@
+#!/usr/bin/env -S python3 -I
+"""Tests for extras/scripts/wonderland-wallpaper against a throwaway config.
+
+Never touches ~/.config: XDG_CONFIG_HOME points at a temp dir. Uses the
+`silk` wallpaper. Run: dev/scripts/wallpaper-selftest
+"""
+
+import json
+import os
+import shlex
+import struct
+import subprocess
+import sys
+import tempfile
+import zlib
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+SCRIPT = REPO / "extras" / "scripts" / "wonderland-wallpaper"
+LIVE = REPO / "extras" / "wallpapers" / "live"
+
+CONFIG = """[input]
+# keep me
+[background]
+type = "shader"
+path = "~/old.glsl"
+# a comment that belongs to the old background
+
+[effects]
+blur_radius = 5
+"""
+
+failures = 0
+
+
+def check(name, cond):
+    global failures
+    print(("ok   " if cond else "FAIL ") + name)
+    failures += not cond
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    cfg_dir = Path(tmp) / "driftwm"
+    cfg_dir.mkdir()
+    cfg = cfg_dir / "config.toml"
+    cfg.write_text(CONFIG)
+    # No driftwm on PATH: the check-config step is skipped, as on CI.
+    env = dict(os.environ, XDG_CONFIG_HOME=tmp, XDG_DATA_HOME=tmp + "/data",
+               WONDERLAND_WALLPAPERS=str(LIVE), PATH="/usr/bin:/bin")
+
+    def run(*args, ok=True):
+        r = subprocess.run([sys.executable, "-I", str(SCRIPT), *args], capture_output=True,
+                           text=True, env=env)
+        if ok and r.returncode != 0:
+            raise SystemExit(f"{args}: {r.stderr}")
+        return r
+
+    out = json.loads(run("apply", "silk", '{"scale": 99, "color": "#FF0000", "x": 1}').stdout)
+    check("clamps floats to the schema", out["values"]["scale"] == 3.0)
+    check("normalizes colours", out["values"]["color"] == "#ff0000")
+    check("ignores unknown keys", "x" not in out["values"])
+    text = cfg.read_text()
+    check("points [background] at current.glsl", 'path = "' + str(cfg_dir / "wallpapers" / "current.glsl") in text)
+    check("keeps the other sections", "[input]\n# keep me" in text and "blur_radius = 5" in text)
+    shader = (cfg_dir / "wallpapers" / "current.glsl").read_text()
+    check("emits the settings as defines", "#define P_COLOR vec3(1.0, 0.0, 0.0)" in shader)
+    check("animated shader declares u_time", "uniform float u_time;" in shader)
+
+    out = json.loads(run("apply", "silk", '{"color": "nope", "speed": 0}').stdout)
+    check("an invalid value keeps the previous one", out["values"]["color"] == "#ff0000")
+    shader = (cfg_dir / "wallpapers" / "current.glsl").read_text()
+    check("speed 0 drops u_time (no per-frame redraw)", "uniform float u_time;" not in shader)
+    check("speed 0 sets animate_fps = 0", "animate_fps = 0" in cfg.read_text())
+
+    state = json.loads(run("current").stdout)
+    check("state records the current wallpaper", state["current"] == "silk")
+
+    run("reset", "silk")
+    out = json.loads(run("apply", "silk").stdout)
+    check("reset forgets the settings", out["values"]["color"] == "#7b7481")
+
+    # Preview: on screen, but neither the settings nor the applied one change.
+    applied = cfg.read_text()
+    before = json.loads(run("current").stdout)
+    out = json.loads(run("preview", "aurora", '{"speed": 0}').stdout)
+    check("preview reports what it shows", out["previewing"] == "aurora" and out["values"]["speed"] == 0)
+    text = cfg.read_text()
+    check("preview points [background] at preview.glsl",
+          'path = "' + str(cfg_dir / "wallpapers" / "preview.glsl") in text and "animate_fps = 0" in text)
+    check("preview keeps the other sections", "[input]\n# keep me" in text and "blur_radius = 5" in text)
+    state = json.loads(run("current").stdout)
+    check("preview leaves the applied wallpaper current", state["current"] == "silk")
+    check("preview stores no settings", state["settings"] == before["settings"])
+    check("state says what is previewed", state["preview"]["id"] == "aurora")
+    run("preview", "silk", '{"color": "#00ff00"}')
+    check("a second preview replaces the first",
+          "#define P_COLOR vec3(0.0, 1.0, 0.0)" in (cfg_dir / "wallpapers" / "preview.glsl").read_text())
+    check("cancel says so", run("cancel").stdout.strip() == "cancelled")
+    check("cancel puts the applied [background] back byte for byte", cfg.read_text() == applied)
+    state = json.loads(run("current").stdout)
+    check("cancel ends the preview", "preview" not in state and state == before)
+    check("cancel without a preview is a no-op",
+          run("cancel").stdout.strip() == "no preview" and cfg.read_text() == applied)
+
+    # Applying what is previewed keeps it, and `restore` still knows the
+    # background from before any live wallpaper.
+    run("preview", "aurora", '{"speed": 2}')
+    out = json.loads(run("apply", "aurora", '{"speed": 2}').stdout)
+    state = json.loads(run("current").stdout)
+    check("apply keeps the preview", out["applied"] == "aurora" and state["current"] == "aurora"
+          and state["settings"]["aurora"]["speed"] == 2 and "preview" not in state)
+    check("apply points [background] back at current.glsl",
+          'path = "' + str(cfg_dir / "wallpapers" / "current.glsl") in cfg.read_text())
+
+    # A preview someone else replaced is over, and so is the wallpaper under it.
+    run("preview", "silk")
+    cfg.write_text(CONFIG)
+    state = json.loads(run("current").stdout)
+    check("a replaced preview is dropped", "preview" not in state and state["current"] is None)
+    run("apply", "aurora")
+
+    run("preview", "silk")
+    run("restore")
+    check("restore puts the old [background] back byte for byte", cfg.read_text() == CONFIG)
+    check("restore ends a running preview", "preview" not in json.loads(run("current").stdout))
+    check("after restore nothing is current", json.loads(run("current").stdout)["current"] is None)
+
+    check("unknown wallpaper fails", run("apply", "nope", ok=False).returncode != 0)
+    check("bad JSON fails", run("apply", "silk", "{", ok=False).returncode != 0)
+
+    listing = json.loads(run("list").stdout)
+    silk = next(w for w in listing["wallpapers"] if w["id"] == "silk")
+    keys = [p["key"] for p in silk["params"]]
+    check("list adds the global settings", keys[-4:] == ["speed", "parallax", "zoom_follow", "fps"])
+
+    # ── imported pictures ────────────────────────────────────────────────
+    def png(path, w, h, rgb):
+        def chunk(kind, data):
+            body = kind + data
+            return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+        raw = (b"\x00" + bytes(rgb) * w) * h
+        Path(path).write_bytes(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0))
+                               + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
+
+    pics = Path(tmp) / "mis fotos"
+    pics.mkdir()
+    photo = pics / 'playa "2024".png'
+    png(photo, 64, 36, (200, 120, 40))
+    (pics / "nota.txt").write_text("no soy una imagen")
+    cfg.write_text(CONFIG)
+    run("restore", ok=False)
+
+    out = json.loads(run("import", str(photo), str(pics / "nota.txt"), str(pics / "falta.png")).stdout)
+    check("import takes the picture and reports the rest", len(out["imported"]) == 1 and len(out["errors"]) == 2)
+    img = out["imported"][0]
+    check("imported ids are img-<hash>", img.startswith("img-") and len(img) == 16)
+    check("importing the same picture again gives the same id",
+          json.loads(run("import", str(photo)).stdout)["imported"] == [img])
+    check("importing nothing usable fails", run("import", str(pics / "nota.txt"), ok=False).returncode != 0)
+
+    listing = json.loads(run("list").stdout)["wallpapers"]
+    entry = listing[0]
+    check("imported pictures are listed first", entry["id"] == img and entry["kind"] == "image")
+    check("named after the file", entry["name"] == 'playa "2024"')
+    check("with a thumbnail that exists", Path(entry["preview"]).is_file())
+    keys = [p["key"] for p in entry["params"]]
+    check("with picture settings, no animation ones",
+          keys[0] == "fit" and keys[-2:] == ["parallax", "zoom_follow"] and "fps" not in keys)
+
+    src = run("render", img).stdout
+    check("image shader samples the texture", "texture2D(tex" in src and "#define P_FIT 0" in src)
+    check("a still picture declares no camera or zoom",
+          "uniform vec2 u_camera" not in src and "uniform float u_zoom" not in src)
+    src = run("render", img, '{"parallax": 0.5}').stdout
+    check("parallax declares both", "uniform vec2 u_camera" in src and "uniform float u_zoom" in src)
+    src = run("render", img, '{"fit": "tile"}').stdout
+    check("real-size fits need the zoom", "uniform vec2 u_camera" not in src and "uniform float u_zoom" in src)
+
+    run("preview", img, '{"fit": "contain"}')
+    text = cfg.read_text()
+    check("preview binds the picture as the shader's texture",
+          'texture = "' + entry["image"] + '"' in text and "preview.glsl" in text)
+    run("cancel")
+    check("cancel of a picture preview puts the old background back", cfg.read_text() == CONFIG)
+
+    out = json.loads(run("apply", img, '{"fit": "nope", "scale": 99}').stdout)
+    check("picture settings are clamped to the schema",
+          out["values"]["fit"] == "cover" and out["values"]["scale"] == 4.0)
+    text = cfg.read_text()
+    check("apply binds the picture and does not animate",
+          'texture = "' + entry["image"] + '"' in text and "animate_fps = 0" in text)
+    run("apply", "silk")
+    check("a live wallpaper after a picture drops the texture", "texture =" not in cfg.read_text())
+    run("apply", img)
+
+    check("remove refuses bundled wallpapers", run("remove", "silk", ok=False).returncode != 0)
+    run("remove", img)
+    check("removing the applied picture restores the old background", cfg.read_text() == CONFIG)
+    state = json.loads(run("current").stdout)
+    check("and forgets its settings", state["current"] is None and img not in state["settings"])
+    check("and deletes its files", not (Path(tmp) / "data" / "wonderlandwm" / "wallpapers" / img).exists())
+    check("a removed picture is unknown", run("apply", img, ok=False).returncode != 0)
+
+    env["WONDERLAND_PICKER"] = "printf '%s\\n' " + shlex.quote(str(photo))
+    out = json.loads(run("pick").stdout)
+    check("pick imports what the dialog returns", out["imported"] == [img])
+    env["WONDERLAND_PICKER"] = "false"
+    out = json.loads(run("pick").stdout)
+    check("a cancelled dialog imports nothing", out["imported"] == [] and out.get("cancelled") is True)
+
+sys.exit(1 if failures else 0)

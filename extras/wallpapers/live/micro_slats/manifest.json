@@ -1,0 +1,173 @@
+{
+  "name": "Microlamas",
+  "component": "MicroSlats",
+  "description": "Un mar de pequeñas lamas redondeadas que se iluminan con el oleaje y se pierden en el horizonte.",
+  "tags": [
+    "olas",
+    "mar",
+    "rejilla",
+    "oscuro"
+  ],
+  "params": [
+    {
+      "key": "preset",
+      "label": "Preajuste",
+      "type": "enum",
+      "options": [
+        {
+          "value": "swell",
+          "label": "Oleaje (usa los ajustes de abajo)"
+        },
+        {
+          "value": "tide",
+          "label": "Marea"
+        },
+        {
+          "value": "storm",
+          "label": "Tormenta"
+        },
+        {
+          "value": "signal",
+          "label": "Señal (ecualizador)"
+        }
+      ],
+      "default": "swell"
+    },
+    {
+      "key": "color",
+      "label": "Color de las lamas",
+      "type": "color",
+      "default": "#a855f7"
+    },
+    {
+      "key": "glint_color",
+      "label": "Color del destello",
+      "type": "color",
+      "default": "#ffffff"
+    },
+    {
+      "key": "background",
+      "label": "Color de fondo",
+      "type": "color",
+      "default": "#000000"
+    },
+    {
+      "key": "slat_width",
+      "label": "Anchura de lama (px)",
+      "type": "float",
+      "min": 2.0,
+      "max": 64.0,
+      "step": 1.0,
+      "default": 10.0
+    },
+    {
+      "key": "slat_height",
+      "label": "Altura de lama (px)",
+      "type": "float",
+      "min": 4.0,
+      "max": 160.0,
+      "step": 1.0,
+      "default": 25.0
+    },
+    {
+      "key": "gap",
+      "label": "Separación (px)",
+      "type": "float",
+      "min": 0.0,
+      "max": 32.0,
+      "step": 1.0,
+      "default": 3.0
+    },
+    {
+      "key": "roundness",
+      "label": "Redondez",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.75
+    },
+    {
+      "key": "scale",
+      "label": "Tamaño del oleaje",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.5
+    },
+    {
+      "key": "wave_speed",
+      "label": "Velocidad de las olas",
+      "type": "float",
+      "min": 0.0,
+      "max": 3.0,
+      "step": 0.05,
+      "default": 0.6
+    },
+    {
+      "key": "direction",
+      "label": "Rumbo del oleaje (grados)",
+      "type": "float",
+      "min": 0.0,
+      "max": 360.0,
+      "step": 1.0,
+      "default": 250.0
+    },
+    {
+      "key": "chop",
+      "label": "Encrespado",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.5,
+      "step": 0.05,
+      "default": 0.55
+    },
+    {
+      "key": "stretch",
+      "label": "Estiramiento de las lamas",
+      "type": "float",
+      "min": 0.0,
+      "max": 0.95,
+      "step": 0.05,
+      "default": 0.0
+    },
+    {
+      "key": "glint",
+      "label": "Destello en las crestas",
+      "type": "float",
+      "min": 0.0,
+      "max": 2.0,
+      "step": 0.05,
+      "default": 0.7
+    },
+    {
+      "key": "contrast",
+      "label": "Contraste",
+      "type": "float",
+      "min": 0.2,
+      "max": 4.0,
+      "step": 0.05,
+      "default": 1.25
+    },
+    {
+      "key": "perspective",
+      "label": "Perspectiva",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.55
+    },
+    {
+      "key": "fog",
+      "label": "Niebla",
+      "type": "float",
+      "min": 0.0,
+      "max": 1.0,
+      "step": 0.05,
+      "default": 0.55
+    }
+  ],
+  "notes": "El campo por lama se calcula en el mismo paso para la lama bajo cada píxel. Se quitan el fluido que agita el cursor (estela de luz, salpicaduras e inclinación de las lamas) y la intro; los ajustes de oleaje solo actúan con el preajuste «Oleaje»."
+}

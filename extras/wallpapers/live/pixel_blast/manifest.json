@@ -1,0 +1,41 @@
+{
+  "name": "Explosión de píxeles",
+  "component": "PixelBlast",
+  "description": "Nubes de píxeles tramados que cambian de forma, se deslizan y titilan.",
+  "tags": ["píxeles", "retro", "oscuro", "nubes"],
+  "params": [
+    {"key": "color", "label": "Color de los píxeles", "type": "color", "default": "#b497cf"},
+    {"key": "accent_color", "label": "Color de acento", "type": "color", "default": "#b497cf"},
+    {"key": "variant", "label": "Forma del píxel", "type": "enum", "default": "square", "options": [
+      {"value": "square", "label": "Cuadrado"},
+      {"value": "circle", "label": "Círculo"},
+      {"value": "triangle", "label": "Triángulo"},
+      {"value": "diamond", "label": "Rombo"},
+      {"value": "cross", "label": "Cruz"},
+      {"value": "ring", "label": "Anillo"}
+    ]},
+    {"key": "pixel_size", "label": "Tamaño del píxel (px)", "type": "float", "min": 1.0, "max": 12.0, "step": 0.5, "default": 3.0},
+    {"key": "pattern_scale", "label": "Escala del patrón", "type": "float", "min": 0.3, "max": 8.0, "step": 0.1, "default": 2.0},
+    {"key": "pattern_density", "label": "Densidad", "type": "float", "min": 0.0, "max": 2.5, "step": 0.05, "default": 1.0},
+    {"key": "pixel_size_jitter", "label": "Variación de tamaño", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "softness", "label": "Suavidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.6},
+    {"key": "smoothing", "label": "Bordes suavizados", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 1.0},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.4},
+    {"key": "twinkle", "label": "Titileo", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.25},
+    {"key": "drift", "label": "Deriva", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.2},
+    {"key": "drift_angle", "label": "Dirección de la deriva (°)", "type": "float", "min": 0.0, "max": 360.0, "step": 1.0, "default": 30.0},
+    {"key": "auto_ripple", "label": "Ondas automáticas (s, 0 = no)", "type": "float", "min": 0.0, "max": 10.0, "step": 0.5, "default": 0.0},
+    {"key": "ripple_speed", "label": "Velocidad de las ondas", "type": "float", "min": 0.05, "max": 1.5, "step": 0.05, "default": 0.3},
+    {"key": "ripple_thickness", "label": "Grosor de las ondas", "type": "float", "min": 0.02, "max": 0.4, "step": 0.01, "default": 0.1},
+    {"key": "ripple_intensity", "label": "Intensidad de las ondas", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "tilt_x", "label": "Inclinación hacia el horizonte (°)", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0},
+    {"key": "tilt_y", "label": "Giro lateral (°)", "type": "float", "min": -70.0, "max": 70.0, "step": 1.0, "default": 0.0},
+    {"key": "edge_fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 0.75, "step": 0.05, "default": 0.5},
+    {"key": "noise_amount", "label": "Grano", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "variation", "label": "Variación", "type": "float", "min": 0.0, "max": 100.0, "step": 1.0, "default": 3.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_background", "label": "Fondo en modo claro", "type": "color", "default": "#f6f6f8"}
+  ],
+  "notes": "La pasada de celdas (ruido por celda en una textura filtrada) se evalúa directamente en cada píxel. Sin efecto del cursor, ondas al hacer clic ni intro; las ondas automáticas nacen en sitios pseudoaleatorios a intervalos fijos. La variación es fija (el original elige una al azar en cada montaje)."
+}

@@ -1,0 +1,30 @@
+[package]
+name = "drift-bench-client"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+description = "Opens N SHM xdg-toplevels for driftwm frame-time baselines"
+publish = false
+
+# Standalone: not part of the driftwm package.
+[workspace]
+
+[dependencies]
+wayland-client = "0.31.14"
+wayland-protocols = { version = "0.32.13", features = ["client"] }
+libc = "0.2"
+wayland-protocols-wlr = { version = "0.3.12", features = ["client"] }
+png = "0.18"
+wayland-protocols-misc = { version = "0.3.12", features = ["client"] }
+
+[[bin]]
+name = "drift-bench-client"
+path = "src/main.rs"
+
+[[bin]]
+name = "drift-shot"
+path = "src/shot.rs"
+
+[[bin]]
+name = "drift-vkbd"
+path = "src/vkbd.rs"

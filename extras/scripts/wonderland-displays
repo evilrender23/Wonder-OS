@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""Write WonderlandWM's monitor layout into config.toml, safely.
+
+    wonderland-displays apply '<json>' [--config PATH] [--dry-run]
+    wonderland-displays revert [--config PATH]
+
+`<json>` is a list of outputs, as the bar's display settings send them:
+
+    [{"name": "DP-6", "mode": "2560x1440@180", "position": [0, 0],
+      "scale": 1.0, "transform": "normal"}, ...]
+
+An [[outputs]] table already naming that connector is edited in place — only
+mode/position/scale/transform change, anything else in it (hot corners,
+focus_placement…) stays. Connectors with no table get one, in a marked block
+at the end. The result is checked with `driftwm --check-config` before it
+replaces the file (the compositor hot-reloads it), and the previous file is
+kept as config.toml.displays.bak, which `revert` puts back.
+"""
+import argparse
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+BEGIN = "# >>> wonderland-displays (managed: edits inside are replaced) >>>"
+END = "# <<< wonderland-displays <<<"
+HEADER = re.compile(r"^\s*\[")
+OUTPUTS = re.compile(r"^\s*\[\[\s*outputs\s*\]\]")
+NAME = re.compile(r"""^\s*name\s*=\s*["']([^"']+)["']""")
+OWNED = re.compile(r"^\s*(mode|position|scale|transform)\s*=")
+TRANSFORMS = {"normal", "90", "180", "270", "flipped", "flipped-90", "flipped-180", "flipped-270"}
+MODE = re.compile(r"^\d{2,5}x\d{2,5}(@\d{1,3})?$")
+
+config_home = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+
+
+def fields(o):
+    x, y = o["position"]
+    lines = [f'mode = "{o["mode"]}"\n', f"position = [{int(x)}, {int(y)}]\n"]
+    if abs(float(o.get("scale", 1.0)) - 1.0) > 1e-9:
+        lines.append(f'scale = {float(o["scale"]):g}\n')
+    if o.get("transform", "normal") != "normal":
+        lines.append(f'transform = "{o["transform"]}"\n')
+    return lines
+
+
+def validate(outputs):
+    if not isinstance(outputs, list) or not outputs:
+        raise ValueError("expected a non-empty list of outputs")
+    for o in outputs:
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+", str(o.get("name", ""))):
+            raise ValueError(f"bad connector name: {o.get('name')!r}")
+        if not MODE.match(str(o.get("mode", ""))):
+            raise ValueError(f"bad mode: {o.get('mode')!r}")
+        pos = o.get("position")
+        if not (isinstance(pos, list) and len(pos) == 2 and all(isinstance(v, (int, float)) for v in pos)):
+            raise ValueError(f"bad position: {pos!r}")
+        if not 0.25 <= float(o.get("scale", 1.0)) <= 4.0:
+            raise ValueError(f"bad scale: {o.get('scale')!r}")
+        if o.get("transform", "normal") not in TRANSFORMS:
+            raise ValueError(f"bad transform: {o.get('transform')!r}")
+
+
+def rewrite(text, outputs):
+    wanted = {o["name"]: o for o in outputs}
+    lines, out, i = text.splitlines(keepends=True), [], 0
+    # Drop the previous managed block; its connectors are re-emitted below.
+    kept, in_block = [], False
+    for line in lines:
+        if line.strip() == BEGIN:
+            in_block = True
+        elif in_block and line.strip() == END:
+            in_block = False
+        elif not in_block:
+            kept.append(line)
+    lines = kept
+
+    done = set()
+    while i < len(lines):
+        line = lines[i]
+        if not OUTPUTS.match(line):
+            out.append(line)
+            i += 1
+            continue
+        # One [[outputs]] table: up to the next header.
+        j = i + 1
+        while j < len(lines) and not HEADER.match(lines[j]):
+            j += 1
+        body = lines[i + 1:j]
+        name = next((m.group(1) for m in map(NAME.match, body) if m), None)
+        if name in wanted and name not in done:
+            body = [b for b in body if not OWNED.match(b)]
+            at = next(k for k, b in enumerate(body) if NAME.match(b)) + 1
+            body[at:at] = fields(wanted[name])
+            done.add(name)
+        out.append(line)
+        out.extend(body)
+        i = j
+
+    missing = [o for o in outputs if o["name"] not in done]
+    if missing:
+        text = "".join(out).rstrip("\n") + "\n\n" + BEGIN + "\n"
+        for o in missing:
+            text += f'[[outputs]]\nname = "{o["name"]}"\n' + "".join(fields(o)) + "\n"
+        return text.rstrip("\n") + "\n" + END + "\n"
+    return "".join(out)
+
+
+def check(text, driftwm):
+    with tempfile.NamedTemporaryFile("w", suffix=".toml", delete=False) as f:
+        f.write(text)
+        tmp = f.name
+    try:
+        r = subprocess.run([driftwm, "--check-config", "--config", tmp], capture_output=True, text=True)
+        return r.returncode == 0, (r.stdout + r.stderr).strip()
+    finally:
+        os.unlink(tmp)
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("command", choices=["apply", "revert"])
+    ap.add_argument("outputs", nargs="?")
+    ap.add_argument("--config", type=Path, default=config_home / "driftwm/config.toml")
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--driftwm", default=shutil.which("driftwm") or "driftwm")
+    a = ap.parse_args()
+    bak = a.config.with_name(a.config.name + ".displays.bak")
+
+    if a.command == "revert":
+        if not bak.is_file():
+            sys.exit(f"nothing to revert: {bak} missing")
+        a.config.write_text(bak.read_text())  # in place: keeps the watched inode
+        print(f"reverted {a.config}")
+        return
+
+    try:
+        outputs = json.loads(a.outputs or "")
+        validate(outputs)
+    except (ValueError, json.JSONDecodeError) as e:
+        sys.exit(f"wonderland-displays: {e}")
+    old = a.config.read_text() if a.config.is_file() else ""
+    new = rewrite(old, outputs)
+    ok, msg = check(new, a.driftwm)
+    if not ok:
+        sys.exit(f"wonderland-displays: the result doesn't validate, config untouched:\n{msg}")
+    if a.dry_run:
+        sys.stdout.write(new)
+        return
+    if new == old:
+        print("unchanged")
+        return
+    bak.write_text(old)
+    a.config.write_text(new)
+    print(f"applied → {a.config}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,30 @@
+{
+  "name": "Degradado granulado",
+  "component": "Grainient",
+  "description": "Degradado de colores que ondula lentamente, con brillo satinado y grano de película.",
+  "tags": ["degradado", "grano", "cálido", "suave"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "count", "label": "Número de colores", "type": "int", "min": 2, "max": 5, "step": 1, "default": 5},
+    {"key": "color_1", "label": "Color 1 (base)", "type": "color", "default": "#120f17"},
+    {"key": "color_2", "label": "Color 2", "type": "color", "default": "#2a0f0a"},
+    {"key": "color_3", "label": "Color 3", "type": "color", "default": "#9a3412"},
+    {"key": "color_4", "label": "Color 4", "type": "color", "default": "#f97316"},
+    {"key": "color_5", "label": "Color 5 (luz)", "type": "color", "default": "#fed7aa"},
+    {"key": "type", "label": "Tipo", "type": "enum", "options": [{"value": "linear", "label": "Lineal"}, {"value": "radial", "label": "Radial"}], "default": "linear"},
+    {"key": "angle", "label": "Ángulo", "type": "float", "min": 0.0, "max": 360.0, "step": 1.0, "default": 55.0},
+    {"key": "bands", "label": "Bandas", "type": "float", "min": 1.0, "max": 8.0, "step": 0.5, "default": 1.0},
+    {"key": "softness", "label": "Suavidad", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 1.0},
+    {"key": "flow", "label": "Ondulación", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 0.8},
+    {"key": "scale", "label": "Tamaño de las ondas", "type": "float", "min": 0.25, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "silk", "label": "Satinado", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.35},
+    {"key": "grain_amount", "label": "Grano", "type": "float", "min": 0.0, "max": 0.5, "step": 0.01, "default": 0.08},
+    {"key": "grain_size", "label": "Tamaño del grano", "type": "float", "min": 0.5, "max": 4.0, "step": 0.1, "default": 1.2},
+    {"key": "grain_animated", "label": "Grano animado", "type": "bool", "default": true},
+    {"key": "contrast", "label": "Contraste", "type": "float", "min": 0.2, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "saturation", "label": "Saturación", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 1.0},
+    {"key": "variation", "label": "Variación", "type": "float", "min": 0.0, "max": 100.0, "step": 1.0, "default": 0.0},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false}
+  ],
+  "notes": "Hasta 5 colores en lugar de 8. Sin arrastre del cursor, remolinos al hacer clic ni intro; el campo se calcula a resolución completa en un solo paso."
+}

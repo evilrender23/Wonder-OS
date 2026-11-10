@@ -1,0 +1,16 @@
+[Desktop Entry]
+Type=Application
+Name=Calendario
+Name[en]=Calendar
+GenericName=Calendario
+GenericName[en]=Calendar
+Comment=Eventos y citas
+Comment[en]=Events and appointments
+Exec=wonderland-calendario %U
+Icon=wonderland-calendario
+Terminal=false
+StartupNotify=true
+StartupWMClass=wonderland-calendario
+MimeType=text/calendar;
+Categories=Office;Calendar;Qt;
+Keywords=calendario;agenda;eventos;citas;recordatorios;calendar;events;appointments;ics;

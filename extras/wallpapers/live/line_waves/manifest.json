@@ -1,0 +1,27 @@
+{
+  "name": "Ondas de líneas",
+  "component": "LineWaves",
+  "description": "Decenas de líneas finas que se curvan en ondas lentas, cruzadas por una franja de luz.",
+  "tags": ["líneas", "ondas", "minimalista", "oscuro"],
+  "extensions": ["GL_OES_standard_derivatives"],
+  "params": [
+    {"key": "color1", "label": "Color 1", "type": "color", "default": "#ffffff"},
+    {"key": "color2", "label": "Color 2", "type": "color", "default": "#ffffff"},
+    {"key": "color3", "label": "Color 3", "type": "color", "default": "#ffffff"},
+    {"key": "color_cycle", "label": "Velocidad del ciclo de color", "type": "float", "min": 0.0, "max": 10.0, "step": 0.1, "default": 1.0},
+    {"key": "line_count", "label": "Número de líneas", "type": "float", "min": 4.0, "max": 250.0, "step": 1.0, "default": 72.0},
+    {"key": "line_width", "label": "Grosor de línea (px)", "type": "float", "min": 0.25, "max": 8.0, "step": 0.05, "default": 1.3},
+    {"key": "glow", "label": "Resplandor", "type": "float", "min": 0.0, "max": 2.0, "step": 0.05, "default": 0.6},
+    {"key": "brightness", "label": "Brillo", "type": "float", "min": 0.2, "max": 2.5, "step": 0.05, "default": 1.0},
+    {"key": "highlight", "label": "Franja de luz", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 1.0},
+    {"key": "highlight_width", "label": "Anchura de la franja", "type": "float", "min": 0.2, "max": 5.0, "step": 0.05, "default": 1.0},
+    {"key": "warp", "label": "Intensidad de las ondas", "type": "float", "min": 0.0, "max": 3.0, "step": 0.05, "default": 1.0},
+    {"key": "warp_scale", "label": "Tamaño de las ondas", "type": "float", "min": 0.2, "max": 4.0, "step": 0.05, "default": 1.0},
+    {"key": "rotation", "label": "Ángulo (grados)", "type": "float", "min": -180.0, "max": 180.0, "step": 1.0, "default": -33.0},
+    {"key": "edge_fade", "label": "Desvanecer bordes", "type": "float", "min": 0.0, "max": 1.0, "step": 0.05, "default": 0.0},
+    {"key": "background", "label": "Fondo", "type": "color", "default": "#0d1117"},
+    {"key": "light_mode", "label": "Modo claro", "type": "bool", "default": false},
+    {"key": "paper", "label": "Fondo en modo claro", "type": "color", "default": "#f5f5f7"}
+  ],
+  "notes": "Sin cursor (lente que separa las líneas), sin ondas al hacer clic ni la animación de entrada; el resto es el mismo shader de un solo paso."
+}
