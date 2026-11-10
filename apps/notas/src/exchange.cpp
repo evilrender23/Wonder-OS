@@ -6,6 +6,7 @@
 #include "store.h"
 #include "zip.h"
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -50,7 +51,7 @@ QString fileName(const QString &title)
     while (name.startsWith(QLatin1Char('.'))) {
         name.remove(0, 1);
     }
-    return name.isEmpty() ? QStringLiteral("Sin título") : name.left(80);
+    return name.isEmpty() ? QCoreApplication::translate("Exchange", "Sin título") : name.left(80);
 }
 
 QString formatOf(const QString &path)
@@ -333,7 +334,7 @@ void compose(const Library *library, const QString &id, QTextDocument *document)
     look.setProperty(QTextFormat::FontPixelSize, 30);
     look.setFontWeight(QFont::Bold);
     cursor.setBlockCharFormat(look);
-    cursor.insertText(info.title.isEmpty() ? QStringLiteral("Sin título") : info.title, look);
+    cursor.insertText(info.title.isEmpty() ? QCoreApplication::translate("Exchange", "Sin título") : info.title, look);
     cursor.endEditBlock();
 }
 
@@ -383,7 +384,7 @@ bool exportPage(const Library *library, const QString &id, const QString &path, 
     }
     const QString kind = format.isEmpty() ? formatOf(path) : format;
     const PageInfo info = library->info(id);
-    const QString title = info.title.isEmpty() ? QStringLiteral("Sin título") : info.title;
+    const QString title = info.title.isEmpty() ? QCoreApplication::translate("Exchange", "Sin título") : info.title;
     const Doc doc = library->doc(id);
     if (kind == QLatin1String("pdf")) {
         return writePdf(library, {id}, path, title);

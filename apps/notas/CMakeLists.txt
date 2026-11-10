@@ -8,10 +8,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Svg DBus)
+find_package(Qt6 6.8 REQUIRED COMPONENTS Quick QuickControls2 QuickDialogs2 Svg DBus LinguistTools)
 find_package(ZLIB REQUIRED)
 
-qt_standard_project_setup(REQUIRES 6.8)
+qt_standard_project_setup(REQUIRES 6.8 I18N_SOURCE_LANGUAGE es I18N_TRANSLATED_LANGUAGES en)
 include(GNUInstallDirs)
 
 # What the tests build too: everything but the window.
@@ -63,6 +63,14 @@ target_include_directories(wonderland-notas PRIVATE src)
 target_compile_definitions(wonderland-notas PRIVATE NOTAS_VERSION="${PROJECT_VERSION}")
 target_link_libraries(wonderland-notas PRIVATE notas-core
     Qt6::Quick Qt6::QuickPrivate Qt6::QuickControls2 Qt6::QuickDialogs2 Qt6::Svg Qt6::DBus)
+
+# The texts are written in Spanish; notas-core has its share of them.
+qt_add_translations(TARGETS wonderland-notas
+    SOURCE_TARGETS wonderland-notas notas-core
+    TS_FILES i18n/wonderland-notas_en.ts
+    RESOURCE_PREFIX /i18n
+    LUPDATE_OPTIONS -locations none -no-obsolete
+)
 
 install(TARGETS wonderland-notas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(FILES wonderland-notas.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)

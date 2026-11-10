@@ -17,6 +17,13 @@
 
 #include <algorithm>
 
+// Day and month names follow the language of the texts, not the system's.
+static QLocale dateLocale()
+{
+    //: Locale whose day and month names go with this language.
+    return QLocale(Library::tr("es_ES"));
+}
+
 static const int formatVersion = 1;
 
 QDateTime Library::now()
@@ -140,8 +147,8 @@ void Library::load()
         }
     }
     if (m_notebooks.isEmpty()) {
-        const QString notebook = addNotebook(QStringLiteral("Mi cuaderno"));
-        addSection(notebook, QStringLiteral("General"));
+        const QString notebook = addNotebook(tr("Mi cuaderno"));
+        addSection(notebook, tr("General"));
     }
 }
 
@@ -243,7 +250,7 @@ QVariantList Library::notebooks() const
 
 QString Library::addNotebook(const QString &name)
 {
-    Notebook notebook{newId(), name.trimmed().isEmpty() ? QStringLiteral("Cuaderno") : name.trimmed(), {}};
+    Notebook notebook{newId(), name.trimmed().isEmpty() ? tr("Cuaderno") : name.trimmed(), {}};
     m_notebooks << notebook;
     saveIndex();
     touch();
@@ -295,7 +302,7 @@ QString Library::addSection(const QString &notebook, const QString &name, const 
             total += each.sections.size();
         }
         const QStringList colors = sectionColors();
-        Section section{newId(), name.trimmed().isEmpty() ? QStringLiteral("Sección") : name.trimmed(),
+        Section section{newId(), name.trimmed().isEmpty() ? tr("Sección") : name.trimmed(),
                         QColor::isValidColorName(color) ? color : colors.at(total % colors.size())};
         owner.sections << section;
         saveIndex();
@@ -374,10 +381,12 @@ QString Library::firstSection() const
 
 QString Library::quickSection()
 {
-    static const QString name = QStringLiteral("Notas rápidas");
+    // The section keeps the name it was made with: one made in Spanish is still the one.
+    static const QString original = QStringLiteral("Notas rápidas");
+    const QString name = tr("Notas rápidas");
     for (const Notebook &notebook : std::as_const(m_notebooks)) {
         for (const Section &section : notebook.sections) {
-            if (section.name == name) {
+            if (section.name == name || section.name == original) {
                 return section.id;
             }
         }
@@ -392,18 +401,18 @@ QString Library::dateText(const QDateTime &when, const QDateTime &now)
     if (!when.isValid()) {
         return {};
     }
-    const QLocale spanish(QLocale::Spanish, QLocale::Spain);
+    const QLocale locale = dateLocale();
     const qint64 days = when.date().daysTo(now.date());
     if (days == 0) {
         return when.toString(QStringLiteral("HH:mm"));
     }
     if (days == 1) {
-        return QStringLiteral("Ayer");
+        return tr("Ayer");
     }
     if (days > 1 && days < 7) {
-        return spanish.dayName(when.date().dayOfWeek(), QLocale::LongFormat);
+        return locale.dayName(when.date().dayOfWeek(), QLocale::LongFormat);
     }
-    return when.date().year() == now.date().year() ? spanish.toString(when.date(), QStringLiteral("d MMM")) : spanish.toString(when.date(), QStringLiteral("d/M/yy"));
+    return when.date().year() == now.date().year() ? locale.toString(when.date(), tr("d MMM")) : locale.toString(when.date(), tr("d/M/yy"));
 }
 
 static QString excerptOf(const QString &text)
@@ -417,7 +426,7 @@ QVariantMap Library::row(const PageInfo &info, int depth, const QString &query) 
 {
     const Notebook *owner = nullptr;
     const Section *section = findSection(info.section, &owner);
-    const QString title = info.title.isEmpty() ? QStringLiteral("Sin título") : info.title;
+    const QString title = info.title.isEmpty() ? tr("Sin título") : info.title;
     int kids = 0;
     for (const PageInfo &other : m_pages) {
         if (other.parent == info.id && other.trashed.isValid() == info.trashed.isValid()) {
@@ -608,8 +617,8 @@ QVariantMap Library::page(const QString &id) const
     if (it == m_pages.constEnd()) {
         return {};
     }
-    const QLocale spanish(QLocale::Spanish, QLocale::Spain);
-    const QString format = QStringLiteral("d 'de' MMMM 'de' yyyy, HH:mm");
+    const QLocale locale = dateLocale();
+    const QString format = tr("d 'de' MMMM 'de' yyyy, HH:mm");
     return {
         {QStringLiteral("id"), it->id},
         {QStringLiteral("title"), it->title},
@@ -617,8 +626,8 @@ QVariantMap Library::page(const QString &id) const
         {QStringLiteral("parent"), it->parent},
         {QStringLiteral("tags"), it->tags},
         {QStringLiteral("pinned"), it->pinned},
-        {QStringLiteral("created"), spanish.toString(it->created, format)},
-        {QStringLiteral("modified"), spanish.toString(it->modified, format)},
+        {QStringLiteral("created"), locale.toString(it->created, format)},
+        {QStringLiteral("modified"), locale.toString(it->modified, format)},
         {QStringLiteral("trashed"), it->trashed.isValid()},
         {QStringLiteral("depth"), depth(id)},
         {QStringLiteral("dir"), pageDir(id)},
@@ -767,7 +776,7 @@ QString Library::duplicatePage(const QString &id)
     }
     const QString section = it->section;
     const QString parent = it->parent;
-    const QString title = (it->title.isEmpty() ? QStringLiteral("Sin título") : it->title) + QStringLiteral(" (copia)");
+    const QString title = (it->title.isEmpty() ? tr("Sin título") : it->title) + tr(" (copia)");
     const QStringList tags = it->tags;
     const QString copy = importPage(section, parent, title, doc(id), tags);
     if (!copy.isEmpty()) {
@@ -819,7 +828,7 @@ void Library::restorePage(const QString &id)
     if (!findSection(home)) {
         home = firstSection();
         if (home.isEmpty()) {
-            home = addSection(m_notebooks.first().id, QStringLiteral("Recuperadas"));
+            home = addSection(m_notebooks.first().id, tr("Recuperadas"));
         }
     }
     const QDateTime when = it->trashed;
@@ -917,7 +926,7 @@ QVariantList Library::backlinks(const QString &id) const
     }
     std::sort(found.begin(), found.end(), [](const PageInfo *a, const PageInfo *b) { return Search::fold(a->title) < Search::fold(b->title); });
     for (const PageInfo *info : std::as_const(found)) {
-        list << QVariantMap{{QStringLiteral("id"), info->id}, {QStringLiteral("title"), info->title.isEmpty() ? QStringLiteral("Sin título") : info->title}};
+        list << QVariantMap{{QStringLiteral("id"), info->id}, {QStringLiteral("title"), info->title.isEmpty() ? tr("Sin título") : info->title}};
     }
     return list;
 }
@@ -983,15 +992,15 @@ static Block line(Block::Type type, const QString &text = QString())
 
 QString Library::templateTitle(const QString &name, const QDate &day)
 {
-    const QLocale spanish(QLocale::Spanish, QLocale::Spain);
+    const QLocale locale = dateLocale();
     if (name == QLatin1String("reunion")) {
-        return QStringLiteral("Reunión del ") + spanish.toString(day, QStringLiteral("d 'de' MMMM"));
+        return tr("Reunión del %1").arg(locale.toString(day, tr("d 'de' MMMM")));
     }
     if (name == QLatin1String("tareas")) {
-        return QStringLiteral("Tareas");
+        return tr("Tareas");
     }
     if (name == QLatin1String("diario")) {
-        QString title = spanish.toString(day, QStringLiteral("dddd, d 'de' MMMM 'de' yyyy"));
+        QString title = locale.toString(day, tr("dddd, d 'de' MMMM 'de' yyyy"));
         if (!title.isEmpty()) {
             title[0] = title.at(0).toUpper();
         }
@@ -1003,21 +1012,21 @@ QString Library::templateTitle(const QString &name, const QDate &day)
 Doc Library::templateDoc(const QString &name, const QDate &day)
 {
     Doc doc;
-    const QLocale spanish(QLocale::Spanish, QLocale::Spain);
+    const QLocale locale = dateLocale();
     if (name == QLatin1String("reunion")) {
         Block when = line(Block::Paragraph);
-        when.runs << Run{.text = QStringLiteral("Fecha: "), .bold = true} << Run{.text = spanish.toString(day, QStringLiteral("d 'de' MMMM 'de' yyyy"))};
+        when.runs << Run{.text = tr("Fecha: "), .bold = true} << Run{.text = locale.toString(day, tr("d 'de' MMMM 'de' yyyy"))};
         Block who = line(Block::Paragraph);
-        who.runs << Run{.text = QStringLiteral("Asistentes: "), .bold = true};
-        doc.blocks << when << who << line(Block::Heading2, QStringLiteral("Orden del día")) << line(Block::Number) << line(Block::Heading2, QStringLiteral("Notas"))
-                   << line(Block::Paragraph) << line(Block::Heading2, QStringLiteral("Acuerdos")) << line(Block::Bullet)
-                   << line(Block::Heading2, QStringLiteral("Tareas")) << line(Block::Task);
+        who.runs << Run{.text = tr("Asistentes: "), .bold = true};
+        doc.blocks << when << who << line(Block::Heading2, tr("Orden del día")) << line(Block::Number) << line(Block::Heading2, tr("Notas"))
+                   << line(Block::Paragraph) << line(Block::Heading2, tr("Acuerdos")) << line(Block::Bullet)
+                   << line(Block::Heading2, tr("Tareas")) << line(Block::Task);
     } else if (name == QLatin1String("tareas")) {
-        doc.blocks << line(Block::Heading2, QStringLiteral("Hoy")) << line(Block::Task) << line(Block::Heading2, QStringLiteral("Esta semana")) << line(Block::Task)
-                   << line(Block::Heading2, QStringLiteral("Más adelante")) << line(Block::Task);
+        doc.blocks << line(Block::Heading2, tr("Hoy")) << line(Block::Task) << line(Block::Heading2, tr("Esta semana")) << line(Block::Task)
+                   << line(Block::Heading2, tr("Más adelante")) << line(Block::Task);
     } else if (name == QLatin1String("diario")) {
-        doc.blocks << line(Block::Heading2, QStringLiteral("Lo mejor del día")) << line(Block::Paragraph) << line(Block::Heading2, QStringLiteral("Qué he hecho"))
-                   << line(Block::Bullet) << line(Block::Heading2, QStringLiteral("Para mañana")) << line(Block::Task);
+        doc.blocks << line(Block::Heading2, tr("Lo mejor del día")) << line(Block::Paragraph) << line(Block::Heading2, tr("Qué he hecho"))
+                   << line(Block::Bullet) << line(Block::Heading2, tr("Para mañana")) << line(Block::Task);
     } else {
         doc.blocks << line(Block::Paragraph);
     }
