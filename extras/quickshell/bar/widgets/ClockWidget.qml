@@ -34,13 +34,13 @@ Pill {
         // Notifications
         RowLayout {
             Layout.fillWidth: true
-            Label { role: "section"; text: "Notificaciones"; Layout.fillWidth: true }
-            IconButton { visible: Notifs.count > 0; icon: "trash-2"; size: 22; tooltip: "Borrar todas"; onClicked: Notifs.clearAll() }
+            Label { role: "section"; text: I18n.tr("Notificaciones"); Layout.fillWidth: true }
+            IconButton { visible: Notifs.count > 0; icon: "trash-2"; size: 22; tooltip: I18n.tr("Borrar todas"); onClicked: Notifs.clearAll() }
             IconButton {
                 icon: Notifs.dnd ? "bell-off" : "bell"
                 size: 22
                 checked: Notifs.dnd
-                tooltip: Notifs.dnd ? "No molestar: activado" : "No molestar"
+                tooltip: Notifs.dnd ? I18n.tr("No molestar: activado") : I18n.tr("No molestar")
                 onClicked: Settings.data.doNotDisturb = !Settings.data.doNotDisturb
             }
         }
@@ -61,16 +61,16 @@ Pill {
                 }
             }
         }
-        Label { visible: Notifs.count === 0; role: "muted"; text: "No hay notificaciones"; Layout.alignment: Qt.AlignHCenter }
+        Label { visible: Notifs.count === 0; role: "muted"; text: I18n.tr("No hay notificaciones"); Layout.alignment: Qt.AlignHCenter }
 
         // Calendar
         ControlTile {
-            Label { role: "title"; text: Time.format(clock.date, "dddd, d 'de' MMMM") }
+            Label { role: "title"; text: Time.format(clock.date, I18n.tr("dddd, d 'de' MMMM")) }
             MonthView { Layout.fillWidth: true }
             RowLayout {
                 Layout.fillWidth: true
-                Label { role: "caption"; text: Settings.data.timezone || "Hora local"; Layout.fillWidth: true }
-                IconButton { icon: "map-pin"; size: 22; tooltip: "Zona horaria"; onClicked: { panel.close(); zones.open() } }
+                Label { role: "caption"; text: Settings.data.timezone || I18n.tr("Hora local"); Layout.fillWidth: true }
+                IconButton { icon: "map-pin"; size: 22; tooltip: I18n.tr("Zona horaria"); onClicked: { panel.close(); zones.open() } }
                 IconButton {
                     text: Settings.data.use24h ? "24h" : "12h"
                     size: 22
@@ -89,7 +89,7 @@ Pill {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 0
-                    Label { text: Weather.place || "Tiempo"; font.weight: Font.DemiBold }
+                    Label { text: Weather.place || I18n.tr("Tiempo"); font.weight: Font.DemiBold }
                     Label { role: "muted"; text: Weather.current ? Weather.describe(Weather.current.code) : "" }
                 }
                 Label { text: Weather.current ? `${Weather.current.temp}${Weather.unit}` : ""; font.pixelSize: 22; font.weight: Font.DemiBold }

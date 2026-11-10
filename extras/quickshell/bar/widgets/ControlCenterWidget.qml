@@ -19,7 +19,7 @@ Pill {
     widgetId: "control"
     icon: "control-center"
     active: panel.visible
-    tooltip: "Centro de control"
+    tooltip: I18n.tr("Centro de control")
     onClicked: panel.toggle()
 
     readonly property var adapter: Bluetooth.defaultAdapter
@@ -48,8 +48,8 @@ Pill {
                 Layout.alignment: Qt.AlignTop
                 ControlToggle {
                     icon: Net.wired ? "network" : Net.icon
-                    text: Net.wired ? "Red" : "Wi-Fi"
-                    detail: Net.wired ? "Cable" : Net.ssid ? Net.ssid : Net.radio ? "Sin conexión" : "No"
+                    text: Net.wired ? I18n.tr("Red") : "Wi-Fi"
+                    detail: Net.wired ? I18n.tr("Cable") : Net.ssid ? Net.ssid : Net.radio ? I18n.tr("Sin conexión") : I18n.tr("No")
                     checked: Net.wired || (Net.radio && Net.ssid !== "")
                     openable: true
                     onToggled: if (!Net.wired) Net.setRadio(!Net.radio)
@@ -59,7 +59,7 @@ Pill {
                     visible: root.adapter !== null
                     icon: root.btOn ? "bluetooth" : "bluetooth-off"
                     text: "Bluetooth"
-                    detail: !root.btOn ? "No" : root.btConnected.length ? root.btConnected.map(d => d.name).join(", ") : "Sí"
+                    detail: !root.btOn ? I18n.tr("No") : root.btConnected.length ? root.btConnected.map(d => d.name).join(", ") : I18n.tr("Sí")
                     checked: root.btOn
                     openable: true
                     onToggled: root.adapter.enabled = !root.adapter.enabled
@@ -75,8 +75,8 @@ Pill {
                 ControlTile {
                     ControlToggle {
                         icon: "moon"
-                        text: "Concentración"
-                        detail: Notifs.dnd ? "No molestar" : "Desactivada"
+                        text: I18n.tr("Concentración")
+                        detail: Notifs.dnd ? I18n.tr("No molestar") : I18n.tr("Desactivada")
                         checked: Notifs.dnd
                         onToggled: Settings.data.doNotDisturb = !Settings.data.doNotDisturb
                     }
@@ -84,8 +84,8 @@ Pill {
                 ControlTile {
                     ControlToggle {
                         icon: "coffee"
-                        text: "Mantener activo"
-                        detail: Session.idleInhibited ? "Sí" : "No"
+                        text: I18n.tr("Mantener activo")
+                        detail: Session.idleInhibited ? I18n.tr("Sí") : I18n.tr("No")
                         checked: Session.idleInhibited
                         onToggled: Session.idleInhibited = !Session.idleInhibited
                     }
@@ -95,7 +95,7 @@ Pill {
 
         ControlTile {
             visible: Brightness.present
-            Text { text: "Pantalla"; color: Theme.p.text; font.pixelSize: Theme.fontSize - 1; font.family: Theme.fontFamily; font.weight: Font.DemiBold }
+            Text { text: I18n.tr("Pantalla"); color: Theme.p.text; font.pixelSize: Theme.fontSize - 1; font.family: Theme.fontFamily; font.weight: Font.DemiBold }
             RowLayout {
                 Layout.fillWidth: true
                 Icon { name: "sun-dim"; size: 14 }
@@ -114,8 +114,8 @@ Pill {
             visible: root.hasSink
             RowLayout {
                 Layout.fillWidth: true
-                Text { Layout.fillWidth: true; text: "Sonido"; color: Theme.p.text; font.pixelSize: Theme.fontSize - 1; font.family: Theme.fontFamily; font.weight: Font.DemiBold }
-                IconButton { icon: "chevron-right"; size: 20; tooltip: "Salidas y aplicaciones"; onClicked: root.openPanel("audio") }
+                Text { Layout.fillWidth: true; text: I18n.tr("Sonido"); color: Theme.p.text; font.pixelSize: Theme.fontSize - 1; font.family: Theme.fontFamily; font.weight: Font.DemiBold }
+                IconButton { icon: "chevron-right"; size: 20; tooltip: I18n.tr("Salidas y aplicaciones"); onClicked: root.openPanel("audio") }
             }
             RowLayout {
                 Layout.fillWidth: true
@@ -167,8 +167,8 @@ Pill {
                 Layout.preferredWidth: 1
                 ControlToggle {
                     icon: Theme.dark ? "moon-star" : "sun"
-                    text: "Modo oscuro"
-                    detail: Theme.dark ? "Sí" : "No"
+                    text: I18n.tr("Modo oscuro")
+                    detail: Theme.dark ? I18n.tr("Sí") : I18n.tr("No")
                     checked: Theme.dark
                     onToggled: Settings.data.themeMode = Theme.dark ? "light" : "dark"
                 }
@@ -177,8 +177,8 @@ Pill {
                 Layout.preferredWidth: 1
                 ControlToggle {
                     icon: "monitor"
-                    text: "Pantallas"
-                    detail: `${Quickshell.screens.length} conectada${Quickshell.screens.length === 1 ? "" : "s"}`
+                    text: I18n.tr("Pantallas")
+                    detail: (Quickshell.screens.length === 1 ? I18n.tr("%1 conectada") : I18n.tr("%1 conectadas")).arg(String(Quickshell.screens.length))
                     openable: true
                     onToggled: { panel.close(); Popups.displaysRequested() }
                     onOpened: { panel.close(); Popups.displaysRequested() }

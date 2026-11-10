@@ -362,23 +362,23 @@ Scope {
                     Layout.fillWidth: true
                     spacing: 10
                     Icon { name: "image"; size: 18; color: Theme.p.accent }
-                    Text { text: "Fondos de pantalla"; font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold; color: Theme.p.text }
+                    Text { text: I18n.tr("Fondos de pantalla"); font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold; color: Theme.p.text }
                     Text {
                         text: {
-                            if (!Wallpapers.loaded) return "Cargando…"
+                            if (!Wallpapers.loaded) return I18n.tr("Cargando…")
                             const own = Wallpapers.list.filter(w => w.kind === "image").length
                             const live = Wallpapers.list.length - own
-                            return `${live} fondos animados` + (own ? ` · ${own} ${own === 1 ? "imagen propia" : "imágenes propias"}` : "")
+                            return I18n.tr("%1 fondos animados").arg(String(live)) + (own ? " · " + (own === 1 ? I18n.tr("%1 imagen propia") : I18n.tr("%1 imágenes propias")).arg(String(own)) : "")
                         }
                         elide: Text.ElideRight
                         font.family: Theme.fontFamily; font.pixelSize: 12; color: Theme.p.text3
                         Layout.fillWidth: true
                     }
-                    Button { text: "Importar imagen"; icon: "plus"; onClicked: root.importImages() }
+                    Button { text: I18n.tr("Importar imagen"); icon: "plus"; onClicked: root.importImages() }
                     TextBox {
                         id: search
                         Layout.preferredWidth: 220
-                        placeholder: "Buscar fondos"
+                        placeholder: I18n.tr("Buscar fondos")
                         onTextChanged: root.filter = text
                     }
                     Rectangle {
@@ -489,7 +489,7 @@ Scope {
                         Text {
                             anchors.centerIn: parent
                             visible: Wallpapers.loaded && !root.shown.length
-                            text: Wallpapers.error || "Ningún fondo coincide"
+                            text: Wallpapers.error || I18n.tr("Ningún fondo coincide")
                             font.family: Theme.fontFamily; font.pixelSize: 13; color: Theme.p.text3
                         }
                     }
@@ -527,7 +527,7 @@ Scope {
                             // Only the user's own pictures can be deleted.
                             Button {
                                 visible: root.selectedIsImage
-                                text: "Eliminar"
+                                text: I18n.tr("Eliminar")
                                 icon: "trash-2"
                                 onClicked: root.removeSelected()
                             }
@@ -541,7 +541,7 @@ Scope {
                         Text {
                             Layout.fillWidth: true
                             visible: !!root.selected && !!root.selected.heavy
-                            text: "Exigente con la GPU: baja los fotogramas por segundo si notas el equipo cargado."
+                            text: I18n.tr("Exigente con la GPU: baja los fotogramas por segundo si notas el equipo cargado.")
                             wrapMode: Text.Wrap
                             font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.yellow
                         }
@@ -568,7 +568,7 @@ Scope {
                                     visible: !!root.selected && !root.selectedIsImage
                                     Layout.fillWidth: true
                                     spacing: 12
-                                    Text { text: "Mezclar con imagen"; font.family: Theme.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.p.text }
+                                    Text { text: I18n.tr("Mezclar con imagen"); font.family: Theme.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold; color: Theme.p.text }
                                     Flow {
                                         Layout.fillWidth: true
                                         spacing: 6
@@ -590,8 +590,8 @@ Scope {
                                     Text {
                                         Layout.fillWidth: true
                                         text: root.blendImage !== ""
-                                            ? "La imagen se multiplica sobre el fondo animado, que la ilumina y la tiñe."
-                                            : "Elige una de tus imágenes, o añade una con +, para multiplicarla sobre el fondo animado."
+                                            ? I18n.tr("La imagen se multiplica sobre el fondo animado, que la ilumina y la tiñe.")
+                                            : I18n.tr("Elige una de tus imágenes, o añade una con +, para multiplicarla sobre el fondo animado.")
                                         wrapMode: Text.Wrap
                                         font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3
                                     }
@@ -610,14 +610,14 @@ Scope {
                                 Text {
                                     Layout.fillWidth: true
                                     visible: !!root.selected && !!root.selected.notes
-                                    text: root.selected && root.selected.notes ? "Nota: " + root.selected.notes : ""
+                                    text: root.selected && root.selected.notes ? I18n.tr("Nota: %1").arg(root.selected.notes) : ""
                                     wrapMode: Text.Wrap
                                     font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3
                                 }
                                 Text {
                                     Layout.fillWidth: true
                                     visible: !!root.selected && !!root.selected.component
-                                    text: "Basado en " + (root.selected ? root.selected.component : "") + " de React Bits."
+                                    text: I18n.tr("Basado en %1 de React Bits.").arg(root.selected ? root.selected.component : "")
                                     font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text4
                                 }
                             }
@@ -632,11 +632,11 @@ Scope {
                         }
                         RowLayout {
                             Layout.fillWidth: true
-                            Button { text: "Restablecer"; icon: "rotate-ccw"; onClicked: root.resetDraft() }
+                            Button { text: I18n.tr("Restablecer"); icon: "rotate-ccw"; onClicked: root.resetDraft() }
                             Item { Layout.fillWidth: true }
                             Button {
                                 visible: Wallpapers.current !== ""
-                                text: Wallpapers.current.startsWith("img-") ? "Quitar fondo" : "Quitar fondo animado"
+                                text: Wallpapers.current.startsWith("img-") ? I18n.tr("Quitar fondo") : I18n.tr("Quitar fondo animado")
                                 onClicked: { debounce.stop(); root.draft = ({}); Wallpapers.restore() }
                             }
                         }
@@ -647,21 +647,21 @@ Scope {
                             Icon { visible: Wallpapers.previewing; name: "eye"; size: 13; color: Theme.p.accent }
                             Text {
                                 Layout.fillWidth: true
-                                text: Wallpapers.previewing ? "Vista previa"
-                                    : root.dirty ? "Sin aplicar" : "Aplicado"
+                                text: Wallpapers.previewing ? I18n.tr("Vista previa")
+                                    : root.dirty ? I18n.tr("Sin aplicar") : I18n.tr("Aplicado")
                                 elide: Text.ElideRight
                                 font.family: Theme.fontFamily; font.pixelSize: 11
                                 color: Wallpapers.previewing ? Theme.p.accent : Theme.p.text3
                             }
                             Button {
                                 visible: Wallpapers.previewing
-                                text: "Descartar"
+                                text: I18n.tr("Descartar")
                                 onClicked: root.discard()
                             }
                             Button {
                                 primary: true
                                 enabled: root.dirty
-                                text: "Aplicar"
+                                text: I18n.tr("Aplicar")
                                 icon: "check"
                                 onClicked: root.apply()
                             }

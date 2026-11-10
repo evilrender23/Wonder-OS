@@ -209,7 +209,7 @@ Scope {
                         anchors.fill: parent
                         verticalAlignment: Text.AlignVCenter
                         visible: !field.text
-                        text: "Buscar"
+                        text: I18n.tr("Buscar")
                         font: field.font
                         color: Theme.p.text3
                     }
@@ -335,7 +335,7 @@ Scope {
                 Text {
                     anchors.centerIn: parent
                     visible: root.shown.length === 0
-                    text: root.query.trim() ? `Sin resultados para «${root.query.trim()}»` : "No hay aplicaciones"
+                    text: root.query.trim() ? I18n.tr("Sin resultados para «%1»").arg(root.query.trim()) : I18n.tr("No hay aplicaciones")
                     font.family: Theme.fontFamily
                     font.pixelSize: 18
                     color: Theme.p.text3

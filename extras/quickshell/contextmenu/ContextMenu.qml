@@ -103,28 +103,28 @@ Scope {
         const out = []
         const t = text.trim()
         if (!t) return out
-        const src = fromClipboard ? " del portapapeles" : ""
+        const src = fromClipboard ? I18n.tr(" del portapapeles") : ""
         const url = asUrl(t), mail = asEmail(t), path = asPath(t), color = asColor(t), sum = asSum(t)
         if (url)
-            out.push({ icon: "globe", text: "Abrir enlace" + src, hint: ellipsis(url.replace(/^https?:\/\//, ""), 28), run: () => openUrl(url) })
+            out.push({ icon: "globe", text: I18n.tr("Abrir enlace") + src, hint: ellipsis(url.replace(/^https?:\/\//, ""), 28), run: () => openUrl(url) })
         else if (mail)
-            out.push({ icon: "corner-down-left", text: "Escribir a " + ellipsis(mail, 30), run: () => openUrl("mailto:" + mail) })
+            out.push({ icon: "corner-down-left", text: I18n.tr("Escribir a %1").arg(ellipsis(mail, 30)), run: () => openUrl("mailto:" + mail) })
         else if (path) {
             // The shell expands ~ and checks the path exists before opening.
             const expand = "p=" + shellQuote(path) + "; p=\"${p/#\\~/$HOME}\"; "
-            out.push({ icon: "hard-drive", text: "Abrir " + ellipsis(path, 34) + src,
+            out.push({ icon: "hard-drive", text: I18n.tr("Abrir %1").arg(ellipsis(path, 34)) + src,
                 run: () => Quickshell.execDetached(["bash", "-c", expand + "[ -e \"$p\" ] && xdg-open \"$p\""]) })
-            out.push({ icon: "search", text: "Mostrar en su carpeta",
+            out.push({ icon: "search", text: I18n.tr("Mostrar en su carpeta"),
                 run: () => Quickshell.execDetached(["bash", "-c", expand + "d=\"$p\"; [ -d \"$d\" ] || d=$(dirname \"$d\"); [ -d \"$d\" ] && xdg-open \"$d\""]) })
         } else if (color)
-            out.push({ icon: "palette", swatch: color, text: "Copiar color " + color.toUpperCase(), run: () => copy(color.toUpperCase()) })
+            out.push({ icon: "palette", swatch: color, text: I18n.tr("Copiar color %1").arg(color.toUpperCase()), run: () => copy(color.toUpperCase()) })
         else if (sum)
-            out.push({ icon: "calculator", text: ellipsis(t, 22) + " = " + sum, hint: "Copiar", run: () => copy(sum) })
+            out.push({ icon: "calculator", text: ellipsis(t, 22) + " = " + sum, hint: I18n.tr("Copiar"), run: () => copy(sum) })
         if (fromClipboard) return out
         if (!url && !mail && !path)
-            out.push({ icon: "search", text: "Buscar «" + ellipsis(t, 26) + "»",
+            out.push({ icon: "search", text: I18n.tr("Buscar «%1»").arg(ellipsis(t, 26)),
                 run: () => openUrl("https://duckduckgo.com/?q=" + encodeURIComponent(t.slice(0, 500))) })
-        out.push({ icon: "check", text: "Copiar selección", hint: t.length > 40 ? t.length + " car." : "", run: () => copy(text) })
+        out.push({ icon: "check", text: I18n.tr("Copiar selección"), hint: t.length > 40 ? I18n.tr("%1 car.").arg(String(t.length)) : "", run: () => copy(text) })
         return out
     }
 
@@ -142,15 +142,15 @@ Scope {
         const out = []
         const act = name => () => withWindow(w, () => Compositor.action(name))
         const filled = w.mode && w.mode !== "Normal"
-        out.push({ icon: "scan", text: "Centrar en pantalla", run: act("center-window") })
-        out.push({ icon: "maximize", text: filled ? "Restaurar tamaño" : "Ajustar a la pantalla", run: act("fit-window") })
-        out.push({ icon: "monitor", text: "Pantalla completa", run: act("toggle-fullscreen") })
-        out.push({ icon: "pin", text: "Fijar a la pantalla", run: () => Compositor.request({ Pin: { window: w.id, value: true } }) })
-        out.push({ icon: "image", text: "Capturar ventana", hint: "al portapapeles",
+        out.push({ icon: "scan", text: I18n.tr("Centrar en pantalla"), run: act("center-window") })
+        out.push({ icon: "maximize", text: filled ? I18n.tr("Restaurar tamaño") : I18n.tr("Ajustar a la pantalla"), run: act("fit-window") })
+        out.push({ icon: "monitor", text: I18n.tr("Pantalla completa"), run: act("toggle-fullscreen") })
+        out.push({ icon: "pin", text: I18n.tr("Fijar a la pantalla"), run: () => Compositor.request({ Pin: { window: w.id, value: true } }) })
+        out.push({ icon: "image", text: I18n.tr("Capturar ventana"), hint: I18n.tr("al portapapeles"),
             run: () => withWindow(w, () => Quickshell.execDetached(["sh", "-c", "sleep 0.25; driftwm msg screenshot window -o - | wl-copy"])) })
         out.push({ separator: true })
-        out.push({ icon: "moon", text: "Suspender", run: () => Compositor.request({ Suspend: w.id }) })
-        out.push({ id: "close", icon: "x", text: "Cerrar ventana", danger: true, run: () => Compositor.closeWindow(w.id) })
+        out.push({ icon: "moon", text: I18n.tr("Suspender"), run: () => Compositor.request({ Suspend: w.id }) })
+        out.push({ id: "close", icon: "x", text: I18n.tr("Cerrar ventana"), danger: true, run: () => Compositor.closeWindow(w.id) })
         return out
     }
 
@@ -158,9 +158,9 @@ Scope {
         const out = []
         const app = appEntry(w)
         if (root.terminals.includes(w.app_id))
-            out.push({ icon: "terminal", text: "Nueva terminal", run: () => Session.terminal() })
+            out.push({ icon: "terminal", text: I18n.tr("Nueva terminal"), run: () => Session.terminal() })
         else if (app)
-            out.push({ icon: "plus", text: "Nueva ventana de " + ellipsis(app.name, 22), run: () => app.execute() })
+            out.push({ icon: "plus", text: I18n.tr("Nueva ventana de %1").arg(ellipsis(app.name, 22)), run: () => app.execute() })
         if (app) {
             for (const a of (app.actions || []).slice(0, 5))
                 out.push({ icon: "sparkles", text: ellipsis(a.name, 34), run: () => a.execute() })
@@ -184,32 +184,32 @@ Scope {
     function desktopItems() {
         if (!root.desktop) return []
         return [
-            { header: "Escritorio" },
-            { icon: "plus", text: "Nueva carpeta", run: () => desktopCall("newFolder") },
-            { icon: "plus", text: "Nuevo documento de texto", run: () => newDocument() },
-            { icon: "layout-grid", text: "Ordenar iconos", run: () => desktopCall("cleanUp") },
-            { icon: "hard-drive", text: "Abrir la carpeta Escritorio", run: () => desktopCall("openFolder") },
+            { header: I18n.tr("Escritorio") },
+            { icon: "plus", text: I18n.tr("Nueva carpeta"), run: () => desktopCall("newFolder") },
+            { icon: "plus", text: I18n.tr("Nuevo documento de texto"), run: () => newDocument() },
+            { icon: "layout-grid", text: I18n.tr("Ordenar iconos"), run: () => desktopCall("cleanUp") },
+            { icon: "hard-drive", text: I18n.tr("Abrir la carpeta Escritorio"), run: () => desktopCall("openFolder") },
         ]
     }
 
     function canvasItems() {
         const out = []
         const wins = Compositor.windows
-        out.push({ icon: "terminal", text: "Nueva terminal", run: () => Session.terminal() })
-        out.push({ icon: "search", text: "Buscar o abrir…", hint: "Super+Espacio", run: () => Popups.spotlightRequested() })
+        out.push({ icon: "terminal", text: I18n.tr("Nueva terminal"), run: () => Session.terminal() })
+        out.push({ icon: "search", text: I18n.tr("Buscar o abrir…"), hint: I18n.tr("Super+Espacio"), run: () => Popups.spotlightRequested() })
         out.push({ separator: true })
         if (wins.length > 1)
-            out.push({ icon: "zoom-out", text: "Ver todas las ventanas", hint: wins.length + "", run: () => Compositor.action("zoom-to-fit") })
+            out.push({ icon: "zoom-out", text: I18n.tr("Ver todas las ventanas"), hint: wins.length + "", run: () => Compositor.action("zoom-to-fit") })
         if (Math.abs(Compositor.zoom - 1) > 0.01)
-            out.push({ icon: "rotate-ccw", text: "Zoom al 100 %", hint: Math.round(Compositor.zoom * 100) + " %", run: () => Compositor.action("zoom-reset") })
-        out.push({ icon: "house", text: "Ir al inicio", run: () => Compositor.action("home-toggle") })
+            out.push({ icon: "rotate-ccw", text: I18n.tr("Zoom al 100 %"), hint: Math.round(Compositor.zoom * 100) + " %", run: () => Compositor.action("zoom-reset") })
+        out.push({ icon: "house", text: I18n.tr("Ir al inicio"), run: () => Compositor.action("home-toggle") })
         if (Quickshell.screens.length > 1)
-            out.push({ icon: "layout-grid", text: "Alinear pantallas", run: () => Compositor.action("align-outputs") })
+            out.push({ icon: "layout-grid", text: I18n.tr("Alinear pantallas"), run: () => Compositor.action("align-outputs") })
 
         // The windows nearest in use, to jump to without hunting the canvas.
         const others = wins.filter(w => !w.is_focused).slice(0, 5)
         if (others.length) {
-            out.push({ header: "Ir a" })
+            out.push({ header: I18n.tr("Ir a") })
             for (const w of others) {
                 const app = appEntry(w)
                 out.push({ icon: w.suspended ? "moon" : "app-window", iconSource: app ? Quickshell.iconPath(app.icon, true) : "",
@@ -217,15 +217,15 @@ Scope {
             }
         }
         out.push({ separator: true })
-        out.push({ icon: "image", text: "Fondos de pantalla…", run: () => Popups.wallpapersRequested() })
-        out.push({ icon: "monitor", text: "Pantallas…", run: () => Popups.displaysRequested() })
-        out.push({ icon: Theme.dark ? "sun" : "moon", text: Theme.dark ? "Tema claro" : "Tema oscuro",
+        out.push({ icon: "image", text: I18n.tr("Fondos de pantalla…"), run: () => Popups.wallpapersRequested() })
+        out.push({ icon: "monitor", text: I18n.tr("Pantallas…"), run: () => Popups.displaysRequested() })
+        out.push({ icon: Theme.dark ? "sun" : "moon", text: Theme.dark ? I18n.tr("Tema claro") : I18n.tr("Tema oscuro"),
             run: () => Settings.data.themeMode = Theme.dark ? "light" : "dark" })
-        out.push({ icon: "settings", text: "Sistema…",
+        out.push({ icon: "settings", text: I18n.tr("Sistema…"),
             run: () => Quickshell.execDetached(["sh", "-c", "command -v wonderland-sistema >/dev/null && exec wonderland-sistema; exec systemsettings"]) })
         const ignored = Settings.data.contextMenuIgnoredApps
         if (ignored.length)
-            out.push({ icon: "rotate-cw", text: "Volver a mostrar este menú en " + ignored.length + (ignored.length === 1 ? " app" : " apps"),
+            out.push({ icon: "rotate-cw", text: (ignored.length === 1 ? I18n.tr("Volver a mostrar este menú en %1 app") : I18n.tr("Volver a mostrar este menú en %1 apps")).arg(String(ignored.length)),
                 run: () => Settings.data.contextMenuIgnoredApps = [] })
         return out
     }
@@ -245,7 +245,7 @@ Scope {
             section(out, canvasItems())
         } else {
             const app = appEntry(w)
-            out.push({ title: ellipsis(app ? app.name : w.app_id || "Ventana", 30), detail: ellipsis(w.title, 44),
+            out.push({ title: ellipsis(app ? app.name : w.app_id || I18n.tr("Ventana"), 30), detail: ellipsis(w.title, 44),
                 iconSource: app ? Quickshell.iconPath(app.icon, true) : "" })
             if (root.target === "window") {
                 section(out, selectionItems(root.selection, false))
@@ -255,7 +255,7 @@ Scope {
             section(out, windowItems(w))
             if (root.target === "window") {
                 out.push({ separator: true })
-                out.push({ icon: "eye-off", text: "No mostrar este menú en esta app",
+                out.push({ icon: "eye-off", text: I18n.tr("No mostrar este menú en esta app"),
                     run: () => Settings.data.contextMenuIgnoredApps = Settings.data.contextMenuIgnoredApps.concat([w.app_id]) })
             }
         }
@@ -487,7 +487,7 @@ Scope {
                                 Text {
                                     id: label
                                     anchors { left: parent.left; leftMargin: 36; verticalCenter: parent.verticalCenter }
-                                    text: entry.armed ? "Pulsa otra vez para confirmar" : entry.item.text
+                                    text: entry.armed ? I18n.tr("Pulsa otra vez para confirmar") : entry.item.text
                                     color: entry.ink
                                     font.pixelSize: Theme.fontSize
                                     font.family: Theme.fontFamily

@@ -22,7 +22,7 @@ Pill {
         function onPanelRequested(id) { if (id === "settings" && root.QsWindow.window.screen === Quickshell.screens[0]) settings.toggleFromIpc() }
     }
     active: menu.visible || settings.visible
-    tooltip: Aquiles.busy ? `AquilesAI: ${Aquiles.status || "trabajando…"}` : ""
+    tooltip: Aquiles.busy ? `AquilesAI: ${Aquiles.status || I18n.tr("trabajando…")}` : ""
     // With the menu or the settings open, a click on the mark closes them.
     onClicked: {
         if (menu.visible || settings.visible) { menu.close(); settings.close(); return }
@@ -65,41 +65,41 @@ Pill {
             }
             MenuSeparator {}
             MenuRow {
-                text: "Acerca de este equipo"
+                text: I18n.tr("Acerca de este equipo")
                 onTriggered: { menu.close(); Popups.aboutRequested() }
             }
             MenuSeparator {}
             MenuRow {
-                text: "Ajustes del sistema…"
+                text: I18n.tr("Ajustes del sistema…")
                 onTriggered: { menu.close(); root.run("command -v wonderland-sistema >/dev/null && exec wonderland-sistema; exec systemsettings") }
             }
             MenuRow {
-                text: "Ajustes de la barra…"
+                text: I18n.tr("Ajustes de la barra…")
                 shortcut: "❖ ,"
                 onTriggered: { menu.close(); settings.open() }
             }
             MenuRow {
-                text: "Pantallas…"
+                text: I18n.tr("Pantallas…")
                 shortcut: "❖ P"
                 onTriggered: { menu.close(); Popups.displaysRequested() }
             }
             MenuRow {
                 text: "Spotlight…"
-                shortcut: "❖ Espacio"
+                shortcut: I18n.tr("❖ Espacio")
                 onTriggered: { menu.close(); Popups.spotlightRequested() }
             }
             MenuSeparator {}
             MenuRow {
-                text: "Forzar salida…"
+                text: I18n.tr("Forzar salida…")
                 onTriggered: { menu.close(); root.run("plasma-systemmonitor") }
             }
             MenuSeparator {}
             MenuRow {
-                text: "Reposo"
+                text: I18n.tr("Reposo")
                 onTriggered: { menu.close(); Session.suspend() }
             }
             MenuRow {
-                text: armed.which === "reboot" ? "¿Reiniciar? Pulsa otra vez" : "Reiniciar…"
+                text: armed.which === "reboot" ? I18n.tr("¿Reiniciar? Pulsa otra vez") : I18n.tr("Reiniciar…")
                 armed: armed.which === "reboot"
                 onTriggered: {
                     if (armed.which !== "reboot") { armed.which = "reboot"; return }
@@ -107,7 +107,7 @@ Pill {
                 }
             }
             MenuRow {
-                text: armed.which === "poweroff" ? "¿Apagar? Pulsa otra vez" : "Apagar…"
+                text: armed.which === "poweroff" ? I18n.tr("¿Apagar? Pulsa otra vez") : I18n.tr("Apagar…")
                 armed: armed.which === "poweroff"
                 onTriggered: {
                     if (armed.which !== "poweroff") { armed.which = "poweroff"; return }
@@ -116,12 +116,12 @@ Pill {
             }
             MenuSeparator {}
             MenuRow {
-                text: "Bloquear pantalla"
+                text: I18n.tr("Bloquear pantalla")
                 onTriggered: { menu.close(); Session.lock() }
             }
             MenuRow {
                 readonly property string user: Quickshell.env("USER") || ""
-                text: armed.which === "logout" ? "¿Cerrar sesión? Pulsa otra vez" : `Cerrar sesión de ${user}…`
+                text: armed.which === "logout" ? I18n.tr("¿Cerrar sesión? Pulsa otra vez") : I18n.tr("Cerrar sesión de %1…").arg(user)
                 armed: armed.which === "logout"
                 onTriggered: {
                     if (armed.which !== "logout") { armed.which = "logout"; return }

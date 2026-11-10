@@ -80,7 +80,7 @@ Singleton {
         if (kind === "window") {
             const fs = Compositor.state ? (Compositor.state.fullscreen || []).find(f => f.output === activeOutput()) : null
             const id = fs ? fs.id : Compositor.focused ? Compositor.focused.id : -1
-            if (id < 0) { result = { error: "No hay ninguna ventana enfocada" }; resultScreen = activeOutput(); finished() }
+            if (id < 0) { result = { error: I18n.tr("No hay ninguna ventana enfocada") }; resultScreen = activeOutput(); finished() }
             else { pick("window", id, activeOutput(), null); skipDelay() }
         } else {
             pick("screen", activeOutput(), activeOutput(), null)
@@ -142,7 +142,7 @@ Singleton {
     function handle(text, code) {
         let reply = null
         try { reply = JSON.parse(text.trim().split("\n").pop()) } catch (e) {}
-        if (!reply) reply = { error: code === 0 ? "Respuesta inesperada" : "wonderland-capture no está instalado" }
+        if (!reply) reply = { error: code === 0 ? I18n.tr("Respuesta inesperada") : I18n.tr("wonderland-capture no está instalado") }
         if (reply.kind === "recording") {
             recording = reply.recording === true
             if (recording) {

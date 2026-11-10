@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import "../services"
 import "../components"
 import ".."
 
@@ -24,7 +25,7 @@ Scope {
         FloatingWindow {
             id: win
 
-            title: "Acerca de este equipo"
+            title: I18n.tr("Acerca de este equipo")
             color: Theme.p.chrome
             implicitWidth: 380
             implicitHeight: 260
@@ -62,7 +63,7 @@ Scope {
                         Layout.alignment: Qt.AlignHCenter
                     }
                     Label {
-                        text: "Proyecto crafteado con <3"
+                        text: I18n.tr("Proyecto crafteado con <3")
                         textFormat: Text.PlainText
                         role: "muted"
                         Layout.alignment: Qt.AlignHCenter

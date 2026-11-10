@@ -135,13 +135,13 @@ Scope {
         stdout: StdioCollector {
             onStreamFinished: {
                 let outs
-                try { outs = JSON.parse(text) } catch (e) { root.error = "wlr-randr no devolvió datos"; return }
+                try { outs = JSON.parse(text) } catch (e) { root.error = I18n.tr("wlr-randr no devolvió datos"); return }
                 root.live = outs.filter(o => o.enabled !== false)
                 root.draft = root.live.map(root.fromLive)
                 root.sel = Math.min(root.sel, Math.max(0, root.draft.length - 1))
             }
         }
-        onExited: code => { if (code !== 0) root.error = "No se pudo leer la configuración (¿está wlr-randr instalado?)" }
+        onExited: code => { if (code !== 0) root.error = I18n.tr("No se pudo leer la configuración (¿está wlr-randr instalado?)") }
     }
     Timer { id: reprobe; interval: 1500; onTriggered: probe.running = true }
 
@@ -172,7 +172,7 @@ Scope {
                 reprobe.restart()
             } else {
                 root.phase = "edit"
-                root.error = applyErr.text.trim().split("\n").slice(-3).join("\n") || "wonderland-displays no está instalado"
+                root.error = applyErr.text.trim().split("\n").slice(-3).join("\n") || I18n.tr("wonderland-displays no está instalado")
             }
         }
     }
@@ -317,7 +317,7 @@ Scope {
                     Layout.fillWidth: true
                     spacing: 10
                     Icon { name: "monitor"; size: 18; color: Theme.p.accent }
-                    Text { text: "Pantallas"; font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold; color: Theme.p.text; Layout.fillWidth: true }
+                    Text { text: I18n.tr("Pantallas"); font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold; color: Theme.p.text; Layout.fillWidth: true }
                     Rectangle {
                         width: 26; height: 26; radius: 13
                         color: closeMouse.containsMouse ? Theme.p.hover : "transparent"
@@ -353,7 +353,7 @@ Scope {
 
                     Text {
                         anchors.left: parent.left; anchors.bottom: parent.bottom; anchors.margins: 10
-                        text: root.draft.length > 1 ? "Arrastra las pantallas para colocarlas como en tu mesa" : ""
+                        text: root.draft.length > 1 ? I18n.tr("Arrastra las pantallas para colocarlas como en tu mesa") : ""
                         font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3
                     }
 
@@ -419,20 +419,20 @@ Scope {
                     }
 
                     Field {
-                        label: "Resolución"
+                        label: I18n.tr("Resolución")
                         Repeater {
                             model: root.draft[root.sel] ? root.resolutions(root.draft[root.sel]).slice(0, 8) : []
                             delegate: Chip {
                                 required property var modelData
                                 readonly property var d: root.draft[root.sel]
-                                text: `${modelData.w} × ${modelData.h}${modelData.native ? "  (nativa)" : ""}`
+                                text: `${modelData.w} × ${modelData.h}${modelData.native ? I18n.tr("  (nativa)") : ""}`
                                 checked: !!d && d.w === modelData.w && d.h === modelData.h
                                 onClicked: root.setResolution(modelData.w, modelData.h)
                             }
                         }
                     }
                     Field {
-                        label: "Frecuencia"
+                        label: I18n.tr("Frecuencia")
                         Repeater {
                             model: root.draft[root.sel] ? root.refreshes(root.draft[root.sel]) : []
                             delegate: Chip {
@@ -444,7 +444,7 @@ Scope {
                         }
                     }
                     Field {
-                        label: "Escala"
+                        label: I18n.tr("Escala")
                         Repeater {
                             model: [1, 1.25, 1.5, 1.75, 2]
                             delegate: Chip {
@@ -456,7 +456,7 @@ Scope {
                         }
                     }
                     Field {
-                        label: "Rotación"
+                        label: I18n.tr("Rotación")
                         Repeater {
                             model: [["normal", "Normal"], ["90", "90°"], ["180", "180°"], ["270", "270°"]]
                             delegate: Chip {
@@ -490,21 +490,21 @@ Scope {
                         anchors.rightMargin: 10
                         Text {
                             Layout.fillWidth: true
-                            text: `¿Mantener esta configuración? Se revertirá en ${root.countdown} s.`
+                            text: I18n.tr("¿Mantener esta configuración? Se revertirá en %1 s.").arg(String(root.countdown))
                             font.family: Theme.fontFamily; font.pixelSize: 13; color: Theme.p.text
                         }
-                        Button { text: "Revertir"; onClicked: root.revert() }
-                        Button { text: "Mantener"; primary: true; onClicked: root.keep() }
+                        Button { text: I18n.tr("Revertir"); onClicked: root.revert() }
+                        Button { text: I18n.tr("Mantener"); primary: true; onClicked: root.keep() }
                     }
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
                     visible: root.phase !== "confirm"
-                    Button { text: "Identificar"; onClicked: { root.identifying = true; unflash.restart() } }
+                    Button { text: I18n.tr("Identificar"); onClicked: { root.identifying = true; unflash.restart() } }
                     Item { Layout.fillWidth: true }
-                    Button { text: "Restablecer"; enabled_: root.dirty; onClicked: root.draft = root.live.map(root.fromLive) }
-                    Button { text: root.phase === "applying" ? "Aplicando…" : "Aplicar"; primary: true; enabled_: root.dirty && root.phase === "edit"; onClicked: root.apply() }
+                    Button { text: I18n.tr("Restablecer"); enabled_: root.dirty; onClicked: root.draft = root.live.map(root.fromLive) }
+                    Button { text: root.phase === "applying" ? I18n.tr("Aplicando…") : I18n.tr("Aplicar"); primary: true; enabled_: root.dirty && root.phase === "edit"; onClicked: root.apply() }
                 }
             }
         }

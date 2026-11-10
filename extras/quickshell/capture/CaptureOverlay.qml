@@ -338,58 +338,58 @@ Scope {
                     y: 8
                     spacing: 2
 
-                    ToolButton { icon: "x"; tip: "Cerrar (Esc)"; onClicked: Capture.close() }
+                    ToolButton { icon: "x"; tip: I18n.tr("Cerrar (Esc)"); onClicked: Capture.close() }
                     Separator {}
                     ToolButton {
-                        icon: "app-window"; label: "Ventana"; checked: Capture.target === "window"
-                        tip: "Clic en una ventana para capturarla sola, con su sombra (W)"
+                        icon: "app-window"; label: I18n.tr("Ventana"); checked: Capture.target === "window"
+                        tip: I18n.tr("Clic en una ventana para capturarla sola, con su sombra (W)")
                         onClicked: Capture.target = "window"
                     }
                     ToolButton {
-                        icon: "square-dashed"; label: "Área"; checked: Capture.target === "area"
-                        tip: "Arrastra para elegir un área (A)"
+                        icon: "square-dashed"; label: I18n.tr("Área"); checked: Capture.target === "area"
+                        tip: I18n.tr("Arrastra para elegir un área (A)")
                         onClicked: Capture.target = "area"
                     }
                     ToolButton {
-                        icon: "monitor"; label: "Pantalla"; checked: Capture.target === "screen"
-                        tip: "Clic en una pantalla para capturarla entera (S)"
+                        icon: "monitor"; label: I18n.tr("Pantalla"); checked: Capture.target === "screen"
+                        tip: I18n.tr("Clic en una pantalla para capturarla entera (S)")
                         onClicked: Capture.target = "screen"
                     }
                     Separator {}
                     ToolButton {
                         icon: "camera"; checked: !Capture.record
-                        tip: "Captura de imagen (R alterna)"
+                        tip: I18n.tr("Captura de imagen (R alterna)")
                         onClicked: Capture.record = false
                     }
                     ToolButton {
                         icon: "video"; checked: Capture.record
-                        tip: Capture.recording ? "Ya hay una grabación en curso" : "Grabar vídeo (R alterna)"
+                        tip: Capture.recording ? I18n.tr("Ya hay una grabación en curso") : I18n.tr("Grabar vídeo (R alterna)")
                         onClicked: Capture.record = true
                     }
                     Separator {}
                     ToolButton {
                         icon: "timer"; label: Capture.opts.delay > 0 ? `${Capture.opts.delay} s` : ""
                         checked: Capture.opts.delay > 0
-                        tip: "Temporizador: sin espera, 3, 5 o 10 s (T)"
+                        tip: I18n.tr("Temporizador: sin espera, 3, 5 o 10 s (T)")
                         onClicked: Capture.cycleDelay()
                     }
                     ToolButton {
                         visible: !Capture.record
                         icon: "mouse-pointer-2"; checked: Capture.opts.cursor
-                        tip: "Incluir el puntero en la imagen (C)"
+                        tip: I18n.tr("Incluir el puntero en la imagen (C)")
                         onClicked: Capture.opts.cursor = !Capture.opts.cursor
                     }
                     ToolButton {
                         visible: !Capture.record
                         icon: Capture.opts.save ? "folder-open" : "clipboard"
-                        tip: Capture.opts.save ? "Se guarda en Imágenes/Capturas y se copia al portapapeles"
-                            : "Solo al portapapeles, sin archivo"
+                        tip: Capture.opts.save ? I18n.tr("Se guarda en Imágenes/Capturas y se copia al portapapeles")
+                            : I18n.tr("Solo al portapapeles, sin archivo")
                         onClicked: Capture.opts.save = !Capture.opts.save
                     }
                     ToolButton {
                         visible: Capture.record
                         icon: Capture.opts.audio ? "volume-2" : "volume-x"; checked: Capture.opts.audio
-                        tip: Capture.opts.audio ? "Graba el sonido del sistema" : "Vídeo sin sonido"
+                        tip: Capture.opts.audio ? I18n.tr("Graba el sonido del sistema") : I18n.tr("Vídeo sin sonido")
                         onClicked: Capture.opts.audio = !Capture.opts.audio
                     }
                 }
@@ -403,10 +403,10 @@ Scope {
                     horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
                     text: root.hint !== "" ? root.hint
-                        : Capture.record && Capture.recording ? "Ya hay una grabación en curso: detenla antes de empezar otra"
-                        : Capture.target === "window" ? (Capture.record ? "Clic en una ventana para grabarla" : "Clic en una ventana para capturarla")
-                        : Capture.target === "area" ? (Capture.record ? "Arrastra el área que quieres grabar" : "Arrastra el área que quieres capturar")
-                        : (Capture.record ? "Clic en la pantalla que quieres grabar" : "Clic en la pantalla que quieres capturar")
+                        : Capture.record && Capture.recording ? I18n.tr("Ya hay una grabación en curso: detenla antes de empezar otra")
+                        : Capture.target === "window" ? (Capture.record ? I18n.tr("Clic en una ventana para grabarla") : I18n.tr("Clic en una ventana para capturarla"))
+                        : Capture.target === "area" ? (Capture.record ? I18n.tr("Arrastra el área que quieres grabar") : I18n.tr("Arrastra el área que quieres capturar"))
+                        : (Capture.record ? I18n.tr("Clic en la pantalla que quieres grabar") : I18n.tr("Clic en la pantalla que quieres capturar"))
                     color: Theme.p.text3
                     font.pixelSize: Theme.smallFontSize
                     font.family: Theme.fontFamily
@@ -445,7 +445,7 @@ Scope {
                     font.family: Theme.fontFamily
                 }
                 Text {
-                    text: "Clic para cancelar"
+                    text: I18n.tr("Clic para cancelar")
                     color: Qt.rgba(1, 1, 1, 0.7)
                     font.pixelSize: Theme.smallFontSize
                     font.family: Theme.fontFamily
@@ -517,7 +517,7 @@ Scope {
                     font.family: Theme.monoFamily
                 }
                 Text {
-                    text: "Detener"
+                    text: I18n.tr("Detener")
                     color: Qt.rgba(1, 1, 1, 0.75)
                     font.pixelSize: Theme.smallFontSize
                     font.family: Theme.fontFamily
@@ -612,8 +612,8 @@ Scope {
                     elide: Text.ElideRight
                     text: !card.res ? ""
                         : card.failed ? card.res.error
-                        : card.isShot ? `${card.res.width} × ${card.res.height} · ${card.res.saved ? "guardada" : "solo portapapeles"}${card.res.copied && card.res.saved ? " y copiada" : ""}`
-                        : `Grabación de ${root.clock(Math.round(card.res.seconds))} · ${card.res.bytes < 1048576 ? Math.max(1, Math.round(card.res.bytes / 1024)) + " KB" : (card.res.bytes / 1048576).toFixed(1) + " MB"}`
+                        : card.isShot ? `${card.res.width} × ${card.res.height} · ${card.res.saved ? I18n.tr("guardada") : I18n.tr("solo portapapeles")}${card.res.copied && card.res.saved ? I18n.tr(" y copiada") : ""}`
+                        : I18n.tr("Grabación de %1").arg(root.clock(Math.round(card.res.seconds))) + ` · ${card.res.bytes < 1048576 ? Math.max(1, Math.round(card.res.bytes / 1024)) + " KB" : (card.res.bytes / 1048576).toFixed(1) + " MB"}`
                     color: card.failed ? Theme.p.red : Theme.p.text2
                     font.pixelSize: Theme.smallFontSize
                     font.family: Theme.fontFamily
@@ -623,10 +623,10 @@ Scope {
                     visible: !card.failed
                     Layout.fillWidth: true
                     spacing: 2
-                    ToolButton { icon: "copy"; label: "Copiar"; onClicked: { Capture.copy(card.res); card.shown = false } }
+                    ToolButton { icon: "copy"; label: I18n.tr("Copiar"); onClicked: { Capture.copy(card.res); card.shown = false } }
                     ToolButton {
                         visible: card.res !== null && card.res.saved !== false
-                        icon: "folder-open"; label: "Carpeta"
+                        icon: "folder-open"; label: I18n.tr("Carpeta")
                         onClicked: { Capture.reveal(card.res.path); card.shown = false }
                     }
                     Item { Layout.fillWidth: true }

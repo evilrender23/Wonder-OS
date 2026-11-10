@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import "../services"
 import "../components"
 import ".."
 
@@ -64,7 +65,7 @@ ColumnLayout {
         columnSpacing: 8
         rowSpacing: 2
 
-        Text { text: "Tono"; font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3 }
+        Text { text: I18n.tr("Tono"); font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3 }
         ThinSlider {
             id: hueSlider
             Layout.fillWidth: true
@@ -72,7 +73,7 @@ ColumnLayout {
             onMoved: { root.lastHue = value; root.picked(root.fromHsv(value, root.color.hsvSaturation, root.color.hsvValue)) }
             Binding on value { when: !hueSlider.pressed; value: root.hue }
         }
-        Text { text: "Saturación"; font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3 }
+        Text { text: I18n.tr("Saturación"); font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3 }
         ThinSlider {
             id: satSlider
             Layout.fillWidth: true
@@ -80,7 +81,7 @@ ColumnLayout {
             onMoved: root.picked(root.fromHsv(root.hue, value, root.color.hsvValue))
             Binding on value { when: !satSlider.pressed; value: root.color.hsvSaturation }
         }
-        Text { text: "Brillo"; font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3 }
+        Text { text: I18n.tr("Brillo"); font.family: Theme.fontFamily; font.pixelSize: 11; color: Theme.p.text3 }
         ThinSlider {
             id: valSlider
             Layout.fillWidth: true

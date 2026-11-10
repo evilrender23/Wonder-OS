@@ -15,3 +15,4 @@ singleton Wallpapers 1.0 Wallpapers.qml
 singleton Capture 1.0 Capture.qml
 singleton AppMenu 1.0 AppMenu.qml
 singleton RabbitOps 1.0 RabbitOps.qml
+singleton I18n 1.0 I18n.qml

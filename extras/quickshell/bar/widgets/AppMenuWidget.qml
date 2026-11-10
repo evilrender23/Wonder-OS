@@ -22,7 +22,7 @@ Item {
     readonly property var target: AppMenu.target
     readonly property bool hasWindow: AppMenu.hasWindow
     readonly property var entry: hasWindow && target ? DesktopEntries.heuristicLookup(target.app_id) : null
-    readonly property string appName: !hasWindow || !target ? "Escritorio"
+    readonly property string appName: !hasWindow || !target ? I18n.tr("Escritorio")
         : entry && entry.name ? entry.name : prettify(target.app_id)
     property string current: ""          // id of the open menu, "" when none
 
@@ -92,9 +92,9 @@ Item {
                 entry: modelData
             }
         }
-        MenuTitle { id: windowTitle; text: "Ventana"; open: root.current === "window"; onPressed: root.toggle("window"); onEntered: root.hoverTo("window") }
-        MenuTitle { id: canvasTitle; text: "Lienzo"; open: root.current === "canvas"; onPressed: root.toggle("canvas"); onEntered: root.hoverTo("canvas") }
-        MenuTitle { id: helpTitle; visible: !root.appHasHelp; text: "Ayuda"; open: root.current === "help"; onPressed: root.toggle("help"); onEntered: root.hoverTo("help") }
+        MenuTitle { id: windowTitle; text: I18n.tr("Ventana"); open: root.current === "window"; onPressed: root.toggle("window"); onEntered: root.hoverTo("window") }
+        MenuTitle { id: canvasTitle; text: I18n.tr("Lienzo"); open: root.current === "canvas"; onPressed: root.toggle("canvas"); onEntered: root.hoverTo("canvas") }
+        MenuTitle { id: helpTitle; visible: !root.appHasHelp; text: I18n.tr("Ayuda"); open: root.current === "help"; onPressed: root.toggle("help"); onEntered: root.hoverTo("help") }
         Repeater {
             id: appHelpTitle
             model: root.appHelp
@@ -113,24 +113,24 @@ Item {
         onVisibleChanged: root.current = visible ? "app" : (root.current === "app" ? "" : root.current)
 
         MenuRow {
-            text: `Acerca de ${root.appName}`
+            text: I18n.tr("Acerca de %1").arg(root.appName)
             enabled: root.entry !== null
             onTriggered: { appPanel.close(); Quickshell.execDetached(["sh", "-c", `xdg-open "https://www.google.com/search?q=${encodeURIComponent(root.appName)}"`]) }
         }
         MenuSeparator {}
         MenuRow {
-            text: "Nueva ventana"
+            text: I18n.tr("Nueva ventana")
             enabled: root.entry !== null
             onTriggered: { appPanel.close(); root.entry.execute() }
         }
         MenuSeparator {}
         MenuRow {
-            text: `Suspender ${root.appName}`
+            text: I18n.tr("Suspender %1").arg(root.appName)
             enabled: root.hasWindow
             onTriggered: { appPanel.close(); Compositor.suspendWindow(root.target.id) }
         }
         MenuRow {
-            text: `Cerrar ${root.appName}`
+            text: I18n.tr("Cerrar %1").arg(root.appName)
             shortcut: "❖ Q"
             enabled: root.hasWindow
             onTriggered: { appPanel.close(); Compositor.closeWindow(root.target.id) }
@@ -144,13 +144,13 @@ Item {
         contentWidth: 270
         onVisibleChanged: root.current = visible ? "window" : (root.current === "window" ? "" : root.current)
 
-        MenuRow { text: "Ajustar a la rejilla"; shortcut: "❖ M"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fit-window-snapped") } }
-        MenuRow { text: "Ajustar a la pantalla"; shortcut: "⇧❖ M"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fit-window") } }
-        MenuRow { text: "Rellenar"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fill-window") } }
-        MenuRow { text: "Centrar"; shortcut: "❖ C"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("center-window") } }
+        MenuRow { text: I18n.tr("Ajustar a la rejilla"); shortcut: "❖ M"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fit-window-snapped") } }
+        MenuRow { text: I18n.tr("Ajustar a la pantalla"); shortcut: "⇧❖ M"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fit-window") } }
+        MenuRow { text: I18n.tr("Rellenar"); enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("fill-window") } }
+        MenuRow { text: I18n.tr("Centrar"); shortcut: "❖ C"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("center-window") } }
         MenuSeparator {}
-        MenuRow { text: "Pantalla completa"; shortcut: "❖ F"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("toggle-fullscreen") } }
-        MenuRow { text: "Fijar a la pantalla"; shortcut: "❖ T"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("toggle-pin-to-screen") } }
+        MenuRow { text: I18n.tr("Pantalla completa"); shortcut: "❖ F"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("toggle-fullscreen") } }
+        MenuRow { text: I18n.tr("Fijar a la pantalla"); shortcut: "❖ T"; enabled: root.hasWindow; onTriggered: { windowPanel.close(); root.act("toggle-pin-to-screen") } }
         MenuSeparator { visible: Compositor.windows.length > 0 }
         Repeater {
             model: Compositor.windows
@@ -173,12 +173,12 @@ Item {
         target: canvasTitle
         onVisibleChanged: root.current = visible ? "canvas" : (root.current === "canvas" ? "" : root.current)
 
-        MenuRow { text: "Acercar"; shortcut: "❖ +"; onTriggered: root.act("zoom-in") }
-        MenuRow { text: "Alejar"; shortcut: "❖ −"; onTriggered: root.act("zoom-out") }
-        MenuRow { text: "Tamaño real"; shortcut: "❖ 0"; onTriggered: { canvasPanel.close(); root.act("zoom-reset") } }
+        MenuRow { text: I18n.tr("Acercar"); shortcut: "❖ +"; onTriggered: root.act("zoom-in") }
+        MenuRow { text: I18n.tr("Alejar"); shortcut: "❖ −"; onTriggered: root.act("zoom-out") }
+        MenuRow { text: I18n.tr("Tamaño real"); shortcut: "❖ 0"; onTriggered: { canvasPanel.close(); root.act("zoom-reset") } }
         MenuSeparator {}
-        MenuRow { text: "Vista general"; shortcut: "❖ W"; onTriggered: { canvasPanel.close(); root.act("zoom-to-fit") } }
-        MenuRow { text: "Ir al inicio"; shortcut: "❖ A"; onTriggered: { canvasPanel.close(); root.act("home-toggle") } }
+        MenuRow { text: I18n.tr("Vista general"); shortcut: "❖ W"; onTriggered: { canvasPanel.close(); root.act("zoom-to-fit") } }
+        MenuRow { text: I18n.tr("Ir al inicio"); shortcut: "❖ A"; onTriggered: { canvasPanel.close(); root.act("home-toggle") } }
         MenuSeparator { visible: Compositor.bookmarkNames.length > 0 }
         Repeater {
             model: Compositor.bookmarkNames

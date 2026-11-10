@@ -45,7 +45,7 @@ Item {
     Tooltip {
         target: root
         shown: mouse.containsMouse && root.shown
-        text: [root.mic.length ? `Micrófono: ${root.names(root.mic)}` : "",
-               root.camera.length ? `Cámara: ${root.names(root.camera)}` : ""].filter(s => s).join("\n")
+        text: [root.mic.length ? I18n.tr("Micrófono: %1").arg(root.names(root.mic)) : "",
+               root.camera.length ? I18n.tr("Cámara: %1").arg(root.names(root.camera)) : ""].filter(s => s).join("\n")
     }
 }

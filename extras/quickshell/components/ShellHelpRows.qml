@@ -13,14 +13,14 @@ ColumnLayout {
     Layout.fillWidth: true
     spacing: 0
 
-    MenuRow { text: "Buscar…"; shortcut: "❖ Espacio"; onTriggered: { root.done(); Popups.spotlightRequested() } }
+    MenuRow { text: I18n.tr("Buscar…"); shortcut: I18n.tr("❖ Espacio"); onTriggered: { root.done(); Popups.spotlightRequested() } }
     MenuSeparator {}
     MenuRow {
-        text: "Ayuda de WonderlandWM"
+        text: I18n.tr("Ayuda de WonderlandWM")
         onTriggered: { root.done(); Quickshell.execDetached(["xdg-open", "https://github.com/evilrender23/wonderlandwm#readme"]) }
     }
     MenuRow {
-        text: "Atajos de teclado"
+        text: I18n.tr("Atajos de teclado")
         onTriggered: { root.done(); Quickshell.execDetached(["xdg-open", "https://github.com/evilrender23/wonderlandwm/blob/main/config.reference.toml"]) }
     }
 }

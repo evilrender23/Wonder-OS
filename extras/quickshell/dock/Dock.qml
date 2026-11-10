@@ -105,7 +105,7 @@ Scope {
     function title(it) {
         if (!it || it.kind === "sep") return ""
         if (it.kind === "launchpad") return "Launchpad"
-        if (it.kind === "trash") return trashCount > 0 ? `Papelera (${trashCount})` : "Papelera"
+        if (it.kind === "trash") return trashCount > 0 ? I18n.tr("Papelera (%1)").arg(String(trashCount)) : I18n.tr("Papelera")
         if (it.kind === "minimized") return it.window.title || (it.entry ? it.entry.name : it.appId)
         if (it.entry) return it.entry.name
         return it.windows && it.windows.length ? (it.windows[0].title || it.appId) : it.appId
@@ -443,7 +443,7 @@ Scope {
                                 Text {
                                     id: label
                                     anchors.centerIn: parent
-                                    text: slot.isSep ? "" : slot.dragged && win.dragRemove ? "Quitar del Dock" : root.title(slot.modelData)
+                                    text: slot.isSep ? "" : slot.dragged && win.dragRemove ? I18n.tr("Quitar del Dock") : root.title(slot.modelData)
                                     font.family: Theme.fontFamily
                                     font.pixelSize: 12
                                     color: Theme.p.text
@@ -527,7 +527,7 @@ Scope {
                         MenuEntry {
                             header: true
                             visible: !!menu.item && menu.item.kind === "app" && menu.item.windows.length > 0
-                            text: "Ventanas"
+                            text: I18n.tr("Ventanas")
                         }
                         Repeater {
                             model: menu.item && menu.item.kind === "app" ? menu.item.windows : []
@@ -542,23 +542,23 @@ Scope {
 
                         MenuEntry {
                             visible: !!menu.item && !!menu.item.entry
-                            text: menu.item && menu.item.windows && menu.item.windows.length ? "Nueva ventana" : "Abrir"
+                            text: menu.item && menu.item.windows && menu.item.windows.length ? I18n.tr("Nueva ventana") : I18n.tr("Abrir")
                             onTriggered: { menu.item.entry.execute(); if (menu.slotItem) menu.slotItem.bounce() }
                         }
                         MenuEntry {
                             visible: !!menu.item && menu.item.kind === "app" && !!menu.item.entry
-                            text: menu.item && menu.item.pinned ? "Quitar del Dock" : "Mantener en el Dock"
+                            text: menu.item && menu.item.pinned ? I18n.tr("Quitar del Dock") : I18n.tr("Mantener en el Dock")
                             onTriggered: menu.item.pinned ? root.unpin(menu.item.key) : root.pin(menu.item.key)
                         }
                         MenuEntry {
                             visible: !!menu.item && menu.item.kind === "app"
                                 && menu.item.windows.some(w => !w.suspended && !w.minimized)
-                            text: "Minimizar"
+                            text: I18n.tr("Minimizar")
                             onTriggered: root.minimizeAll(menu.item)
                         }
                         MenuEntry {
                             visible: !!menu.item && menu.item.kind === "trash"
-                            text: "Abrir la Papelera"
+                            text: I18n.tr("Abrir la Papelera")
                             onTriggered: root.openTrash()
                         }
                         // A minimized window's own tile.
@@ -569,20 +569,20 @@ Scope {
                         }
                         MenuEntry {
                             visible: !!menu.item && menu.item.kind === "minimized"
-                            text: "Restaurar"
+                            text: I18n.tr("Restaurar")
                             onTriggered: Compositor.restoreWindow(menu.item.window.id)
                         }
                         MenuEntry {
                             visible: !!menu.item && menu.item.kind === "minimized"
                             danger: true
-                            text: "Cerrar"
+                            text: I18n.tr("Cerrar")
                             onTriggered: Compositor.closeWindow(menu.item.window.id)
                         }
                         MenuSep { visible: !!menu.item && menu.item.kind === "app" && menu.item.windows.length > 0 }
                         MenuEntry {
                             visible: !!menu.item && menu.item.kind === "app" && menu.item.windows.length > 0
                             danger: true
-                            text: menu.item && menu.item.windows && menu.item.windows.length > 1 ? `Cerrar ${menu.item.windows.length} ventanas` : "Cerrar"
+                            text: menu.item && menu.item.windows && menu.item.windows.length > 1 ? I18n.tr("Cerrar %1 ventanas").arg(String(menu.item.windows.length)) : I18n.tr("Cerrar")
                             onTriggered: root.quit(menu.item)
                         }
                     }

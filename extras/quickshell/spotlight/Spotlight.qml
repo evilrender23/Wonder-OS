@@ -79,29 +79,29 @@ Scope {
     }
 
     readonly property var systemActions: [
-        { title: "AquilesAI", detail: "el agente del escritorio", icon: "sparkles",
+        { title: "AquilesAI", detail: I18n.tr("el agente del escritorio"), icon: "sparkles",
           keys: "aquiles aquilesai ia ai agente agent chat hermes claude codex antigravity asistente", run: () => Popups.aquilesRequested() },
-        { title: "Ajustes de pantallas", detail: "resolución, frecuencia, disposición", icon: "monitor",
+        { title: I18n.tr("Ajustes de pantallas"), detail: I18n.tr("resolución, frecuencia, disposición"), icon: "monitor",
           keys: "pantallas monitores displays resolucion frecuencia hz escala", run: () => Popups.displaysRequested() },
-        { title: "Fondos de pantalla", detail: "fondos animados, tus imágenes y sus ajustes", icon: "image",
+        { title: I18n.tr("Fondos de pantalla"), detail: I18n.tr("fondos animados, tus imágenes y sus ajustes"), icon: "image",
           keys: "wallpapers wallpaper fondos fondo de pantalla escritorio background imagen foto importar", run: () => Popups.wallpapersRequested() },
-        { title: "Captura de pantalla", detail: "ventana, área o pantalla completa", icon: "camera",
+        { title: I18n.tr("Captura de pantalla"), detail: I18n.tr("ventana, área o pantalla completa"), icon: "camera",
           keys: "captura capturar screenshot pantallazo imagen recorte", run: () => Capture.show("last") },
-        { title: "Grabar la pantalla", detail: Capture.recording ? "hay una grabación en curso: la detiene" : "vídeo de una ventana, un área o una pantalla", icon: "video",
+        { title: I18n.tr("Grabar la pantalla"), detail: Capture.recording ? I18n.tr("hay una grabación en curso: la detiene") : I18n.tr("vídeo de una ventana, un área o una pantalla"), icon: "video",
           keys: "grabar grabacion recorder record video screencast", run: () => Capture.toggleRecord() },
-        { title: "Alinear pantallas", detail: "pon los otros monitores junto a este", icon: "layout-grid",
+        { title: I18n.tr("Alinear pantallas"), detail: I18n.tr("pon los otros monitores junto a este"), icon: "layout-grid",
           keys: "alinear align outputs monitores", run: () => Compositor.action("align-outputs") },
-        { title: "Ver todas las ventanas", detail: "zoom para abarcar el lienzo", icon: "zoom-out",
+        { title: I18n.tr("Ver todas las ventanas"), detail: I18n.tr("zoom para abarcar el lienzo"), icon: "zoom-out",
           keys: "zoom fit todas ventanas overview", run: () => Compositor.action("zoom-to-fit") },
-        { title: Theme.dark ? "Tema claro" : "Tema oscuro", detail: "apariencia de la barra", icon: Theme.dark ? "sun" : "moon",
+        { title: Theme.dark ? I18n.tr("Tema claro") : I18n.tr("Tema oscuro"), detail: I18n.tr("apariencia de la barra"), icon: Theme.dark ? "sun" : "moon",
           keys: "tema theme oscuro claro dark light modo", run: () => Settings.data.themeMode = Theme.dark ? "light" : "dark" },
-        { title: "Terminal", detail: "nueva terminal", icon: "terminal",
+        { title: "Terminal", detail: I18n.tr("nueva terminal"), icon: "terminal",
           keys: "terminal consola shell", run: () => Session.terminal() },
-        { title: "Bloquear pantalla", detail: "", icon: "lock", keys: "bloquear lock", run: () => Session.lock() },
-        { title: "Suspender", detail: "", icon: "moon-star", keys: "suspender dormir sleep suspend", run: () => Session.suspend() },
-        { title: "Cerrar sesión", detail: "salir de WonderlandWM", icon: "log-out", keys: "cerrar sesion logout salir", run: () => Session.logout() },
-        { title: "Reiniciar", detail: "", icon: "rotate-cw", keys: "reiniciar reboot restart", run: () => Session.reboot() },
-        { title: "Apagar", detail: "", icon: "power", keys: "apagar shutdown poweroff", run: () => Session.poweroff() }
+        { title: I18n.tr("Bloquear pantalla"), detail: "", icon: "lock", keys: "bloquear lock", run: () => Session.lock() },
+        { title: I18n.tr("Suspender"), detail: "", icon: "moon-star", keys: "suspender dormir sleep suspend", run: () => Session.suspend() },
+        { title: I18n.tr("Cerrar sesión"), detail: I18n.tr("salir de WonderlandWM"), icon: "log-out", keys: "cerrar sesion logout salir", run: () => Session.logout() },
+        { title: I18n.tr("Reiniciar"), detail: "", icon: "rotate-cw", keys: "reiniciar reboot restart", run: () => Session.reboot() },
+        { title: I18n.tr("Apagar"), detail: "", icon: "power", keys: "apagar shutdown poweroff", run: () => Session.poweroff() }
     ]
 
     function calc(q) {
@@ -129,28 +129,28 @@ Scope {
                                score(q, String(a.keywords || ""), false) * 0.6, score(q, a.id, false) * 0.5)
             if (s > 0) groups.apps.push({ s: s, row: { kind: "app", title: a.name,
                 detail: a.genericName || a.comment || "", iconSource: Quickshell.iconPath(a.icon, "application-x-executable"),
-                icon: "", hint: "Abrir" }, run: () => a.execute() })
+                icon: "", hint: I18n.tr("Abrir") }, run: () => a.execute() })
         }
         for (const w of Compositor.windows) {
             const s = Math.max(score(q, w.title), score(q, w.app_id)) * 0.95
             if (s > 0) {
                 const app = DesktopEntries.heuristicLookup(w.app_id)
                 groups.windows.push({ s: s, row: { kind: "window", title: w.title || w.app_id,
-                    detail: w.suspended ? "suspendida · " + w.app_id : w.app_id,
+                    detail: w.suspended ? I18n.tr("suspendida") + " · " + w.app_id : w.app_id,
                     iconSource: app ? Quickshell.iconPath(app.icon, true) : "", icon: w.suspended ? "moon" : "app-window",
-                    hint: w.suspended ? "Relanzar" : "Ir" },
+                    hint: w.suspended ? I18n.tr("Relanzar") : I18n.tr("Ir") },
                     run: () => w.suspended ? Compositor.relaunch(w.id) : Compositor.focusWindow(w.id) })
             }
         }
         for (const b of Compositor.bookmarkNames) {
             const s = score(q, b) * 0.9 + (score(q, "marcador bookmark") > 0 ? 100 : 0)
-            if (s > 0) groups.marks.push({ s: s, row: { kind: "bookmark", title: b, detail: "marcador",
-                iconSource: "", icon: "bookmark", hint: "Ir" }, run: () => Compositor.goToBookmark(b) })
+            if (s > 0) groups.marks.push({ s: s, row: { kind: "bookmark", title: b, detail: I18n.tr("marcador"),
+                iconSource: "", icon: "bookmark", hint: I18n.tr("Ir") }, run: () => Compositor.goToBookmark(b) })
         }
         for (const act of systemActions) {
             const s = Math.max(score(q, act.title), score(q, act.keys, false) * 0.8) * 0.9
             if (s > 0) groups.system.push({ s: s, row: { kind: "system", title: act.title, detail: act.detail,
-                iconSource: "", icon: act.icon, hint: "Ejecutar" }, run: act.run })
+                iconSource: "", icon: act.icon, hint: I18n.tr("Ejecutar") }, run: act.run })
         }
         // «wallpapers» / «fondos» lists them all; a name («aurora») finds one.
         const wallWord = q.length >= 3 && Math.max(score(q, "wallpapers"), score(q, "fondos de pantalla"), score(q, "fondo"), score(q, "background")) > 0
@@ -158,8 +158,8 @@ Scope {
             const named = Math.max(score(q, w.name), score(q, w.component, false) * 0.8, score(q, (w.tags || []).join(" "), false) * 0.5)
             const s = wallWord ? 300 + named * 0.1 + (Wallpapers.current === w.id ? 50 : 0) : named * 0.7
             if (s > 0) groups.walls.push({ s: s, row: { kind: "wallpaper", title: w.name,
-                detail: Wallpapers.current === w.id ? "fondo actual" : "fondo de pantalla",
-                iconSource: w.preview ? "file://" + w.preview : "", icon: "image", hint: "Aplicar" },
+                detail: Wallpapers.current === w.id ? I18n.tr("fondo actual") : I18n.tr("fondo de pantalla"),
+                iconSource: w.preview ? "file://" + w.preview : "", icon: "image", hint: I18n.tr("Aplicar") },
                 run: () => Wallpapers.apply(w.id, {}) })
         }
         for (const k in groups) groups[k].sort((x, y) => y.s - x.s)
@@ -176,8 +176,8 @@ Scope {
 
         const value = calc(query)
         if (value !== null)
-            push("Calculadora", { row: { kind: "calc", title: value, detail: query.trim() + " =",
-                iconSource: "", icon: "calculator", hint: "Copiar" },
+            push(I18n.tr("Calculadora"), { row: { kind: "calc", title: value, detail: query.trim() + " =",
+                iconSource: "", icon: "calculator", hint: I18n.tr("Copiar") },
                 run: () => Quickshell.execDetached(["wl-copy", value]) })
 
         // Top hit: the best score across groups leads, on its own.
@@ -185,16 +185,16 @@ Scope {
         for (const k in groups)
             if (groups[k].length && (!best || groups[k][0].s > best.s)) { best = groups[k][0]; bestKey = k }
         if (best && value === null) {
-            push("Mejor resultado", best)
+            push(I18n.tr("Mejor resultado"), best)
             groups[bestKey] = groups[bestKey].slice(1)
         }
-        for (const [k, label] of [["apps", "Aplicaciones"], ["windows", "Ventanas en el lienzo"],
-                                  ["marks", "Marcadores"], ["system", "Sistema"], ["walls", "Fondos de pantalla"]])
+        for (const [k, label] of [["apps", I18n.tr("Aplicaciones")], ["windows", I18n.tr("Ventanas en el lienzo")],
+                                  ["marks", I18n.tr("Marcadores")], ["system", I18n.tr("Sistema")], ["walls", I18n.tr("Fondos de pantalla")]])
             for (const item of groups[k]) push(label, item)
 
         const raw = query.trim()
-        push("Web", { row: { kind: "web", title: `Buscar «${raw}» en la web`, detail: "DuckDuckGo",
-            iconSource: "", icon: "globe", hint: "Buscar" },
+        push("Web", { row: { kind: "web", title: I18n.tr("Buscar «%1» en la web").arg(raw), detail: "DuckDuckGo",
+            iconSource: "", icon: "globe", hint: I18n.tr("Buscar") },
             run: () => Quickshell.execDetached(["xdg-open", "https://duckduckgo.com/?q=" + encodeURIComponent(raw)]) })
 
         root.refs = refs
@@ -303,7 +303,7 @@ Scope {
                         anchors.fill: parent
                         verticalAlignment: Text.AlignVCenter
                         visible: !field.text
-                        text: "Buscar en WonderlandWM"
+                        text: I18n.tr("Buscar en WonderlandWM")
                         font: field.font
                         color: Theme.p.text4
                     }

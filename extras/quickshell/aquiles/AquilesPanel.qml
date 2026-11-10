@@ -64,7 +64,7 @@ Scope {
     function ago(ts) {
         if (!ts) return ""
         const s = Date.now() / 1000 - (ts > 1e12 ? ts / 1000 : ts)
-        if (s < 90) return "ahora"
+        if (s < 90) return I18n.tr("ahora")
         if (s < 3600) return Math.round(s / 60) + " min"
         if (s < 86400) return Math.round(s / 3600) + " h"
         return Math.round(s / 86400) + " d"
@@ -132,16 +132,16 @@ Scope {
                         color: Aquiles.link === "open" ? Theme.p.green : Aquiles.link === "error" ? Theme.p.red : Theme.p.yellow
                     }
                     Item { Layout.fillWidth: true }
-                    IconButton { icon: "plus"; size: 26; tooltip: "Chat nuevo"; onClicked: { Aquiles.newChat(); root.view = "chat"; input.forceActiveFocus() } }
-                    IconButton { icon: "clock"; size: 26; tooltip: "Sesiones"; checked: root.view === "sessions"
+                    IconButton { icon: "plus"; size: 26; tooltip: I18n.tr("Chat nuevo"); onClicked: { Aquiles.newChat(); root.view = "chat"; input.forceActiveFocus() } }
+                    IconButton { icon: "clock"; size: 26; tooltip: I18n.tr("Sesiones"); checked: root.view === "sessions"
                         onClicked: { root.view = root.view === "sessions" ? "chat" : "sessions"; if (Aquiles.isHermes) Aquiles.refreshSessions() } }
-                    IconButton { icon: "cpu"; size: 26; tooltip: "Modelos"; checked: root.view === "models"
+                    IconButton { icon: "cpu"; size: 26; tooltip: I18n.tr("Modelos"); checked: root.view === "models"
                         onClicked: { if (root.view === "models") root.view = "chat"; else root.pickModel("") } }
-                    IconButton { icon: "sliders-horizontal"; size: 26; tooltip: "Motor, permisos y API keys"; checked: root.view === "engine"
+                    IconButton { icon: "sliders-horizontal"; size: 26; tooltip: I18n.tr("Motor, permisos y API keys"); checked: root.view === "engine"
                         onClicked: root.view = root.view === "engine" ? "chat" : "engine" }
-                    IconButton { icon: "pin"; size: 26; tooltip: root.pinned ? "Soltar" : "Fijar junto a las ventanas"; checked: root.pinned
+                    IconButton { icon: "pin"; size: 26; tooltip: root.pinned ? I18n.tr("Soltar") : I18n.tr("Fijar junto a las ventanas"); checked: root.pinned
                         onClicked: Settings.data.aquilesPinned = !root.pinned }
-                    IconButton { icon: "x"; size: 26; tooltip: "Cerrar (Esc)"; onClicked: root.close() }
+                    IconButton { icon: "x"; size: 26; tooltip: I18n.tr("Cerrar (Esc)"); onClicked: root.close() }
                 }
 
                 Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Theme.p.stroke3 }
@@ -158,7 +158,7 @@ Scope {
                         visible: Aquiles.messages.count === 0
                         spacing: 6
                         Icon { name: "sparkles"; size: 34; color: Theme.p.stroke1; Layout.alignment: Qt.AlignHCenter }
-                        Label { text: "¿En qué te ayudo?"; role: "title"; Layout.alignment: Qt.AlignHCenter }
+                        Label { text: I18n.tr("¿En qué te ayudo?"); role: "title"; Layout.alignment: Qt.AlignHCenter }
                         Label {
                             Layout.fillWidth: true
                             role: "muted"
@@ -166,10 +166,10 @@ Scope {
                             horizontalAlignment: Text.AlignHCenter
                             text: Aquiles.isHermes
                                 ? (Aquiles.link === "error" ? Aquiles.linkError
-                                    : Aquiles.link !== "open" ? "Conectando con Hermes…"
-                                    : `${Aquiles.model || "modelo por defecto"} · ${Aquiles.provider}\nEscribe / para ver los comandos.`)
-                                : (Aquiles.bins[Aquiles.backend] ? `${Aquiles.engineName(Aquiles.backend)} en ${Aquiles.cwd}`
-                                    : Aquiles.binsReady ? `«${Aquiles.backend}» no está instalado.` : "")
+                                    : Aquiles.link !== "open" ? I18n.tr("Conectando con Hermes…")
+                                    : `${Aquiles.model || I18n.tr("modelo por defecto")} · ${Aquiles.provider}\n` + I18n.tr("Escribe / para ver los comandos."))
+                                : (Aquiles.bins[Aquiles.backend] ? I18n.tr("%1 en %2").arg(Aquiles.engineName(Aquiles.backend)).arg(Aquiles.cwd)
+                                    : Aquiles.binsReady ? I18n.tr("«%1» no está instalado.").arg(Aquiles.backend) : "")
                         }
                     }
 
@@ -235,7 +235,7 @@ Scope {
                                     Icon { name: msg.expanded ? "chevron-down" : "chevron-right"; size: 12; color: Theme.p.text3; anchors.verticalCenter: parent.verticalCenter }
                                     Label {
                                         role: "caption"
-                                        text: "Razonamiento"
+                                        text: I18n.tr("Razonamiento")
                                         MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: msg.expanded = !msg.expanded }
                                     }
                                 }
@@ -292,7 +292,7 @@ Scope {
                                             }
                                             Label {
                                                 role: "caption"
-                                                text: msg.state === "running" ? "…" : msg.state === "error" ? "falló" : "hecho"
+                                                text: msg.state === "running" ? "…" : msg.state === "error" ? I18n.tr("falló") : I18n.tr("hecho")
                                                 color: msg.state === "error" ? Theme.p.red : msg.state === "running" ? Theme.p.accent : Theme.p.green
                                             }
                                         }
@@ -336,7 +336,7 @@ Scope {
                                     id: promptCard
                                     readonly property bool isPrompt: msg.kind === "approval" || msg.kind === "clarify" || msg.kind === "secret"
                                     readonly property var options: isPrompt ? JSON.parse(msg.choices || "[]") : []
-                                    readonly property var choiceNames: ({ once: "Permitir una vez", session: "Esta sesión", always: "Siempre", deny: "Denegar" })
+                                    readonly property var choiceNames: ({ once: I18n.tr("Permitir una vez"), session: I18n.tr("Esta sesión"), always: I18n.tr("Siempre"), deny: I18n.tr("Denegar") })
                                     visible: isPrompt
                                     width: body.width
                                     height: promptCol.implicitHeight + 18
@@ -352,7 +352,7 @@ Scope {
                                         RowLayout {
                                             spacing: 6
                                             Icon { name: msg.kind === "clarify" ? "circle-alert" : "lock"; size: 14; color: Theme.p.orange }
-                                            Label { text: msg.kind === "approval" ? "Permiso" : msg.kind === "secret" ? "Contraseña" : "Pregunta"; font.weight: Font.DemiBold }
+                                            Label { text: msg.kind === "approval" ? I18n.tr("Permiso") : msg.kind === "secret" ? I18n.tr("Contraseña") : I18n.tr("Pregunta"); font.weight: Font.DemiBold }
                                             Label {
                                                 visible: msg.state !== "pending" && msg.kind !== "clarify" && msg.result !== ""
                                                 role: "caption"
@@ -391,16 +391,16 @@ Scope {
                                                 id: answerBox
                                                 Layout.fillWidth: true
                                                 password: msg.kind === "secret"
-                                                placeholder: msg.kind === "secret" ? "Se envía solo al gateway local" : "Tu respuesta"
+                                                placeholder: msg.kind === "secret" ? I18n.tr("Se envía solo al gateway local") : I18n.tr("Tu respuesta")
                                                 onAccepted: sendAnswer.clicked()
                                             }
                                             IconButton {
                                                 id: sendAnswer
-                                                text: msg.kind === "secret" ? "Enviar" : "Responder"
+                                                text: msg.kind === "secret" ? I18n.tr("Enviar") : I18n.tr("Responder")
                                                 primary: true
                                                 onClicked: { const v = answerBox.text; answerBox.text = ""; Aquiles.answer(msg.index, v) }
                                             }
-                                            IconButton { visible: msg.kind === "secret"; text: "Omitir"; onClicked: { answerBox.text = ""; Aquiles.answer(msg.index, "") } }
+                                            IconButton { visible: msg.kind === "secret"; text: I18n.tr("Omitir"); onClicked: { answerBox.text = ""; Aquiles.answer(msg.index, "") } }
                                         }
                                     }
                                 }
@@ -418,7 +418,7 @@ Scope {
 
                     Label {
                         role: "section"
-                        text: Aquiles.isHermes ? "Sesiones de Hermes" : `Chats de ${Aquiles.engineName(Aquiles.backend)}`
+                        text: Aquiles.isHermes ? I18n.tr("Sesiones de Hermes") : I18n.tr("Chats de %1").arg(Aquiles.engineName(Aquiles.backend))
                     }
                     ListView {
                         id: sessionList
@@ -460,14 +460,14 @@ Scope {
                                     Layout.fillWidth: true
                                     spacing: 1
                                     visible: !srow.renaming
-                                    Label { Layout.fillWidth: true; text: srow.modelData.title || "Sin título" }
+                                    Label { Layout.fillWidth: true; text: srow.modelData.title || I18n.tr("Sin título") }
                                     Label {
                                         Layout.fillWidth: true
                                         role: "caption"
                                         text: Aquiles.isHermes
-                                            ? [srow.modelData.model, `${srow.modelData.message_count} mensajes`, root.ago(srow.modelData.started_at),
-                                                srow.modelData.running ? "en curso" : ""].filter(Boolean).join(" · ")
-                                            : [root.ago(srow.modelData.ts), srow.modelData.native ? "reanudable" : ""].filter(Boolean).join(" · ")
+                                            ? [srow.modelData.model, I18n.tr("%1 mensajes").arg(String(srow.modelData.message_count)), root.ago(srow.modelData.started_at),
+                                                srow.modelData.running ? I18n.tr("en curso") : ""].filter(Boolean).join(" · ")
+                                            : [root.ago(srow.modelData.ts), srow.modelData.native ? I18n.tr("reanudable") : ""].filter(Boolean).join(" · ")
                                     }
                                 }
                                 TextBox {
@@ -483,7 +483,7 @@ Scope {
                                     }
                                 }
                                 IconButton {
-                                    icon: "check"; size: 24; tooltip: "Renombrar"
+                                    icon: "check"; size: 24; tooltip: I18n.tr("Renombrar")
                                     visible: hover.containsMouse || srow.renaming
                                     onClicked: {
                                         if (srow.renaming) { renameBox.accepted(); return }
@@ -493,7 +493,7 @@ Scope {
                                     }
                                 }
                                 IconButton {
-                                    icon: "trash-2"; size: 24; danger: true; tooltip: "Borrar"
+                                    icon: "trash-2"; size: 24; danger: true; tooltip: I18n.tr("Borrar")
                                     visible: hover.containsMouse && !srow.renaming && !(Aquiles.isHermes && srow.modelData.running)
                                     onClicked: {
                                         if (Aquiles.isHermes) Aquiles.deleteSession(srow.sessionId)
@@ -508,7 +508,7 @@ Scope {
                         Layout.alignment: Qt.AlignHCenter
                         Layout.bottomMargin: 40
                         role: "muted"
-                        text: "Aún no hay conversaciones."
+                        text: I18n.tr("Aún no hay conversaciones.")
                     }
                 }
 
@@ -537,7 +537,7 @@ Scope {
                         TextBox {
                             id: modelFilter
                             Layout.fillWidth: true
-                            placeholder: Aquiles.isHermes ? "Buscar modelo: haiku, opus, gemini…" : "Buscar o escribir el nombre de un modelo"
+                            placeholder: Aquiles.isHermes ? I18n.tr("Buscar modelo: haiku, opus, gemini…") : I18n.tr("Buscar o escribir el nombre de un modelo")
                             onAccepted: modelPage.choose(modelPage.pick)
                             Keys.onPressed: event => {
                                 const n = modelPage.rows.length
@@ -547,13 +547,13 @@ Scope {
                                 event.accepted = true
                             }
                         }
-                        IconButton { visible: Aquiles.isHermes; icon: "refresh-cw"; size: 26; tooltip: "Actualizar catálogos"; onClicked: Aquiles.refreshProviders(true) }
+                        IconButton { visible: Aquiles.isHermes; icon: "refresh-cw"; size: 26; tooltip: I18n.tr("Actualizar catálogos"); onClicked: Aquiles.refreshProviders(true) }
                     }
                     Label {
                         Layout.fillWidth: true
                         role: "caption"
                         wrapMode: Text.Wrap; elide: Text.ElideNone
-                        text: `Ahora: ${Aquiles.model || "el modelo por defecto"} · ${Aquiles.provider}`
+                        text: I18n.tr("Ahora: %1").arg(Aquiles.model || I18n.tr("el modelo por defecto")) + ` · ${Aquiles.provider}`
                     }
                     ListView {
                         id: modelList
@@ -609,12 +609,12 @@ Scope {
                         Layout.fillWidth: true
                         role: "caption"
                         wrapMode: Text.Wrap; elide: Text.ElideNone
-                        text: !Aquiles.isHermes ? "Escribe el nombre exacto del modelo y pulsa Enter."
-                            : Aquiles.link !== "open" ? "Conectando con Hermes…"
-                            : modelFilter.text.trim() !== "" ? "Ningún proveedor conectado ofrece ese modelo. Añade su API key en Motor."
-                            : "No hay proveedores conectados. Añade una API key en Motor."
+                        text: !Aquiles.isHermes ? I18n.tr("Escribe el nombre exacto del modelo y pulsa Enter.")
+                            : Aquiles.link !== "open" ? I18n.tr("Conectando con Hermes…")
+                            : modelFilter.text.trim() !== "" ? I18n.tr("Ningún proveedor conectado ofrece ese modelo. Añade su API key en Motor.")
+                            : I18n.tr("No hay proveedores conectados. Añade una API key en Motor.")
                     }
-                    Label { Layout.fillWidth: true; role: "caption"; text: "↑↓ elegir · Enter aplicar · vale para este chat y los nuevos" }
+                    Label { Layout.fillWidth: true; role: "caption"; text: I18n.tr("↑↓ elegir · Enter aplicar · vale para este chat y los nuevos") }
                 }
 
                 // ── engine, models and keys ─────────────────────────────
@@ -635,7 +635,7 @@ Scope {
                         width: enginePage.width
                         spacing: 4
 
-                        Label { role: "section"; text: "Motor" }
+                        Label { role: "section"; text: I18n.tr("Motor") }
                         Repeater {
                             model: Aquiles.engines
                             delegate: Rectangle {
@@ -669,7 +669,7 @@ Scope {
                                             color: erow.installed ? Theme.p.text3 : Theme.p.orange
                                             text: !erow.cli ? (Aquiles.link === "open" ? erow.modelData.detail : Aquiles.link === "error" ? Aquiles.linkError.split("\n")[0] : erow.modelData.detail)
                                                 : erow.installed ? Aquiles.bins[erow.modelData.id]
-                                                : Aquiles.binsReady ? `${erow.modelData.detail}: no instalado` : erow.modelData.detail
+                                                : Aquiles.binsReady ? I18n.tr("%1: no instalado").arg(erow.modelData.detail) : erow.modelData.detail
                                         }
                                     }
                                     Icon { visible: erow.selected; name: "check"; size: 14; color: Theme.p.accent }
@@ -677,17 +677,17 @@ Scope {
                             }
                         }
 
-                        Section { text: "Carpeta de trabajo" }
+                        Section { text: I18n.tr("Carpeta de trabajo") }
                         TextBox {
                             Layout.fillWidth: true
                             placeholder: Aquiles.home
                             text: Settings.data.aquilesCwd
                             onAccepted: Settings.data.aquilesCwd = text.trim()
                         }
-                        Label { role: "caption"; text: "Enter para aplicar; vale para los chats nuevos." }
+                        Label { role: "caption"; text: I18n.tr("Enter para aplicar; vale para los chats nuevos.") }
 
                         // CLI engines
-                        Section { text: "Modelo" }
+                        Section { text: I18n.tr("Modelo") }
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 6
@@ -695,9 +695,9 @@ Scope {
                                 Layout.fillWidth: true
                                 elide: Text.ElideMiddle
                                 font.family: Theme.monoFamily
-                                text: Aquiles.model || "por defecto"
+                                text: Aquiles.model || I18n.tr("por defecto")
                             }
-                            IconButton { text: "Cambiar…"; onClicked: root.pickModel("") }
+                            IconButton { text: I18n.tr("Cambiar…"); onClicked: root.pickModel("") }
                         }
                         Flow {
                             visible: !Aquiles.isHermes && (Aquiles.cliModels[Aquiles.backend] || []).length > 0
@@ -714,12 +714,12 @@ Scope {
                                 }
                             }
                         }
-                        Section { visible: !Aquiles.isHermes; text: "Permisos" }
+                        Section { visible: !Aquiles.isHermes; text: I18n.tr("Permisos") }
                         RowLayout {
                             visible: !Aquiles.isHermes
                             spacing: 6
                             Repeater {
-                                model: [{ id: "read", name: "Solo lectura" }, { id: "edits", name: "Editar archivos" }, { id: "full", name: "Sin preguntar" }]
+                                model: [{ id: "read", name: I18n.tr("Solo lectura") }, { id: "edits", name: I18n.tr("Editar archivos") }, { id: "full", name: I18n.tr("Sin preguntar") }]
                                 delegate: IconButton {
                                     required property var modelData
                                     text: modelData.name
@@ -734,22 +734,22 @@ Scope {
                             Layout.fillWidth: true
                             role: "caption"
                             wrapMode: Text.Wrap; elide: Text.ElideNone
-                            text: "La CLI usa su propio inicio de sesión (suscripción o API key): ábrela una vez en una terminal para entrar. «Sin preguntar» deja que ejecute cualquier orden."
+                            text: I18n.tr("La CLI usa su propio inicio de sesión (suscripción o API key): ábrela una vez en una terminal para entrar. «Sin preguntar» deja que ejecute cualquier orden.")
                         }
                         IconButton {
                             visible: !Aquiles.isHermes
                             icon: "terminal"
-                            text: `Abrir ${Aquiles.backend} en una terminal`
+                            text: I18n.tr("Abrir %1 en una terminal").arg(Aquiles.backend)
                             enabled: !!Aquiles.bins[Aquiles.backend]
                             onClicked: Session.terminal(Aquiles.bins[Aquiles.backend])
                         }
 
                         // Hermes: session controls, then every provider
-                        Section { visible: Aquiles.isHermes; text: "Sesión" }
+                        Section { visible: Aquiles.isHermes; text: I18n.tr("Sesión") }
                         RowLayout {
                             visible: Aquiles.isHermes
                             spacing: 4
-                            Label { role: "muted"; text: "Razonamiento" }
+                            Label { role: "muted"; text: I18n.tr("Razonamiento") }
                             Repeater {
                                 model: ["none", "low", "medium", "high", "xhigh"]
                                 delegate: IconButton {
@@ -764,7 +764,7 @@ Scope {
                         Switch {
                             visible: Aquiles.isHermes
                             text: "YOLO"
-                            detail: "ejecuta órdenes sin pedir permiso"
+                            detail: I18n.tr("ejecuta órdenes sin pedir permiso")
                             checked: !!Aquiles.info.yolo
                             onToggled: Aquiles.setYolo(!Aquiles.info.yolo)
                         }
@@ -773,10 +773,10 @@ Scope {
                             visible: Aquiles.isHermes
                             Layout.fillWidth: true
                             Layout.topMargin: 10
-                            Label { role: "section"; text: "Proveedores y API keys"; Layout.fillWidth: true }
-                            IconButton { icon: "refresh-cw"; size: 22; tooltip: "Actualizar"; onClicked: Aquiles.refreshProviders(true) }
+                            Label { role: "section"; text: I18n.tr("Proveedores y API keys"); Layout.fillWidth: true }
+                            IconButton { icon: "refresh-cw"; size: 22; tooltip: I18n.tr("Actualizar"); onClicked: Aquiles.refreshProviders(true) }
                         }
-                        TextBox { id: filter; visible: Aquiles.isHermes; Layout.fillWidth: true; placeholder: "Filtrar proveedores o modelos" }
+                        TextBox { id: filter; visible: Aquiles.isHermes; Layout.fillWidth: true; placeholder: I18n.tr("Filtrar proveedores o modelos") }
 
                         Repeater {
                             model: Aquiles.isHermes ? Aquiles.providers : []
@@ -812,18 +812,18 @@ Scope {
                                         Label {
                                             Layout.fillWidth: true
                                             role: "caption"
-                                            text: prow.modelData.authenticated ? `${prow.modelData.total_models || (prow.modelData.models || []).length} modelos`
-                                                : prow.takesKey ? "sin API key" : "se configura con «hermes model»"
+                                            text: prow.modelData.authenticated ? I18n.tr("%1 modelos").arg(String(prow.modelData.total_models || (prow.modelData.models || []).length))
+                                                : prow.takesKey ? I18n.tr("sin API key") : I18n.tr("se configura con «hermes model»")
                                         }
                                         IconButton {
                                             visible: prow.takesKey
                                             size: 24
-                                            text: prow.modelData.authenticated ? "Cambiar key" : "Añadir key"
+                                            text: prow.modelData.authenticated ? I18n.tr("Cambiar key") : I18n.tr("Añadir key")
                                             onClicked: { enginePage.keyFor = enginePage.keyFor === prow.modelData.slug ? "" : prow.modelData.slug; enginePage.keyError = "" }
                                         }
                                         IconButton {
                                             visible: prow.modelData.authenticated && prow.takesKey
-                                            size: 24; icon: "trash-2"; danger: true; tooltip: "Quitar la API key"
+                                            size: 24; icon: "trash-2"; danger: true; tooltip: I18n.tr("Quitar la API key")
                                             onClicked: Aquiles.disconnectProvider(prow.modelData.slug, err => enginePage.keyError = err)
                                         }
                                     }
@@ -843,7 +843,7 @@ Scope {
                                     }
                                     IconButton {
                                         id: saveKey
-                                        text: "Guardar"
+                                        text: I18n.tr("Guardar")
                                         primary: true
                                         enabled: keyBox.text.trim() !== ""
                                         onClicked: Aquiles.saveKey(prow.modelData.slug, keyBox.text.trim(), err => {
@@ -942,7 +942,7 @@ Scope {
                     Layout.fillWidth: true
                     role: "caption"
                     color: Theme.p.accent
-                    text: Aquiles.status || "trabajando…"
+                    text: Aquiles.status || I18n.tr("trabajando…")
                 }
 
                 Rectangle {
@@ -1013,7 +1013,7 @@ Scope {
 
                             Text {
                                 visible: !input.text
-                                text: Aquiles.busy && Aquiles.isHermes ? "Corrige el rumbo mientras trabaja…" : "Pregunta a AquilesAI"
+                                text: Aquiles.busy && Aquiles.isHermes ? I18n.tr("Corrige el rumbo mientras trabaja…") : I18n.tr("Pregunta a AquilesAI")
                                 color: Theme.p.text4
                                 font: input.font
                             }
@@ -1027,7 +1027,7 @@ Scope {
                         primary: !Aquiles.busy || input.text.trim() !== ""
                         danger: Aquiles.busy && input.text.trim() === ""
                         icon: Aquiles.busy && input.text.trim() === "" ? "x" : "corner-down-left"
-                        tooltip: Aquiles.busy && input.text.trim() === "" ? "Detener" : "Enviar (Enter)"
+                        tooltip: Aquiles.busy && input.text.trim() === "" ? I18n.tr("Detener") : I18n.tr("Enviar (Enter)")
                         onClicked: { if (Aquiles.busy && input.text.trim() === "") Aquiles.stop(); else input.submit() }
                     }
                 }
@@ -1040,7 +1040,7 @@ Scope {
                         Layout.fillWidth: true
                         role: "caption"
                         elide: Text.ElideMiddle
-                        text: [Aquiles.title, Aquiles.isHermes ? (Aquiles.info.yolo ? "YOLO" : "") : ({ read: "solo lectura", edits: "edita archivos", full: "sin preguntar" })[Aquiles.permission]]
+                        text: [Aquiles.title, Aquiles.isHermes ? (Aquiles.info.yolo ? "YOLO" : "") : ({ read: I18n.tr("solo lectura"), edits: I18n.tr("edita archivos"), full: I18n.tr("sin preguntar") })[Aquiles.permission]]
                             .filter(Boolean).join(" · ")
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.view = "engine" }
                     }
@@ -1054,7 +1054,7 @@ Scope {
                         border.color: Theme.p.stroke2
                         Label { id: modelTag; anchors.fill: parent; anchors.leftMargin: 7; anchors.rightMargin: 7; role: "caption"
                             horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter; elide: Text.ElideLeft
-                            text: (Aquiles.model || "modelo por defecto") + " ▾" }
+                            text: (Aquiles.model || I18n.tr("modelo por defecto")) + " ▾" }
                         MouseArea { id: modelTagHover; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.pickModel("") }
                     }
                 }

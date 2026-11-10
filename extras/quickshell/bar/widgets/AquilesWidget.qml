@@ -9,6 +9,6 @@ Pill {
     widgetId: "aquiles"
     icon: "sparkles"
     iconColor: Aquiles.busy ? Theme.p.accent : Theme.p.text2
-    tooltip: Aquiles.busy ? `AquilesAI: ${Aquiles.status || "trabajando…"}` : "AquilesAI (Super+A)"
+    tooltip: Aquiles.busy ? `AquilesAI: ${Aquiles.status || I18n.tr("trabajando…")}` : "AquilesAI (Super+A)"
     onClicked: Popups.aquilesRequested()
 }

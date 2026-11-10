@@ -111,7 +111,7 @@ Singleton {
         property bool relist: false
         stderr: StdioCollector { id: runErr }
         onExited: code => {
-            root.error = code === 0 ? "" : (runErr.text.trim().split("\n").slice(-2).join("\n") || "wonderland-wallpaper no está instalado")
+            root.error = code === 0 ? "" : (runErr.text.trim().split("\n").slice(-2).join("\n") || I18n.tr("wonderland-wallpaper no está instalado"))
             if (relist) root.refresh()
             if (root.queue.length) root.pump()
             else stateReader.running = true
@@ -140,12 +140,12 @@ Singleton {
             try { data = JSON.parse(importOut.text) } catch (e) {}
             if (!data) {
                 root.importError = importErr.text.trim().split("\n").pop().replace(/^wonderland-wallpaper: /, "")
-                    || "No se pudo importar la imagen"
+                    || I18n.tr("No se pudo importar la imagen")
                 root.importing = false
                 return
             }
             const errors = data.errors || []
-            root.importError = errors.length ? "No se pudo importar " + errors.join("; ") : ""
+            root.importError = errors.length ? I18n.tr("No se pudo importar %1").arg(errors.join("; ")) : ""
             pending = data.imported || []
             if (pending.length) root.refresh()
             else root.importing = false
@@ -158,7 +158,7 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 let data
-                try { data = JSON.parse(text) } catch (e) { root.error = "No se pudo leer la lista de fondos"; return }
+                try { data = JSON.parse(text) } catch (e) { root.error = I18n.tr("No se pudo leer la lista de fondos"); return }
                 root.list = data.wallpapers || []
                 root.state = data.state || { current: null, settings: {} }
                 root.loaded = true
@@ -178,7 +178,7 @@ Singleton {
         }
         onExited: code => {
             if (code === 0) return
-            root.error = "wonderland-wallpaper no está instalado"
+            root.error = I18n.tr("wonderland-wallpaper no está instalado")
             importer.pending = []
             root.importing = false
         }

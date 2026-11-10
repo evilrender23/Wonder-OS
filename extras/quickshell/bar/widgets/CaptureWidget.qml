@@ -17,7 +17,7 @@ Pill {
         return `${m < 10 ? "0" : ""}${m}:${r < 10 ? "0" : ""}${r}`
     }
     active: Capture.open
-    tooltip: Capture.recording ? "Detener la grabación" : "Capturar o grabar la pantalla (Impr Pant)"
+    tooltip: Capture.recording ? I18n.tr("Detener la grabación") : I18n.tr("Capturar o grabar la pantalla (Impr Pant)")
     onClicked: Capture.recording ? Capture.stop() : Capture.toggle()
     onRightClicked: if (!Capture.recording) Capture.show("record")
 }

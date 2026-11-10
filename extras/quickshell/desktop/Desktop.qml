@@ -286,7 +286,7 @@ Scope {
         if (from === "") return
         if (to === "" || to === from) { renaming = ""; renameError = ""; return }
         op.then = res => {
-            if (!res.ok) { root.renameError = res.error || "No se pudo renombrar"; return }
+            if (!res.ok) { root.renameError = res.error || I18n.tr("No se pudo renombrar"); return }
             // The icon keeps its place under its new name.
             const next = Object.assign({}, root.positions)
             if (next[from]) { next[res.name] = next[from]; delete next[from] }

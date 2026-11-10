@@ -8,6 +8,6 @@ Pill {
     property var bar
     widgetId: "spotlight"
     icon: "search"
-    tooltip: "Spotlight (Super+Espacio)"
+    tooltip: I18n.tr("Spotlight (Super+Espacio)")
     onClicked: Popups.spotlightRequested()
 }

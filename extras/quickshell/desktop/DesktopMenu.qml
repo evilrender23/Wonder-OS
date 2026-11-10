@@ -49,42 +49,42 @@ Item {
         spacing: 0
 
         MenuRow {
-            text: menu.single ? "Abrir" : `Abrir ${menu.names.length} elementos`
+            text: menu.single ? I18n.tr("Abrir") : I18n.tr("Abrir %1 elementos").arg(String(menu.names.length))
             shortcut: "↵"
             onTriggered: menu.pick(() => menu.desk.open(menu.names))
         }
         MenuRow {
             visible: menu.single
-            text: "Mostrar en el gestor de archivos"
+            text: I18n.tr("Mostrar en el gestor de archivos")
             onTriggered: menu.pick(() => menu.desk.run(["reveal", menu.names[0]]))
         }
         MenuRow {
             visible: menu.single
-            text: "Renombrar"
+            text: I18n.tr("Renombrar")
             shortcut: "F2"
             onTriggered: menu.pick(() => menu.desk.renaming = menu.names[0])
         }
         MenuRow {
             visible: menu.folder
-            text: "Personalizar carpeta…"
+            text: I18n.tr("Personalizar carpeta…")
             onTriggered: menu.pick(() => menu.desk.run(["customize", menu.names[0]]))
         }
         MenuRow {
-            text: "Mover a la papelera"
-            shortcut: "Supr"
+            text: I18n.tr("Mover a la papelera")
+            shortcut: I18n.tr("Supr")
             onTriggered: menu.pick(() => menu.desk.trash(menu.names))
         }
         MenuSeparator {}
         MenuRow {
-            text: "Nueva carpeta"
+            text: I18n.tr("Nueva carpeta")
             onTriggered: menu.pick(() => menu.desk.newFolder(true))
         }
         MenuRow {
-            text: "Ordenar iconos"
+            text: I18n.tr("Ordenar iconos")
             onTriggered: menu.pick(() => menu.desk.cleanUp())
         }
         MenuRow {
-            text: Settings.data.desktopMagnet ? "Desactivar el imán" : "Activar el imán"
+            text: Settings.data.desktopMagnet ? I18n.tr("Desactivar el imán") : I18n.tr("Activar el imán")
             onTriggered: menu.pick(() => Settings.data.desktopMagnet = !Settings.data.desktopMagnet)
         }
     }

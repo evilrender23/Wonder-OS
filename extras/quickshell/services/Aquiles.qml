@@ -20,10 +20,10 @@ Singleton {
 
     readonly property string home: Quickshell.env("HOME")
     readonly property var engines: [
-        { id: "hermes", name: "Hermes Agent", detail: "gateway local: todos los proveedores y API keys" },
-        { id: "claude", name: "Claude Code", detail: "CLI claude" },
-        { id: "codex", name: "Codex (ChatGPT)", detail: "CLI codex" },
-        { id: "agy", name: "Antigravity", detail: "CLI agy" }
+        { id: "hermes", name: "Hermes Agent", detail: I18n.tr("gateway local: todos los proveedores y API keys") },
+        { id: "claude", name: "Claude Code", detail: I18n.tr("CLI claude") },
+        { id: "codex", name: "Codex (ChatGPT)", detail: I18n.tr("CLI codex") },
+        { id: "agy", name: "Antigravity", detail: I18n.tr("CLI agy") }
     ]
     readonly property string backend: Settings.data.aquilesBackend
     readonly property bool isHermes: backend === "hermes"
@@ -59,7 +59,7 @@ Singleton {
     }
     function clip(s, n) {
         s = typeof s === "string" ? s : JSON.stringify(s)
-        return s && s.length > n ? s.slice(0, n) + "\n… (" + (s.length - n) + " caracteres más)" : (s || "")
+        return s && s.length > n ? s.slice(0, n) + "\n… " + I18n.tr("(%1 caracteres más)").arg(String(s.length - n)) : (s || "")
     }
     function toolStart(pid, name, detail) {
         cur = -1
@@ -195,7 +195,7 @@ Singleton {
         onExited: code => {
             if (code !== 0) {
                 root.link = "error"
-                root.linkError = bootErr.text.trim().split("\n").slice(-3).join("\n") || ("gateway_bootstrap salió con " + code)
+                root.linkError = bootErr.text.trim().split("\n").slice(-3).join("\n") || I18n.tr("gateway_bootstrap salió con %1").arg(String(code))
                 root.dropQueue()
             }
         }
@@ -204,7 +204,7 @@ Singleton {
     function dropQueue() {
         const q = queue
         queue = []
-        for (const c of q) if (c[2]) c[2](null, { message: linkError || "sin conexión con Hermes" })
+        for (const c of q) if (c[2]) c[2](null, { message: linkError || I18n.tr("sin conexión con Hermes") })
     }
 
     WebSocket {
@@ -231,7 +231,7 @@ Singleton {
                 root.link = status === WebSocket.Error ? "error" : "off"
                 const p = root.pending
                 root.pending = ({})
-                for (const id in p) p[id](null, { message: "conexión cerrada" })
+                for (const id in p) p[id](null, { message: I18n.tr("conexión cerrada") })
                 if (root.busy && root.isHermes) { root.busy = false; root.status = "" }
                 active = false
                 if (was === "open" && root.retries < 5) { root.retries++; reconnect.restart() }
@@ -288,7 +288,7 @@ Singleton {
             if (picked.provider) p.provider = picked.provider
         }
         rpc("session.create", p, (r, e) => {
-            if (e) { fail("No se pudo crear la sesión: " + e.message); return }
+            if (e) { fail(I18n.tr("No se pudo crear la sesión: %1").arg(e.message)); return }
             adopt(r)
             then()
         })
@@ -297,7 +297,7 @@ Singleton {
     function openSession(id, quiet) {
         if (busy && !quiet) return
         rpc("session.resume", { session_id: id }, (r, e) => {
-            if (e) { if (!quiet) fail("No se pudo abrir la sesión: " + e.message); return }
+            if (e) { if (!quiet) fail(I18n.tr("No se pudo abrir la sesión: %1").arg(e.message)); return }
             if (subscription && sid && sid !== r.session_id) rpc("session.detach", { session_id: sid, subscription_id: subscription })
             messages.clear()
             cur = -1
@@ -321,7 +321,7 @@ Singleton {
             const call = busy ? "session.steer" : "prompt.submit"
             const params = busy ? { session_id: sid, execution_generation: gen, text: text }
                 : { session_id: sid, text: text, input_id: uuid() }
-            if (!busy) { busy = true; status = "enviando…" }
+            if (!busy) { busy = true; status = I18n.tr("enviando…") }
             rpc(call, params, (r, e) => {
                 if (e) { fail(e.message); if (call === "prompt.submit") { busy = false; status = "" } }
             })
@@ -348,7 +348,7 @@ Singleton {
     }
     function submitRaw(text) {
         busy = true
-        status = "enviando…"
+        status = I18n.tr("enviando…")
         rpc("prompt.submit", { session_id: sid, text: text, input_id: uuid() }, (r, e) => {
             if (e) { fail(e.message); busy = false; status = "" }
         })
@@ -405,9 +405,9 @@ Singleton {
     // models; a CLI lists its aliases plus whatever it reports itself, and
     // takes any other name typed by hand. The choice sticks for new chats.
     property var cliModels: ({
-        claude: [{ id: "haiku", name: "Haiku", detail: "el más rápido y barato" },
-                 { id: "sonnet", name: "Sonnet", detail: "equilibrado" },
-                 { id: "opus", name: "Opus", detail: "el más capaz" },
+        claude: [{ id: "haiku", name: "Haiku", detail: I18n.tr("el más rápido y barato") },
+                 { id: "sonnet", name: "Sonnet", detail: I18n.tr("equilibrado") },
+                 { id: "opus", name: "Opus", detail: I18n.tr("el más capaz") },
                  { id: "fable", name: "Fable", detail: "" }],
         codex: [], agy: []
     })
@@ -429,22 +429,22 @@ Singleton {
             return out
         }
         const group = engineName(backend)
-        if (!q) out.push({ id: "", provider: "", group: group, name: "Por defecto", detail: "el que tenga configurado la CLI", current: model === "" })
+        if (!q) out.push({ id: "", provider: "", group: group, name: I18n.tr("Por defecto"), detail: I18n.tr("el que tenga configurado la CLI"), current: model === "" })
         const known = cliModels[backend] || []
         for (const m of known)
             if (hit(m.id + " " + m.name))
                 out.push({ id: m.id, provider: "", group: group, name: m.name || m.id, detail: m.name && m.name !== m.id ? [m.id, m.detail].filter(Boolean).join(" · ") : (m.detail || ""), current: m.id === model })
         if (model && !known.some(m => m.id === model) && hit(model))
-            out.push({ id: model, provider: "", group: group, name: model, detail: "escrito a mano", current: true })
+            out.push({ id: model, provider: "", group: group, name: model, detail: I18n.tr("escrito a mano"), current: true })
         if (q && !/\s/.test(q) && q !== model && !known.some(m => m.id === q))
-            out.push({ id: q, provider: "", group: group, name: q, detail: "usar este nombre tal cual", current: false })
+            out.push({ id: q, provider: "", group: group, name: q, detail: I18n.tr("usar este nombre tal cual"), current: false })
         return out
     }
 
     function recentModels() {
         return (models.recent || []).filter(r => r.backend === backend && !(r.id === model && (!isHermes || r.provider === provider))
             && (!isHermes || providers.some(p => p.slug === r.provider && p.authenticated)))
-            .map(r => ({ id: r.id, provider: r.provider || "", group: "Recientes", name: r.id || "Por defecto",
+            .map(r => ({ id: r.id, provider: r.provider || "", group: I18n.tr("Recientes"), name: r.id || I18n.tr("Por defecto"),
                 detail: isHermes ? providerName(r.provider) : "", current: r.id === model && (!isHermes || r.provider === provider) }))
     }
     function providerName(slug) {
@@ -460,14 +460,14 @@ Singleton {
         if (model) next.recent = [{ backend: b, id: model, provider: provider || "" }].concat((models.recent || [])
             .filter(r => !(r.backend === b && r.id === model && (r.provider || "") === (provider || "")))).slice(0, 24)
         Settings.data.aquilesModels = next
-        note(isHermes ? `Modelo: ${model} · ${providerName(provider)}`
-            : model ? `Modelo: ${model} · ${engineName(b)}` : `Modelo: el que ${engineName(b)} tenga por defecto`)
+        note(isHermes ? I18n.tr("Modelo: %1").arg(model) + ` · ${providerName(provider)}`
+            : model ? I18n.tr("Modelo: %1").arg(model) + ` · ${engineName(b)}` : I18n.tr("Modelo: el que %1 tenga por defecto").arg(engineName(b)))
     }
 
     function setModel(model, provider) {
         if (!isHermes || !sid) { keepModel(model, provider); return }   // no chat yet: it applies when one starts
         mutate(sid, "model", { model: model, provider: provider }, (r, e) => {
-            if (e) { fail("No se pudo cambiar el modelo: " + e.message); return }
+            if (e) { fail(I18n.tr("No se pudo cambiar el modelo: %1").arg(e.message)); return }
             info = Object.assign({}, info, { model: model, provider: provider })
             keepModel(model, provider)
         })
@@ -480,7 +480,7 @@ Singleton {
     }
     function renameSession(id, name) {
         mutate(id, "rename", { title: name }, (r, e) => {
-            if (e) fail("No se pudo renombrar: " + e.message)
+            if (e) fail(I18n.tr("No se pudo renombrar: %1").arg(e.message))
             else if (id === sid) title = name
             refreshSessions()
         })
@@ -488,7 +488,7 @@ Singleton {
     function deleteSession(id) {
         const own = id === sid
         mutate(id, "delete", {}, (r, e) => {
-            if (e) { fail("No se pudo borrar: " + e.message); return }
+            if (e) { fail(I18n.tr("No se pudo borrar: %1").arg(e.message)); return }
             if (own) { sid = ""; subscription = ""; newChat() }
             refreshSessions()
         })
@@ -526,8 +526,8 @@ Singleton {
         cur = -1
         if (method === "approval") {
             asks[id] = { method: method }
-            status = "esperando tu permiso"
-            card("approval", p.description || "El agente pide permiso", { detail: p.command || "",
+            status = I18n.tr("esperando tu permiso")
+            card("approval", p.description || I18n.tr("El agente pide permiso"), { detail: p.command || "",
                 choices: JSON.stringify(p.choices && p.choices.length ? p.choices : ["once", "session", "always", "deny"]) })
         } else if (method === "clarify") {
             const qs = (p.questions || []).filter(q => q && q.qid && q.question)
@@ -535,15 +535,15 @@ Singleton {
             const answers = {}
             for (const q of qs) if (p.answers && typeof p.answers[q.qid] === "string") answers[q.qid] = p.answers[q.qid]
             asks[id] = { method: method, qids: qs.map(q => q.qid), answers: answers }
-            status = "esperando tu respuesta"
+            status = I18n.tr("esperando tu respuesta")
             for (const q of qs) {
                 const i = card("clarify", q.question, { name: q.qid, choices: JSON.stringify(q.choices || []) })
                 if (answers[q.qid] !== undefined) { messages.setProperty(i, "state", "done"); messages.setProperty(i, "detail", "→ " + answers[q.qid]) }
             }
         } else if (method === "sudo" || method === "secret") {
             asks[id] = { method: method }
-            status = "esperando una contraseña"
-            card("secret", method === "sudo" ? "Contraseña de sudo" : (p.prompt || p.env_var || "Valor secreto"),
+            status = I18n.tr("esperando una contraseña")
+            card("secret", method === "sudo" ? I18n.tr("Contraseña de sudo") : (p.prompt || p.env_var || I18n.tr("Valor secreto")),
                 { detail: method === "sudo" ? (p.command || "") : (p.env_var || "") })
         } else reply(id, null, { code: -32601, message: "AquilesAI cannot answer " + method })
     }
@@ -560,16 +560,16 @@ Singleton {
             messages.setProperty(index, "result", choice)
             reply(id, { choice: choice || "deny" })
         } else if (m.kind === "secret") {
-            messages.setProperty(index, "result", choice ? "enviado" : "omitido")
+            messages.setProperty(index, "result", choice ? I18n.tr("enviado") : I18n.tr("omitido"))
             reply(id, { value: choice })
         } else {
-            messages.setProperty(index, "detail", "→ " + (choice || "omitido"))
+            messages.setProperty(index, "detail", "→ " + (choice || I18n.tr("omitido")))
             ask.answers[m.name] = choice
             if (ask.qids.some(q => ask.answers[q] === undefined)) return
             reply(id, { answers: ask.answers })
         }
         delete asks[id]
-        if (busy) status = "pensando…"
+        if (busy) status = I18n.tr("pensando…")
     }
 
     function dismissAsk(id) {
@@ -580,7 +580,7 @@ Singleton {
     function showUsage(u) {
         if (!u || !u.total) return
         const k = n => n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n || 0)
-        usageText = `${k(u.total)} tokens` + (u.context_percent !== undefined ? ` · contexto ${u.context_percent}%` : "")
+        usageText = `${k(u.total)} tokens` + (u.context_percent !== undefined ? " · " + I18n.tr("contexto %1%").arg(String(u.context_percent)) : "")
     }
 
     function onEvent(p) {
@@ -590,11 +590,11 @@ Singleton {
         const d = p.payload || {}
         if (p.execution_generation !== undefined && p.execution_generation !== null) gen = p.execution_generation
         switch (t) {
-        case "message.start": busy = true; status = "pensando…"; cur = -1; break
+        case "message.start": busy = true; status = I18n.tr("pensando…"); cur = -1; break
         case "message.delta": status = ""; appendText(d.text); break
-        case "reasoning.delta": status = "razonando…"; appendReasoning(d.text); break
+        case "reasoning.delta": status = I18n.tr("razonando…"); appendReasoning(d.text); break
         case "thinking.delta": if (d.text) status = d.text; break
-        case "tool.generating": status = `preparando ${d.name || "herramienta"}…`; break
+        case "tool.generating": status = I18n.tr("preparando %1…").arg(d.name || I18n.tr("herramienta")); break
         case "tool.start": status = `${d.name || "tool"}…`; toolStart(d.tool_id, d.name, d.context || (d.args ? JSON.stringify(d.args) : "")); break
         case "tool.complete": toolEnd(d.tool_id, !d.is_error, d.result, d.name, d.context); break
         case "request.cancel": dismissAsk(d.id); break
@@ -611,14 +611,14 @@ Singleton {
                 if (cur < 0) cur = row("assistant", "")
                 messages.setProperty(cur, "text", d.text)
             }
-            if (d.status && d.status !== "complete") note(`Turno ${d.outcome || d.status}`)
+            if (d.status && d.status !== "complete") note(I18n.tr("Turno %1").arg(d.outcome || d.status))
             showUsage(d.usage)
             busy = false; status = ""; cur = -1
             settlePrompts("")
             asks = ({})
             turnFinished()
             break
-        case "error": fail(d.message || d.error || "error del gateway"); break
+        case "error": fail(d.message || d.error || I18n.tr("error del gateway")); break
         case "session.replay_gap": openSession(sid, true); break
         }
     }
@@ -688,9 +688,9 @@ Singleton {
     }
 
     function cliSend(text) {
-        if (busy) { note("Espera a que termine el turno (o deténlo) para enviar otro mensaje."); return }
+        if (busy) { note(I18n.tr("Espera a que termine el turno (o deténlo) para enviar otro mensaje.")); return }
         if (!bins[backend]) {
-            fail(`${engineName(backend)}: no encuentro el ejecutable «${backend}» en el PATH. Instálalo e inicia sesión en una terminal, o elige otro motor.`)
+            fail(I18n.tr("%1: no encuentro el ejecutable «%2» en el PATH. Instálalo e inicia sesión en una terminal, o elige otro motor.").arg(engineName(backend)).arg(backend))
             return
         }
         row("user", text)
@@ -700,7 +700,7 @@ Singleton {
         stopped = false
         errTail = ""
         agyStep = -1
-        status = "pensando…"
+        status = I18n.tr("pensando…")
         // Quickshell hands the child an open stdin pipe that never reaches EOF, and
         // `codex exec` waits on it for extra prompt text before starting the turn.
         proc.command = ["sh", "-c", 'exec "$0" "$@" </dev/null'].concat(cliCommand(text))
@@ -722,8 +722,8 @@ Singleton {
         }
         stderr: SplitParser { onRead: line => root.errTail = (root.errTail + "\n" + line).slice(-1200) }
         onExited: code => {
-            if (root.stopped) root.note("Detenido.")
-            else if (code !== 0) root.fail(`${root.engineName(root.backend)} salió con código ${code}` + (root.errTail.trim() ? "\n" + root.errTail.trim() : ""))
+            if (root.stopped) root.note(I18n.tr("Detenido."))
+            else if (code !== 0) root.fail(I18n.tr("%1 salió con código %2").arg(root.engineName(root.backend)).arg(String(code)) + (root.errTail.trim() ? "\n" + root.errTail.trim() : ""))
             for (let i = 0; i < root.messages.count; i++)
                 if (root.messages.get(i).kind === "tool" && root.messages.get(i).state === "running")
                     root.messages.setProperty(i, "state", "error")
@@ -752,9 +752,9 @@ Singleton {
             const e = j.event || {}, d = e.delta || {}
             if (e.type === "content_block_delta") {
                 if (d.type === "text_delta") { status = ""; appendText(d.text) }
-                else if (d.type === "thinking_delta") { status = "razonando…"; appendReasoning(d.thinking) }
+                else if (d.type === "thinking_delta") { status = I18n.tr("razonando…"); appendReasoning(d.thinking) }
             } else if (e.type === "content_block_start" && e.content_block && e.content_block.type === "tool_use")
-                status = `preparando ${e.content_block.name}…`
+                status = I18n.tr("preparando %1…").arg(e.content_block.name)
             return
         }
         if (j.type === "assistant" && j.message) {
@@ -765,7 +765,7 @@ Singleton {
         if (j.type === "user" && j.message && Array.isArray(j.message.content)) {
             for (const b of j.message.content)
                 if (b.type === "tool_result") toolEnd(b.tool_use_id, !b.is_error, flat(b.content))
-            status = "pensando…"
+            status = I18n.tr("pensando…")
             return
         }
         if (j.type === "result") {
@@ -782,7 +782,7 @@ Singleton {
         const it = j.item || {}
         switch (j.type) {
         case "thread.started": nativeId = j.thread_id || nativeId; break
-        case "turn.started": status = "pensando…"; break
+        case "turn.started": status = I18n.tr("pensando…"); break
         case "item.started":
             if (it.type === "command_execution") { status = "shell…"; toolStart(it.id, "shell", it.command) }
             else if (it.type === "mcp_tool_call") toolStart(it.id, `${it.server || "mcp"}.${it.tool || "tool"}`, brief(it.arguments))
@@ -804,8 +804,8 @@ Singleton {
             usageText = `${(u.input_tokens || 0) + (u.cached_input_tokens || 0)} in · ${u.output_tokens || 0} out`
             break
         }
-        case "turn.failed": fail((j.error && j.error.message) || "el turno falló"); break
-        case "error": fail(j.message || "error de codex"); break
+        case "turn.failed": fail((j.error && j.error.message) || I18n.tr("el turno falló")); break
+        case "error": fail(j.message || I18n.tr("error de codex")); break
         }
     }
 

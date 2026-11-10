@@ -111,7 +111,7 @@ PopupWindow {
                         elide: Text.ElideRight
                     }
                 }
-                IconButton { icon: "x"; size: 24; tooltip: "Cerrar"; onClicked: root.close() }
+                IconButton { icon: "x"; size: 24; tooltip: I18n.tr("Cerrar"); onClicked: root.close() }
             }
 
             Flickable {
