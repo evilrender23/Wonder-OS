@@ -71,6 +71,25 @@ impl SizeConstraints {
         }
     }
 
+    /// Tighten the ceiling to `cap` on each axis: the smaller of the client's own
+    /// maximum and the cap, or the cap alone where the client declared none. A
+    /// declared minimum above the cap wins — a client is never asked for a size
+    /// it has said it cannot draw.
+    pub fn capped_to(mut self, cap: Size<i32, Logical>) -> Self {
+        let axis = |min: i32, max: i32, cap: i32| -> i32 {
+            if cap <= 0 {
+                return max;
+            }
+            let capped = if max > 0 { max.min(cap) } else { cap };
+            capped.max(min)
+        };
+        self.max = Size::from((
+            axis(self.min.w, self.max.w, cap.w),
+            axis(self.min.h, self.max.h, cap.h),
+        ));
+        self
+    }
+
     /// Clamp a requested size to `[min, max]` along each axis. Zero values
     /// on either bound are ignored (unconstrained). Also enforces a 1×1
     /// floor so clients never see nonsense geometry from a fast drag.
@@ -834,6 +853,35 @@ impl TouchGrab<DriftWm> for ResizeGrab {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn capped(min: (i32, i32), max: (i32, i32), cap: (i32, i32)) -> (i32, i32) {
+        let c = SizeConstraints {
+            min: Size::from(min),
+            max: Size::from(max),
+        }
+        .capped_to(Size::from(cap));
+        (c.max.w, c.max.h)
+    }
+
+    #[test]
+    fn a_cap_bounds_an_axis_with_no_declared_maximum() {
+        assert_eq!(capped((0, 0), (0, 0), (1728, 972)), (1728, 972));
+    }
+
+    #[test]
+    fn a_cap_keeps_a_tighter_declared_maximum_and_tightens_a_looser_one() {
+        assert_eq!(capped((0, 0), (800, 2000), (1728, 972)), (800, 972));
+    }
+
+    #[test]
+    fn a_declared_minimum_above_the_cap_wins() {
+        assert_eq!(capped((1800, 100), (0, 0), (1728, 972)), (1800, 972));
+    }
+
+    #[test]
+    fn a_degenerate_cap_leaves_the_axis_as_declared() {
+        assert_eq!(capped((0, 0), (0, 500), (0, 0)), (0, 500));
+    }
 
     // Initial 200×100 → locked ratio 2.0 (width / height).
     fn constrained(target: (i32, i32), edges: xdg_toplevel::ResizeEdge) -> (i32, i32) {

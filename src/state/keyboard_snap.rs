@@ -195,7 +195,13 @@ impl DriftWm {
         } else {
             Direction::Down
         };
-        self.step_resize(&element, start, &axis, (target - edge).round() as i32);
+        self.step_resize(
+            &element,
+            start,
+            &axis,
+            (target - edge).round() as i32,
+            false,
+        );
     }
 
     /// The query for `frame`'s stops along one axis, with the alignment band a

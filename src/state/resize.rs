@@ -123,7 +123,89 @@ pub(crate) fn resize_constraints(element: &StageWindow, chrome: Chrome) -> SizeC
     }
 }
 
+/// How much of its output a window's visual frame may span, per axis, as a
+/// fraction `NUM / DEN`. A window opens no larger, and a drag or a
+/// `grow-window` step stops here. The requests that name their own target are
+/// the deliberate ways past it: fit-window, fullscreen, fill, resize-to-snap,
+/// a rule `size` and `driftwm msg resize`.
+pub(crate) const MAX_WINDOW_SCREEN_NUM: i32 = 9;
+pub(crate) const MAX_WINDOW_SCREEN_DEN: i32 = 10;
+
+/// The largest visual frame a window may have on an output of `output_size`.
+pub(crate) fn max_window_frame(output_size: Size<i32, Logical>) -> Size<i32, Logical> {
+    let part = |v: i32| -> i32 {
+        (i64::from(v) * i64::from(MAX_WINDOW_SCREEN_NUM) / i64::from(MAX_WINDOW_SCREEN_DEN)) as i32
+    };
+    Size::from((part(output_size.w), part(output_size.h)))
+}
+
 impl DriftWm {
+    /// The largest content size `chrome` leaves a window on `output` under the
+    /// screen-fraction cap ([`max_window_frame`]).
+    pub(crate) fn max_window_content_on(
+        &self,
+        output: &smithay::output::Output,
+        chrome: Chrome,
+    ) -> Size<i32, Logical> {
+        chrome.content_size(max_window_frame(super::output_logical_size(output)))
+    }
+
+    /// The content size to ask of a window whose first sized commit exceeds the
+    /// screen-fraction cap, or `None` when it fits or the cap does not apply:
+    /// a window on its way to fullscreen or fit, one a rule sizes, pins or
+    /// makes a widget, and one waiting on a deferred adopt all keep the size
+    /// they came with.
+    pub(crate) fn oversized_open_content(
+        &self,
+        window: &Window,
+        root: &WlSurface,
+        applied: Option<&driftwm::config::AppliedWindowRule>,
+        effective: &driftwm::config::DecorationMode,
+        hidden_for_adopt: bool,
+    ) -> Option<Size<i32, Logical>> {
+        let size = window.geometry().size;
+        if size.w <= 0
+            || size.h <= 0
+            || hidden_for_adopt
+            || self.stage.is_fullscreen(window)
+            || self.stage.is_fit(window)
+            || self.pending_fit.contains(root)
+            || self.pending_fullscreen.contains_key(root)
+            || applied.is_some_and(|a| {
+                a.size.is_some() || a.pinned_to_screen || a.widget || a.fullscreen == Some(true)
+            })
+        {
+            return None;
+        }
+        let output = self.active_output()?;
+        let cap = self.max_window_content_on(&output, self.mapping_chrome(root, effective));
+        // Only the cap is enforced here. A size past the client's own declared
+        // maximum is the client's business — it may tighten its limits after
+        // mapping — but its declared minimum still outranks the cap.
+        let min = SizeConstraints::for_window(window).min;
+        let target = Size::from((
+            size.w.min(cap.w.max(min.w).max(1)),
+            size.h.min(cap.h.max(min.h).max(1)),
+        ));
+        (target != size).then_some(target)
+    }
+
+    /// What an interactive resize — a drag, or a `grow-window` step — clamps a
+    /// request to: [`resize_constraints`] under the screen-fraction cap of the
+    /// output the element is on. The cap is stated against the visible frame,
+    /// so the element's chrome deflates it like the stand-in's floor.
+    pub(crate) fn capped_resize_constraints(&self, element: &StageWindow) -> SizeConstraints {
+        let chrome = self.element_chrome(element);
+        let declared = resize_constraints(element, chrome);
+        match self
+            .output_for_window(element)
+            .or_else(|| self.active_output())
+        {
+            Some(output) => declared.capped_to(self.max_window_content_on(&output, chrome)),
+            None => declared,
+        }
+    }
+
     /// The size an *absolute* resize measures its delta and its anchor against:
     /// the request still outstanding on this element, else the size its
     /// placement assumes.
@@ -362,7 +444,7 @@ impl DriftWm {
             return;
         };
         let step = self.canvas_step(&element, step);
-        self.step_resize(&element, start, dir, step);
+        self.step_resize(&element, start, dir, step, true);
     }
 
     /// The focused canvas element and the rect a step on it starts from.
@@ -389,6 +471,7 @@ impl DriftWm {
         start: StepStart,
         dir: &Direction,
         step: i32,
+        capped: bool,
     ) {
         let StepStart { loc, size: current } = start;
 
@@ -398,8 +481,15 @@ impl DriftWm {
         let (ux, uy) = dir.to_unit_vec();
         let dw = (ux.abs() * step as f64).round() as i32;
         let dh = (uy.abs() * step as f64).round() as i32;
-        let clamped = resize_constraints(element, self.element_chrome(element))
-            .clamp(current.w.saturating_add(dw), current.h.saturating_add(dh));
+        // Only growth meets the cap: a shrink of a window already past it (one
+        // that kept its size at open, or grew by a route the cap exempts) walks
+        // down from where it is instead of dropping to the cap in one step.
+        let constraints = if capped && step > 0 {
+            self.capped_resize_constraints(element)
+        } else {
+            resize_constraints(element, self.element_chrome(element))
+        };
+        let clamped = constraints.clamp(current.w.saturating_add(dw), current.h.saturating_add(dh));
         // An axis the step leaves alone keeps its size, clamp included: a client
         // is free to declare a `max_size` its current size already violates
         // (after a fit, say), and `grow-window up` must not silently narrow the

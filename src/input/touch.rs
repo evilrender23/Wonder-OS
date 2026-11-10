@@ -445,7 +445,7 @@ impl DriftWm {
                     initial_window_location,
                     initial_window_size,
                     output,
-                    crate::grabs::SizeConstraints::for_suspended(self.suspended_chrome()),
+                    self.capped_resize_constraints(element),
                     slots,
                     cluster_resize,
                     None,
@@ -475,7 +475,7 @@ impl DriftWm {
         } else {
             crate::state::ClusterResizeSnapshot::empty()
         };
-        let constraints = crate::grabs::SizeConstraints::for_window(&window);
+        let constraints = self.capped_resize_constraints(&StageWindow::Client(window.clone()));
         let locked_ratio = crate::grabs::locked_ratio_for(&window, initial_window_size);
         Some(ResizeGrab::new_touch(
             touch_start,

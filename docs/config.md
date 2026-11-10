@@ -995,7 +995,7 @@ Actions:
 - `detach-tab` — take the focused tab out of its frame into a window of its own; it won't be tabbed again
 - `nudge-window <dir>` — move the focused window by nudge_step screen px
 - `move-to-snap <dir>` — move the focused window to the next snap stop that way, else by nudge_step screen px; never onto another window
-- `grow-window <dir>` — push the focused window's `<dir>` edge out by resize_step screen px
+- `grow-window <dir>` — push the focused window's `<dir>` edge out by resize_step screen px (stops at 90% of the screen, like a drag-resize; fit and fullscreen go past it)
 - `shrink-window <dir>` — pull the focused window's `<dir>` edge in by resize_step screen px
 - `resize-to-snap <dir>` — right/down grow the right/bottom edge to the next snap stop, never over a window; left/up pull it back to the previous stop, else by resize_step screen px
 - `pan-viewport <dir>` — pan by pan_step screen px

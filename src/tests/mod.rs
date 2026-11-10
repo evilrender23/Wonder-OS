@@ -100,6 +100,7 @@ mod trackpad_send_events;
 mod translucent_fullscreen;
 mod virtual_keyboard;
 mod window_animation;
+mod window_cap;
 mod window_mode;
 mod window_opening;
 mod window_pid;
@@ -205,7 +206,31 @@ fn map_window(
     window.attach_new_buffer();
     window.ack_last_and_commit();
     f.double_roundtrip(id);
+    keep_size_past_the_open_cap(f, id, &surface);
     surface
+}
+
+/// The size the compositor last put in `window`'s toplevel state — what its
+/// next configure would carry.
+fn configured_size(window: &Window) -> smithay::utils::Size<i32, Logical> {
+    crate::state::configured_window_size(window)
+}
+
+/// The client half of a window that opens past the screen-fraction cap and
+/// keeps its size: the compositor answers the first sized commit with a capped
+/// configure and holds placement for the reply, so ack it and commit unchanged.
+/// A window under the cap owes nothing and this is a no-op, which keeps the
+/// configure and commit counts of every such scenario as they were.
+fn keep_size_past_the_open_cap(
+    f: &mut Fixture,
+    id: client::ClientId,
+    surface: &wayland_client::protocol::wl_surface::WlSurface,
+) {
+    if f.state().pending_center.is_empty() {
+        return;
+    }
+    f.client(id).window(surface).ack_last_and_commit();
+    f.double_roundtrip(id);
 }
 
 /// [`map_window`] with a real `wl_shm` texture instead of the 1x1 single-pixel
@@ -231,6 +256,7 @@ fn map_window_shm(
     window.attach_shm_buffer(texels, pixels);
     window.ack_last_and_commit();
     f.double_roundtrip(id);
+    keep_size_past_the_open_cap(f, id, &surface);
     surface
 }
 
@@ -258,6 +284,7 @@ fn map_window_with_limits(
     window.attach_new_buffer();
     window.ack_last_and_commit();
     f.double_roundtrip(id);
+    keep_size_past_the_open_cap(f, id, &surface);
     surface
 }
 

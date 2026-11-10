@@ -52,6 +52,7 @@ fn map_settled(
     window.attach_new_buffer();
     window.ack_last_and_commit();
     f.double_roundtrip(id);
+    super::keep_size_past_the_open_cap(f, id, &surface);
     f.client(id).window(&surface).format_recent_configures();
     surface
 }

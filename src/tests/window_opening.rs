@@ -24,7 +24,7 @@ fn simple() {
     let window = f.client(id).window(&surface);
     assert_snapshot!(
         window.format_recent_configures(),
-        @"size: 0 × 0, bounds: 0 × 0, states: [TiledLeft, TiledRight, TiledTop, TiledBottom]"
+        @"size: 0 × 0, bounds: 1728 × 972, states: [TiledLeft, TiledRight, TiledTop, TiledBottom]"
     );
 
     window.attach_new_buffer();
@@ -34,7 +34,7 @@ fn simple() {
     let window = f.client(id).window(&surface);
     assert_snapshot!(
         window.format_recent_configures(),
-        @"size: 0 × 0, bounds: 0 × 0, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated]"
+        @"size: 0 × 0, bounds: 1728 × 972, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated]"
     );
 }
 
@@ -98,8 +98,8 @@ position = [100, 200]
     assert_snapshot!(
         window.format_recent_configures(),
         @r"
-        size: 640 × 480, bounds: 0 × 0, states: []
-        size: 640 × 480, bounds: 0 × 0, states: [TiledLeft, TiledRight, TiledTop, TiledBottom]
+        size: 640 × 480, bounds: 1728 × 972, states: []
+        size: 640 × 480, bounds: 1728 × 972, states: [TiledLeft, TiledRight, TiledTop, TiledBottom]
         "
     );
 
@@ -113,7 +113,7 @@ position = [100, 200]
     // arrives on the placement configure once the buffer commit maps the window.
     assert_snapshot!(
         f.client(id).window(&surface).format_recent_configures(),
-        @"size: 640 × 480, bounds: 0 × 0, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated]"
+        @"size: 640 × 480, bounds: 1728 × 972, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated]"
     );
 
     let mapped = f.state().stage.windows().next().cloned().unwrap();
@@ -277,7 +277,7 @@ fn fullscreen_configure_sequence() {
     let window = f.client(id).window(&surface);
     assert_snapshot!(
         window.format_recent_configures(),
-        @"size: 1920 × 1080, bounds: 0 × 0, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated, Fullscreen]"
+        @"size: 1920 × 1080, bounds: 1728 × 972, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated, Fullscreen]"
     );
     window.ack_last_and_commit();
     f.double_roundtrip(id);
@@ -289,7 +289,7 @@ fn fullscreen_configure_sequence() {
     let window = f.client(id).window(&surface);
     assert_snapshot!(
         window.format_recent_configures(),
-        @"size: 800 × 600, bounds: 0 × 0, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated]"
+        @"size: 800 × 600, bounds: 1728 × 972, states: [TiledLeft, TiledRight, TiledTop, TiledBottom, Activated]"
     );
 }
 
@@ -450,6 +450,9 @@ fn a_server_decorated_window_wider_than_any_buffer_opens() {
     window.attach_new_buffer();
     window.ack_last_and_commit();
     f.double_roundtrip(id);
+    // Far past the screen-fraction cap: the client is asked for less, and
+    // answers at the size it came with.
+    super::keep_size_past_the_open_cap(&mut f, id, &surface);
 
     let window = window_by_app_id(&mut f, "huge").unwrap();
     assert_eq!(window.geometry().size.w, 30_000_000);

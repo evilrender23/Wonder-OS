@@ -65,6 +65,21 @@ impl XdgShellHandler for DriftWm {
         self.auto_anchor_snapshot
             .insert(wl_surface.clone(), prev_focus);
 
+        // Tell the client how large a window may open (xdg_toplevel
+        // configure_bounds), so a toolkit that honors it picks a size under the
+        // screen-fraction cap on its own instead of being asked down after its
+        // first frame. Written into the pending state here because whichever
+        // path sends the initial configure carries it. The rule that could put
+        // a title bar on it is not resolved yet (no app_id), so the default
+        // decoration mode stands in for the chrome.
+        if let Some(output) = self.active_output()
+            && let Some(toplevel) = window.toplevel()
+        {
+            let chrome = self.mapping_chrome(&wl_surface, &self.config.decorations.default_mode);
+            let bounds = self.max_window_content_on(&output, chrome);
+            toplevel.with_pending_state(|state| state.bounds = Some(bounds));
+        }
+
         // Initial configure is deferred to ensure_initial_configure in
         // compositor.rs first-commit handler so rule-resolved state (size,
         // decoration_mode, tiled) can be batched into a single configure.
@@ -618,7 +633,7 @@ impl XdgShellHandler for DriftWm {
             } else {
                 crate::state::ClusterResizeSnapshot::empty()
             };
-        let constraints = crate::grabs::SizeConstraints::for_window(&window);
+        let constraints = self.capped_resize_constraints(&StageWindow::Client(window.clone()));
         let locked_ratio = crate::grabs::locked_ratio_for(&window, initial_window_size);
         let grab_output = pinned_output.unwrap_or(output);
         let (start_screen, start_zoom) =

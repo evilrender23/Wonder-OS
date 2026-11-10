@@ -612,6 +612,32 @@ impl CompositorHandler for DriftWm {
                         } else {
                             self.pending_size.remove(&root);
                         }
+                    } else if let Some(content) = self.oversized_open_content(
+                        &window,
+                        &root,
+                        applied.as_ref(),
+                        &effective,
+                        hidden_for_adopt,
+                    ) && self.pending_size.insert(root.clone())
+                    {
+                        // A window that opens larger than the screen-fraction
+                        // cap is asked for the capped size the same way a rule
+                        // `size` is: configure now, place on the follow-up
+                        // commit. One-shot through the `pending_size` gate, so a
+                        // client that keeps its size is placed as it is.
+                        if let Some(toplevel) = window.toplevel() {
+                            toplevel.with_pending_state(|state| {
+                                state.size = Some(content);
+                            });
+                            toplevel.send_configure();
+                            // The restore size was just captured from the
+                            // oversized commit; an unfit must not bring it back.
+                            self.stage.set_restore_size(&window, content);
+                            self.pending_center.insert(root.clone());
+                            force_pending = true;
+                        } else {
+                            self.pending_size.remove(&root);
+                        }
                     } else if !hidden_for_adopt
                         && applied.as_ref().is_some_and(|a| a.pinned_to_screen)
                         && has_size
@@ -838,6 +864,23 @@ impl CompositorHandler for DriftWm {
                     }
 
                     if has_size && !force_pending {
+                        // The open cap is one request, not a standing one: a
+                        // client that answered it at its own size has spoken.
+                        // Leaving the capped size in the pending state would
+                        // re-ask it on every later configure and have every
+                        // placement measured against a size nobody draws.
+                        if self.pending_size.contains(&root)
+                            && applied.as_ref().is_none_or(|a| a.size.is_none())
+                            && let Some(toplevel) = window.toplevel()
+                        {
+                            let committed = window.geometry().size;
+                            toplevel.with_pending_state(|state| {
+                                if state.size.is_some_and(|s| s != committed) {
+                                    state.size = Some(committed);
+                                }
+                            });
+                            self.stage.set_restore_size(&window, committed);
+                        }
                         // Create the title bar widget BEFORE navigate_to_window
                         // so window_ssd_bar() returns the right height;
                         // otherwise camera target drifts by bar/2.

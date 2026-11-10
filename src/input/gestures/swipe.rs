@@ -573,7 +573,7 @@ impl DriftWm {
                 self.begin_client_resize(window, &wl_surface, edges, initial_size, None);
                 (
                     ClusterMember::Client(window.clone()),
-                    crate::grabs::SizeConstraints::for_window(window),
+                    self.capped_resize_constraints(&element),
                     crate::grabs::locked_ratio_for(window, initial_size),
                 )
             }
@@ -583,7 +583,7 @@ impl DriftWm {
                 self.arm_interactive_move(&s.id);
                 (
                     ClusterMember::Suspended(s.id),
-                    crate::grabs::SizeConstraints::for_suspended(self.suspended_chrome()),
+                    self.capped_resize_constraints(&element),
                     None,
                 )
             }
