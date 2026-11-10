@@ -342,6 +342,18 @@
 # friction = 3.0                 # 0.5–20: damping; lower wobbles for longer
 # exclude = []                   # app_ids that stay rigid, e.g. ["mpv"]
 
+# [effects.tilt]
+# # 3D windows: a dragged window leans into the motion in real perspective,
+# # like a card held by the point under the pointer. Its leading edge swings
+# # away, the far side falls into shade and a glint crosses it; when the hand
+# # stops or lets go it swings back flat with a small overshoot. Fullscreen
+# # and pinned windows stay flat, a frosted window's blur pauses while it
+# # leans, and it combines with [effects.wobbly]. Off unless switched on.
+# enabled = false
+# strength = 1.0                 # 0.2–2: how far it leans; 1 is about 20° at full speed
+# shine = true                   # shade and glint on the leaning window
+# exclude = []                   # app_ids that stay flat, e.g. ["mpv"]
+
 # [effects.magic_lamp]
 # # The genie: a minimized window is squeezed down a funnel into the dock and
 # # comes back out of it when restored. Disabled, minimize flies the window

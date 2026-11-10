@@ -26,5 +26,6 @@ pub mod stage;
 pub mod sync;
 pub mod text;
 pub mod text_cursor;
+pub mod tilt;
 pub mod window_ext;
 pub mod wobbly;

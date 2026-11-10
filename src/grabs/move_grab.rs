@@ -451,9 +451,11 @@ impl PointerGrab<DriftWm> for MoveGrab {
         data.disarm_interactive_move(&self.target);
         if let Some(element) = self.target.resolve(&data.stage) {
             data.release_wobble(&element);
+            data.release_tilt(&element);
         }
         for (member, _) in self.resolved_members(data) {
             data.release_wobble(&member);
+            data.release_tilt(&member);
         }
         // A settled position (including a cross-output teleport) is durable —
         // persist it on the session-store debounce, live or stand-in alike.
@@ -579,10 +581,12 @@ impl MoveGrab {
             let member_pos = new_loc + offset;
             let was = data.stage.position_of(&member);
             data.wobble_dragged(&member, was, member_pos, location);
+            data.tilt_dragged(&member, was, member_pos, location);
             crate::grabs::drag_map_window(data, member, member_pos);
         }
         let was = data.stage.position_of(element);
         data.wobble_dragged(element, was, new_loc, location);
+        data.tilt_dragged(element, was, new_loc, location);
         crate::grabs::drag_map_window(data, element.clone(), new_loc);
 
         // Sub-pixel motion that resolves to the same integer canvas position
@@ -775,9 +779,11 @@ impl TouchGrab<DriftWm> for MoveGrab {
         data.disarm_interactive_move(&self.target);
         if let Some(element) = self.target.resolve(&data.stage) {
             data.release_wobble(&element);
+            data.release_tilt(&element);
         }
         for (member, _) in self.resolved_members(data) {
             data.release_wobble(&member);
+            data.release_tilt(&member);
         }
         // A settled touch move is durable exactly like a pointer one.
         data.session_store_mark_dirty();

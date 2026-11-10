@@ -1116,6 +1116,8 @@ pub struct EffectsConfig {
     pub cursor_blur: CursorBlurConfig,
     /// Jelly windows while dragging: `[effects.wobbly]`.
     pub wobbly: WobblyConfig,
+    /// 3D windows while dragging: `[effects.tilt]`.
+    pub tilt: TiltConfig,
     /// Genie animation into and out of the dock: `[effects.magic_lamp]`.
     pub magic_lamp: MagicLampConfig,
     /// How a closed window leaves the screen: `[effects.close_animation]`.
@@ -1134,6 +1136,7 @@ impl Default for EffectsConfig {
             text_cursor: TextCursorConfig::default(),
             cursor_blur: CursorBlurConfig::default(),
             wobbly: WobblyConfig::default(),
+            tilt: TiltConfig::default(),
             magic_lamp: MagicLampConfig::default(),
             close_animation: CloseAnimationConfig::default(),
         }
@@ -1190,6 +1193,36 @@ impl Default for WobblyConfig {
 }
 
 impl WobblyConfig {
+    pub fn excludes(&self, app_id: &str) -> bool {
+        self.exclude.iter().any(|e| e.eq_ignore_ascii_case(app_id))
+    }
+}
+
+/// 3D windows: a dragged window leans into the motion in perspective, like a
+/// card held by one point, and swings back flat when it stops.
+#[derive(Clone, Debug, PartialEq)]
+pub struct TiltConfig {
+    pub enabled: bool,
+    /// How far the window leans: 1 is about 20° at full speed.
+    pub strength: f64,
+    /// Light the leaning window: shade on the far side, a glint across it.
+    pub shine: bool,
+    /// `app_id`s (X11: class) that stay flat.
+    pub exclude: Vec<String>,
+}
+
+impl Default for TiltConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            strength: 1.0,
+            shine: true,
+            exclude: Vec::new(),
+        }
+    }
+}
+
+impl TiltConfig {
     pub fn excludes(&self, app_id: &str) -> bool {
         self.exclude.iter().any(|e| e.eq_ignore_ascii_case(app_id))
     }

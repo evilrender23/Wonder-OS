@@ -23,6 +23,13 @@ uniform vec4 clip;
 uniform vec2 used;
 uniform vec2 alloc;
 
+// A leaning 3D window's light. `lit` is the window's frame within the
+// picture, (u0, v0, u1, v1); `light` is the brightness slope across that
+// frame along x and y, then where the glint's streak sits across it and how
+// bright it is. All zero for everything else.
+uniform vec4 light;
+uniform vec4 lit;
+
 varying vec2 v_uv;
 varying vec2 v_pos;
 
@@ -56,6 +63,18 @@ void main() {
     // one frame pixel there (one texel where the picture is not squeezed), so
     // a bent edge is antialiased even where the picture is opaque right up to
     // its border, and an unbent one lands exactly on its pixels.
+    if (lit.z > lit.x && lit.w > lit.y) {
+        vec2 f = (v_uv - lit.xy) / (lit.zw - lit.xy);
+        if (f.x >= 0.0 && f.y >= 0.0 && f.x <= 1.0 && f.y <= 1.0) {
+            // The near side catches the light and the far one falls into
+            // shade; a soft diagonal streak crosses the card as it turns.
+            float shade = 1.0 + dot(f - vec2(0.5), light.xy);
+            float across = f.x + 0.35 * (f.y - 0.5) - light.z;
+            float glint = light.w * exp(-across * across / 0.02);
+            // Premultiplied: lit colour never exceeds its own coverage.
+            color.rgb = min(color.rgb * shade + vec3(glint * color.a), vec3(color.a));
+        }
+    }
     vec2 edge = clamp(min(texel, used - texel) / span + 0.5, 0.0, 1.0);
     gl_FragColor = color * (alpha * edge.x * edge.y);
 }

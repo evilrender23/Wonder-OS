@@ -206,6 +206,7 @@ impl DriftWm {
             || !self.resize_crossfades.is_empty()
             || self.text_caret.anim.visible()
             || self.wobbly.is_active()
+            || self.tilt.is_animating()
             || self.cursor_smear_is_live()
     }
 }

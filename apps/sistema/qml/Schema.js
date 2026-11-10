@@ -282,6 +282,16 @@ const pages = [
                 ]
             },
             {
+                title: "Ventanas 3D",
+                note: "Al arrastrar una ventana se inclina en perspectiva hacia donde la llevas, como una carta sujeta por un punto, y vuelve a quedar plana con un pequeño vaivén al parar. Se combina con las ventanas gelatinosas.",
+                items: [
+                    s("effects.tilt.enabled", "bool", "Ventanas 3D"),
+                    s("effects.tilt.strength", "float", "Inclinación", "Cuánto se ladea: 1 son unos 20° a toda velocidad.", { min: 0.2, max: 2, step: 0.1 }),
+                    s("effects.tilt.shine", "bool", "Luz y reflejo", "Sombrea el lado que se aleja y cruza un destello por la ventana."),
+                    s("effects.tilt.exclude", "lines", "Apps excluidas", "Un app_id por línea; esas ventanas se mueven planas.", { hint: "mpv" })
+                ]
+            },
+            {
                 title: "Lámpara mágica al minimizar",
                 note: "La ventana se escurre por un embudo hasta el dock y vuelve a salir de él al restaurarla. Desactivada, vuela en línea recta.",
                 items: [

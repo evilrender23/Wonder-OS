@@ -21,6 +21,7 @@ use smithay::utils::user_data::UserDataMap;
 use smithay::utils::{Buffer, Physical, Point, Rectangle, Scale, Size, Transform};
 
 use driftwm::magic_lamp::Lamp;
+use driftwm::tilt::Pose;
 use driftwm::wobbly::{Offsets, patch_offset};
 
 const VERTEX_SRC: &str = include_str!("../shaders/warp.vert");
@@ -51,6 +52,9 @@ struct ProgramInner {
     u_clip: ffi::types::GLint,
     u_used: ffi::types::GLint,
     u_alloc: ffi::types::GLint,
+    /// The 3D windows' light; absent (-1) from the close effects.
+    u_light: ffi::types::GLint,
+    u_lit: ffi::types::GLint,
     /// The close effects' own uniforms; absent (-1) from the plain warp.
     u_effect: ffi::types::GLint,
     u_progress: ffi::types::GLint,
@@ -144,6 +148,8 @@ fn compile_program(
             u_clip: uniform(c"clip"),
             u_used: uniform(c"used"),
             u_alloc: uniform(c"alloc"),
+            u_light: uniform(c"light"),
+            u_lit: uniform(c"lit"),
             u_effect: uniform(c"effect"),
             u_progress: uniform(c"progress"),
             u_seed: uniform(c"seed"),
@@ -328,8 +334,22 @@ impl WarpMesh {
     /// `frame` the window's frame (content plus title bar) the spring grid
     /// spans, both in physical pixels; `px_per_unit` converts the grid's
     /// logical offsets.
+    #[cfg(test)]
     pub fn wobbly(
         offsets: &Offsets,
+        baked: Rectangle<i32, Physical>,
+        frame: Rectangle<f64, Physical>,
+        px_per_unit: f64,
+    ) -> Self {
+        Self::bent(Some(offsets), None, baked, frame, px_per_unit)
+    }
+
+    /// A window bent by its spring grid (`[effects.wobbly]`), turned in
+    /// perspective (`[effects.tilt]`), or both: the jelly is bent first and
+    /// the bent sheet is what turns. Rectangles as in [`Self::wobbly`].
+    pub fn bent(
+        offsets: Option<&Offsets>,
+        pose: Option<Pose>,
         baked: Rectangle<i32, Physical>,
         frame: Rectangle<f64, Physical>,
         px_per_unit: f64,
@@ -337,12 +357,22 @@ impl WarpMesh {
         let (w, h) = (baked.size.w as f64, baked.size.h as f64);
         let fw = frame.size.w.max(1.0);
         let fh = frame.size.h.max(1.0);
-        // A wobble stretches and shears; it never squeezes by much.
-        Self::build(cells_for(w), cells_for(h), baked.size, 1.5, |u, v| {
-            let x = baked.loc.x as f64 + u * w;
-            let y = baked.loc.y as f64 + v * h;
-            let o = patch_offset(offsets, (x - frame.loc.x) / fw, (y - frame.loc.y) / fh);
-            [x + o[0] * px_per_unit, y + o[1] * px_per_unit]
+        let frame_rect = [frame.loc.x, frame.loc.y, fw, fh];
+        // A wobble stretches and shears and never squeezes by much; a turned
+        // window's far side is squeezed to a little over half.
+        let overhang = if pose.is_some() { 2.0 } else { 1.5 };
+        Self::build(cells_for(w), cells_for(h), baked.size, overhang, |u, v| {
+            let mut x = baked.loc.x as f64 + u * w;
+            let mut y = baked.loc.y as f64 + v * h;
+            if let Some(offsets) = offsets {
+                let o = patch_offset(offsets, (x - frame.loc.x) / fw, (y - frame.loc.y) / fh);
+                x += o[0] * px_per_unit;
+                y += o[1] * px_per_unit;
+            }
+            match pose {
+                Some(pose) => pose.project(frame_rect, x, y),
+                None => [x, y],
+            }
         })
     }
 
@@ -412,6 +442,9 @@ pub struct WarpElement {
     mesh: WarpMesh,
     alpha: f32,
     burn: Option<BurnUniforms>,
+    /// The fragment stage's `light` and `lit` uniforms; zeros leave the
+    /// picture as it is.
+    light: [[f32; 4]; 2],
 }
 
 impl WarpElement {
@@ -429,7 +462,16 @@ impl WarpElement {
             mesh,
             alpha,
             burn: None,
+            light: [[0.0; 4]; 2],
         }
+    }
+
+    /// Light the picture as a leaning card. `light` is [`Pose::light`]; `lit`
+    /// is the window's frame within the picture, `(u0, v0, u1, v1)`: its
+    /// shadow, outside it, is left alone.
+    pub fn lit(mut self, light: [f32; 4], lit: [f32; 4]) -> Self {
+        self.light = [light, lit];
+        self
     }
 
     /// Draw with a close effect's uniforms; `program` must then be the one
@@ -503,6 +545,7 @@ impl RenderElement<GlesRenderer> for WarpElement {
         let mesh = &self.mesh;
         let alpha = self.alpha;
         let burn = self.burn;
+        let [light, lit] = self.light;
         // Smithay re-establishes program, texture unit, attribute arrays and
         // divisors on each of its own draws, and never binds an element array
         // buffer or VAO, so nothing here needs restoring beyond what is
@@ -525,6 +568,8 @@ impl RenderElement<GlesRenderer> for WarpElement {
             gl.UniformMatrix3fv(program.u_matrix, 1, ffi::FALSE, projection.as_ptr());
             gl.UniformMatrix3fv(program.u_local, 1, ffi::FALSE, local.as_ptr());
             gl.Uniform1f(program.u_alpha, alpha);
+            gl.Uniform4f(program.u_light, light[0], light[1], light[2], light[3]);
+            gl.Uniform4f(program.u_lit, lit[0], lit[1], lit[2], lit[3]);
             if let Some(burn) = burn {
                 gl.Uniform1f(program.u_effect, burn.effect);
                 gl.Uniform1f(program.u_progress, burn.progress);
@@ -592,14 +637,17 @@ impl RenderElement<GlesRenderer> for WarpElement {
     }
 }
 
-/// Replace what a wobbling window pushed onto `bucket` from `start` on with
-/// one element: that picture, bent through the window's spring grid. `frame`
-/// is the window's frame (content plus title bar) in the output's logical
-/// pixels before zoom. Returns whether it did; a window at rest, and one whose
-/// picture could not be flattened, is left exactly as pushed.
+/// Replace what a wobbling or leaning window pushed onto `bucket` from
+/// `start` on with one element: that picture, bent through the window's
+/// spring grid and turned to its 3D pose. `frame` is the window's frame
+/// (content plus title bar) in the output's logical pixels before zoom.
+/// Returns whether it did; a window at rest, and one whose picture could not
+/// be flattened, is left exactly as pushed.
 #[allow(clippy::too_many_arguments)]
-pub(crate) fn push_wobbling_window(
+pub(crate) fn push_bent_window(
     wobbly: &mut crate::state::Wobbly,
+    tilt: &mut crate::state::Tilt,
+    shine: bool,
     program: Option<&WarpProgram>,
     renderer: &mut GlesRenderer,
     output: &smithay::output::Output,
@@ -610,9 +658,14 @@ pub(crate) fn push_wobbling_window(
     zoom: f64,
     scale: Scale<f64>,
 ) -> bool {
-    let (Some(program), Some(entry)) = (program, wobbly.get_mut(surface)) else {
+    let Some(program) = program else {
         return false;
     };
+    let jelly = wobbly.get_mut(surface);
+    let card = tilt.leaning_mut(surface);
+    if jelly.is_none() && card.is_none() {
+        return false;
+    }
     let px_per_unit = zoom * scale.x;
     let Some(painted) = bucket[start..]
         .iter()
@@ -621,10 +674,13 @@ pub(crate) fn push_wobbling_window(
     else {
         return false;
     };
-    // Nothing further off the output than the jelly can stretch back onto it
-    // is worth flattening: a window parked half off-screen keeps a texture
-    // the size of what can show.
-    let reach = (entry.reach() * px_per_unit).ceil() as i32 + 2;
+    let pose = card.as_ref().map(|c| c.pose());
+    // Nothing further off the output than the window can stretch or swing
+    // back onto it is worth flattening: a window parked half off-screen keeps
+    // a texture the size of what can show.
+    let reach = jelly.as_ref().map_or(0.0, |j| j.reach())
+        + pose.map_or(0.0, |p| p.reach() * frame.size.w.max(frame.size.h));
+    let reach = (reach * px_per_unit).ceil() as i32 + 2;
     let mode = output
         .current_mode()
         .map(|m| output.current_transform().transform_size(m.size))
@@ -636,7 +692,20 @@ pub(crate) fn push_wobbling_window(
     let Some(rect) = painted.intersection(visible) else {
         return false;
     };
-    let slot = entry.targets.entry(output.name()).or_default();
+    let offsets = jelly.as_ref().map(|j| j.offsets());
+    // One offscreen and one damage identity per window: the card's while it
+    // leans, the jelly's otherwise.
+    let (slot, stamp) = match (card, jelly) {
+        (Some(card), _) => (
+            card.targets.entry(output.name()).or_default(),
+            &mut card.stamp,
+        ),
+        (None, Some(jelly)) => (
+            jelly.targets.entry(output.name()).or_default(),
+            &mut jelly.stamp,
+        ),
+        (None, None) => return false,
+    };
     let Some(source) = bake_elements(renderer, slot, &bucket[start..], rect, scale) else {
         return false;
     };
@@ -644,9 +713,23 @@ pub(crate) fn push_wobbling_window(
         Point::from((frame.loc.x * px_per_unit, frame.loc.y * px_per_unit)),
         Size::from((frame.size.w * px_per_unit, frame.size.h * px_per_unit)),
     );
-    let mesh = WarpMesh::wobbly(&entry.offsets(), rect, frame_phys, px_per_unit);
-    entry.stamp.bump();
-    let element = WarpElement::new(&entry.stamp, program, source, mesh, 1.0);
+    let mesh = WarpMesh::bent(offsets.as_ref(), pose, rect, frame_phys, px_per_unit);
+    stamp.bump();
+    let mut element = WarpElement::new(stamp, program, source, mesh, 1.0);
+    if let Some(pose) = pose {
+        let (w, h) = (rect.size.w.max(1) as f64, rect.size.h.max(1) as f64);
+        let u0 = (frame_phys.loc.x - rect.loc.x as f64) / w;
+        let v0 = (frame_phys.loc.y - rect.loc.y as f64) / h;
+        element = element.lit(
+            pose.light(shine),
+            [
+                u0 as f32,
+                v0 as f32,
+                (u0 + frame_phys.size.w / w) as f32,
+                (v0 + frame_phys.size.h / h) as f32,
+            ],
+        );
+    }
     bucket.truncate(start);
     bucket.push(super::OutputRenderElements::Warp(element));
     true

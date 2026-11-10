@@ -18,8 +18,8 @@ use super::types::{
     BackendConfig, CloseAnimationConfig, CloseStyle, CursorBlurConfig, DecorationConfig,
     DecorationMode, EffectsConfig, FocusPlacement, FontWeight, GlassConfig, HotCorners,
     MagicLampConfig, ModKey, OutputConfig, OutputMode, OutputOutlineSettings, OutputPosition,
-    PassList, Pattern, TextCursorAnimation, TextCursorConfig, TextCursorVfx, TitleAlign,
-    WindowRule, WobblyConfig,
+    PassList, Pattern, TextCursorAnimation, TextCursorConfig, TextCursorVfx, TiltConfig,
+    TitleAlign, WindowRule, WobblyConfig,
 };
 
 /// How actionable a config warning is. The error bar has room for one message,
@@ -543,6 +543,7 @@ pub(super) fn parse_effects_config(raw: EffectsFileConfig, errors: &mut Warnings
         text_cursor: parse_text_cursor_config(raw.text_cursor, errors),
         cursor_blur: parse_cursor_blur_config(raw.cursor_blur, errors),
         wobbly: parse_wobbly_config(raw.wobbly, errors),
+        tilt: parse_tilt_config(raw.tilt, errors),
         magic_lamp: parse_magic_lamp_config(raw.magic_lamp, errors),
         close_animation: parse_close_animation_config(raw.close_animation, errors),
     }
@@ -583,6 +584,25 @@ pub(super) fn parse_wobbly_config(raw: WobblyFileConfig, errors: &mut Warnings) 
             "effects.wobbly.friction",
             errors,
         ),
+        exclude: raw.exclude.unwrap_or_default(),
+    }
+}
+
+pub(super) fn parse_tilt_config(
+    raw: super::toml::TiltFileConfig,
+    errors: &mut Warnings,
+) -> TiltConfig {
+    let d = TiltConfig::default();
+    TiltConfig {
+        enabled: raw.enabled.unwrap_or(d.enabled),
+        strength: clamp_warn(
+            raw.strength.unwrap_or(d.strength),
+            0.2,
+            2.0,
+            "effects.tilt.strength",
+            errors,
+        ),
+        shine: raw.shine.unwrap_or(d.shine),
         exclude: raw.exclude.unwrap_or_default(),
     }
 }

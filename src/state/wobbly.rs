@@ -135,7 +135,7 @@ impl DriftWm {
     }
 
     /// Height of the server-side title bar drawn above `surface`, 0 without.
-    fn title_bar_height_of(&self, surface: &WlSurface) -> i32 {
+    pub(super) fn title_bar_height_of(&self, surface: &WlSurface) -> i32 {
         if self
             .decorations
             .contains_key(&crate::decorations::DecorationKey::Surface(surface.id()))

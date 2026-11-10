@@ -820,6 +820,32 @@ Default: `[]`
 
 app_ids that stay rigid, e.g. ["mpv"]
 
+## `[effects.tilt]`
+
+### `enabled`
+
+Default: `false`
+
+3D windows: a dragged window leans into the motion in real perspective, like a card held by the point under the pointer. Its leading edge swings away, the far side falls into shade and a glint crosses it; when the hand stops or lets go it swings back flat with a small overshoot. Fullscreen and pinned windows stay flat, a frosted window's blur pauses while it leans, and it combines with [effects.wobbly]. Off unless switched on.
+
+### `strength`
+
+Default: `1.0`
+
+0.2–2: how far it leans; 1 is about 20° at full speed
+
+### `shine`
+
+Default: `true`
+
+shade and glint on the leaning window
+
+### `exclude`
+
+Default: `[]`
+
+app_ids that stay flat, e.g. ["mpv"]
+
 ## `[effects.magic_lamp]`
 
 ### `enabled`

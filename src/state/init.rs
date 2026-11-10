@@ -447,6 +447,7 @@ impl DriftWm {
             last_animation_tick: Instant::now(),
             text_caret: Default::default(),
             wobbly: Default::default(),
+            tilt: Default::default(),
             cursor_blur: Default::default(),
             cursor_smear_shown: false,
             last_pointer_delivery: None,

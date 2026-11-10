@@ -165,7 +165,7 @@ The *clear fit → clear fill → seed `ResizeState` → set `Resizing` → unse
 
 ## The warp effects replace a window's elements, so they sit after everything that counts them
 
-A wobbling window is not drawn by its own elements: `warp::push_wobbling_window`
+A wobbling or leaning window is not drawn by its own elements: `warp::push_bent_window`
 takes everything the window pushed in `compose_frame` (popups, bar, content,
 border, shadow), flattens it into an offscreen texture and leaves one
 `Warp` element in its place. Two things follow. Anything that indexes into
@@ -175,6 +175,16 @@ a straight-edged backdrop sample cannot follow a bent outline. And a window
 at rest must not have an entry in `state.wobbly` at all: the grid is created
 when a move grab first displaces the window and dropped on the tick it comes
 to rest, which is what keeps the ordinary path pixel-identical and free.
+
+3D windows (`[effects.tilt]`, `src/tilt.rs` + `src/state/tilt.rs`) ride the
+same swap: the mesh is the jelly's grid, if any, pushed through the pose's
+perspective projection, so the two effects share one bake and one element.
+The difference is the rest rule. A held window that stops moving goes flat
+while still in the hand, so its model stays in `state.tilt` — but
+`leaning_mut` only hands out a model whose pose is not flat, and
+`has_active_animations` asks `is_animating`, not `is_active`: a flat, waiting
+model draws by the ordinary path and requests no frames. The light is two
+uniforms on `warp.frag` that are zero for every other user of the shader.
 
 The lamp is the same renderer fed by a different deformation, hung on the
 closing-snapshot machinery: while a snapshot pours a window in or out,

@@ -1699,6 +1699,9 @@ mod tests {
         assert!(!fx.wobbly.enabled);
         assert_eq!((fx.wobbly.stiffness, fx.wobbly.friction), (8.0, 3.0));
         assert!(fx.wobbly.exclude.is_empty());
+        assert!(!fx.tilt.enabled && fx.tilt.shine);
+        assert_eq!(fx.tilt.strength, 1.0);
+        assert!(fx.tilt.exclude.is_empty());
         assert!(fx.magic_lamp.enabled);
         assert_eq!(fx.magic_lamp.duration_ms, 380.0);
         assert_eq!(
@@ -1803,6 +1806,30 @@ mod tests {
                 "a warning names {field}: {warnings:?}"
             );
         }
+    }
+
+    #[test]
+    fn the_3d_windows_table_is_read_and_clamped() {
+        let (config, warnings) = Config::from_toml_collect(
+            r#"
+            [effects.tilt]
+            enabled = true
+            strength = 1.5
+            shine = false
+            exclude = ["mpv"]
+        "#,
+        )
+        .unwrap();
+        let tilt = &config.effects.tilt;
+        assert!(tilt.enabled && !tilt.shine);
+        assert_eq!(tilt.strength, 1.5);
+        assert!(tilt.excludes("MPV") && !tilt.excludes("foot"));
+        assert!(warnings.is_empty(), "{warnings:?}");
+
+        let (config, warnings) =
+            Config::from_toml_collect("[effects.tilt]\nstrength = 7\n").unwrap();
+        assert_eq!(config.effects.tilt.strength, 2.0);
+        assert!(warnings.iter().any(|w| w.contains("tilt.strength")));
     }
 
     #[test]

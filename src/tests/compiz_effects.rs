@@ -1188,3 +1188,271 @@ fn instant_animations_skip_the_close_effect() {
     assert!(f.state().closing_snapshots.is_empty());
     teardown(&mut f, &output);
 }
+
+// ---------------------------------------------------------------------------
+// 3D windows (`[effects.tilt]`)
+// ---------------------------------------------------------------------------
+
+/// 3D windows on, the jelly off, so what bends the picture is the lean alone.
+const TILT_ONLY: &str = "[effects.wobbly]\nenabled = false\n\n[effects.tilt]\nenabled = true\n";
+
+fn tick_tilt(f: &mut Fixture, frames: usize) {
+    for _ in 0..frames {
+        f.state().tick_tilt(FRAME);
+    }
+}
+
+/// Run the swing until `done`, which must come within a few seconds.
+fn settle_tilt(f: &mut Fixture, done: impl Fn(&crate::state::Tilt) -> bool) {
+    for _ in 0..4000 {
+        if done(&f.state().tilt) {
+            return;
+        }
+        f.state().tick_tilt(FRAME);
+    }
+    panic!("the leaning window never came to rest");
+}
+
+fn is_leaning(f: &mut Fixture) -> bool {
+    let window = window_by_app_id(f, "jelly").expect("the scene's window");
+    let surface = smithay::wayland::seat::WaylandFocus::wl_surface(&window)
+        .expect("a surface")
+        .into_owned();
+    f.state().tilt.is_leaning(&surface)
+}
+
+/// Inclusive `(first, last)` painted row of column `x`.
+fn column_span(img: &RgbaImage, x: u32) -> Option<(u32, u32)> {
+    let painted: Vec<u32> = (0..img.height())
+        .filter(|y| img.get_pixel(x, *y)[3] > 8)
+        .collect();
+    Some((*painted.first()?, *painted.last()?))
+}
+
+/// Mean brightness of the painted pixels in columns `x0..x1`.
+fn brightness(img: &RgbaImage, x0: u32, x1: u32) -> f64 {
+    let (mut sum, mut count) = (0.0, 0.0);
+    for (x, _, p) in img.enumerate_pixels() {
+        if x >= x0 && x < x1 && p[3] > 250 {
+            sum += p[0] as f64 + p[1] as f64 + p[2] as f64;
+            count += 3.0;
+        }
+    }
+    sum / f64::max(count, 1.0)
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn a_dragged_window_leans_into_the_motion_and_lies_flat_again() {
+    let _gl = gl::lock();
+    let no_shine = format!("{TILT_ONLY}shine = false\n");
+    let Some((mut f, output)) = scene("tilt", &no_shine) else {
+        return;
+    };
+    let baseline = live_frame(&mut f, &output);
+    let rest = painted_bounds(&baseline).expect("the window is drawn");
+
+    // Taking hold of it changes nothing: flat until it actually moves.
+    assert!(f.state().try_start_gesture_move(handle(), false));
+    assert!(!f.state().tilt.is_active());
+    assert!(live_frame(&mut f, &output) == baseline);
+
+    // A steady pull to the right: 30 px every 25 ms.
+    const PULL: i32 = 240;
+    for step in 1..=8 {
+        motion(&mut f, handle() + Point::from((step as f64 * 30.0, 0.0)));
+        tick_tilt(&mut f, 6);
+        dump(&live_frame(&mut f, &output), &format!("tilt_{step:02}"));
+    }
+    assert!(is_leaning(&mut f));
+    assert!(f.state().has_active_animations());
+    let leaning = live_frame(&mut f, &output);
+    let b = painted_bounds(&leaning).expect("the window is drawn");
+    // The leading (right) edge has swung away: it is drawn shorter than the
+    // trailing one, which has come nearer and is drawn taller than at rest.
+    let height = |x: u32| {
+        let (top, bottom) = column_span(&leaning, x).expect("a painted column");
+        bottom - top + 1
+    };
+    let (near, far) = (height(b.0 + 4), height(b.2 - 4));
+    assert!(near > WINDOW.1 as u32 + 6, "the near side grew: {near}");
+    assert!(far + 6 < WINDOW.1 as u32, "the far side shrank: {far}");
+    // Turned, it is narrower than it is wide.
+    assert!(b.2 - b.0 + 8 < WINDOW.0 as u32, "foreshortened: {b:?}");
+    // The spot of the title bar that was taken is still under the hand.
+    let held = (WINDOW_AT.0 + WINDOW.0 as u32 / 2, WINDOW_AT.1 + 14);
+    assert_eq!(
+        leaning.get_pixel(held.0 + PULL as u32, held.1),
+        baseline.get_pixel(held.0, held.1)
+    );
+
+    // The same pose, lit: the near side is brighter than the far one by more
+    // than the picture alone makes it.
+    let lean_of = |img: &RgbaImage| {
+        let b = painted_bounds(img).expect("the window is drawn");
+        let third = (b.2 - b.0) / 3;
+        brightness(img, b.0, b.0 + third) - brightness(img, b.2 - third, b.2)
+    };
+    f.state()
+        .reload_config_from_contents(&config_toml(TILT_ONLY));
+    f.state().pending_mode_changes.clear();
+    let lit = live_frame(&mut f, &output);
+    dump(&lit, "tilt_09_lit");
+    assert!(
+        lean_of(&lit) > lean_of(&leaning) + 4.0,
+        "shade on the far side: {} vs {}",
+        lean_of(&lit),
+        lean_of(&leaning)
+    );
+    assert_eq!(painted_bounds(&lit), Some(b), "light moves no pixel");
+
+    // Held still it swings back flat and stops asking for frames, drawn by
+    // the ordinary path again.
+    for step in 10..=15 {
+        tick_tilt(&mut f, 12);
+        dump(&live_frame(&mut f, &output), &format!("tilt_{step:02}"));
+    }
+    settle_tilt(&mut f, |tilt| !tilt.is_animating());
+    assert!(!f.state().has_active_animations());
+    let shifted = image::imageops::crop_imm(&baseline, rest.0, rest.1, 480, 320).to_image();
+    let landed = |img: &RgbaImage| {
+        image::imageops::crop_imm(img, rest.0 + PULL as u32, rest.1, 480, 320).to_image()
+    };
+    assert!(
+        shifted == landed(&live_frame(&mut f, &output)),
+        "flat in hand"
+    );
+
+    // A flick and a release: it swings past flat and comes to rest.
+    for step in 9..=12 {
+        motion(&mut f, handle() + Point::from((step as f64 * 30.0, 0.0)));
+        tick_tilt(&mut f, 6);
+    }
+    motion(&mut f, handle() + Point::from((PULL as f64, 0.0)));
+    assert!(is_leaning(&mut f));
+    end_drag(&mut f);
+    settle_tilt(&mut f, |tilt| !tilt.is_active());
+    assert!(!f.state().has_active_animations());
+    let after = live_frame(&mut f, &output);
+    dump(&after, "tilt_16_rest");
+    assert!(shifted == landed(&after), "at rest it is the plain window");
+    assert_eq!(
+        painted_bounds(&after),
+        Some((rest.0 + PULL as u32, rest.1, rest.2 + PULL as u32, rest.3))
+    );
+
+    teardown(&mut f, &output);
+}
+
+#[test]
+#[ignore = "needs Mesa surfaceless EGL; run with --include-ignored"]
+fn a_jelly_window_can_lean_too() {
+    let _gl = gl::lock();
+    let Some((mut f, output)) = scene("tilt_wobbly", "[effects.tilt]\nenabled = true\n") else {
+        return;
+    };
+    let baseline = live_frame(&mut f, &output);
+    let rest = painted_bounds(&baseline).expect("the window is drawn");
+    assert!(f.state().try_start_gesture_move(handle(), false));
+    for step in 1..=6 {
+        motion(&mut f, handle() + Point::from((step as f64 * 30.0, 0.0)));
+        tick_tilt(&mut f, 6);
+        tick_wobble(&mut f, 6);
+    }
+    assert!(f.state().wobbly.is_active() && is_leaning(&mut f));
+    let both = live_frame(&mut f, &output);
+    dump(&both, "tilt_wobbly");
+    assert!(painted_bounds(&both).is_some());
+    end_drag(&mut f);
+    settle_wobble(&mut f);
+    settle_tilt(&mut f, |tilt| !tilt.is_active());
+    let after = live_frame(&mut f, &output);
+    assert_eq!(
+        painted_bounds(&after),
+        Some((rest.0 + 180, rest.1, rest.2 + 180, rest.3))
+    );
+    teardown(&mut f, &output);
+}
+
+#[test]
+fn a_drag_leans_the_window_and_stillness_costs_no_frames() {
+    let mut f = stage(TILT_ONLY);
+    assert!(!f.state().has_active_animations());
+    drag_by(&mut f, 120.0);
+    assert!(f.state().tilt.is_active());
+    assert!(f.state().has_active_animations());
+    tick_tilt(&mut f, 4);
+    assert!(is_leaning(&mut f));
+    // Held still, it goes flat: the model waits but asks for nothing.
+    settle_tilt(&mut f, |tilt| !tilt.is_animating());
+    assert!(f.state().tilt.is_active() && !is_leaning(&mut f));
+    assert!(!f.state().has_active_animations());
+    // The next move leans it again; letting go drops the model at rest.
+    motion(&mut f, handle() + Point::from((200.0, 60.0)));
+    assert!(f.state().has_active_animations());
+    end_drag(&mut f);
+    settle_tilt(&mut f, |tilt| !tilt.is_active());
+    assert!(!f.state().has_active_animations());
+}
+
+#[test]
+fn switched_off_3d_windows_never_lean() {
+    let mut f = stage("");
+    drag_by(&mut f, 120.0);
+    assert!(!f.state().tilt.is_active());
+    end_drag(&mut f);
+}
+
+#[test]
+fn an_excluded_app_stays_flat() {
+    let mut f = stage(&format!("{TILT_ONLY}exclude = [\"Jelly\"]\n"));
+    drag_by(&mut f, 120.0);
+    assert!(!f.state().tilt.is_active());
+    end_drag(&mut f);
+}
+
+#[test]
+fn switching_3d_windows_off_mid_lean_lays_the_window_flat() {
+    let mut f = stage(TILT_ONLY);
+    drag_by(&mut f, 120.0);
+    tick_tilt(&mut f, 4);
+    assert!(is_leaning(&mut f));
+    f.state()
+        .reload_config_from_contents(&config_toml("[effects.tilt]\nenabled = false\n"));
+    f.state().pending_mode_changes.clear();
+    f.state().tick_tilt(FRAME);
+    assert!(!f.state().tilt.is_active());
+    assert!(!f.state().has_active_animations() || f.state().wobbly.is_active());
+    end_drag(&mut f);
+}
+
+#[test]
+fn a_pinned_window_stays_flat() {
+    let mut f = stage(TILT_ONLY);
+    let window = window_by_app_id(&mut f, "jelly").expect("the window");
+    f.state().pin_window(&window).expect("pinned");
+    tick_until_settled(&mut f);
+    let from = f
+        .state()
+        .stage
+        .position_of(&crate::state::StageWindow::Client(window.clone()));
+    f.state().tilt_dragged(
+        &crate::state::StageWindow::Client(window),
+        from,
+        from.expect("mapped") + Point::from((90, 0)),
+        handle(),
+    );
+    assert!(!f.state().tilt.is_active());
+}
+
+#[test]
+fn a_window_that_dies_mid_lean_takes_its_model_with_it() {
+    let (mut f, client) = stage_with_client(TILT_ONLY);
+    drag_by(&mut f, 120.0);
+    end_drag(&mut f);
+    assert!(f.state().tilt.is_active());
+    f.kill_client(client);
+    f.pump(4);
+    f.state().tick_tilt(FRAME);
+    assert!(!f.state().tilt.is_active());
+}

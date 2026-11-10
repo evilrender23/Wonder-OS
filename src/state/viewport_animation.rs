@@ -633,6 +633,7 @@ impl DriftWm {
         self.tick_window_animations(dt);
         self.tick_text_caret(dt);
         self.tick_wobbly(dt);
+        self.tick_tilt(dt);
         self.tick_cursor_blur();
         // Re-arm cursor edge-pan from the current cursor position before the
         // per-output velocities are applied below (disarms outputs the cursor

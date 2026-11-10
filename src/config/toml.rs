@@ -65,6 +65,7 @@ pub(super) struct EffectsFileConfig {
     pub text_cursor: TextCursorFileConfig,
     pub cursor_blur: CursorBlurFileConfig,
     pub wobbly: WobblyFileConfig,
+    pub tilt: TiltFileConfig,
     pub magic_lamp: MagicLampFileConfig,
     pub close_animation: CloseAnimationFileConfig,
 }
@@ -89,6 +90,15 @@ pub(super) struct WobblyFileConfig {
     pub enabled: Option<bool>,
     pub stiffness: Option<f64>,
     pub friction: Option<f64>,
+    pub exclude: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, Default)]
+#[serde(default, deny_unknown_fields)]
+pub(super) struct TiltFileConfig {
+    pub enabled: Option<bool>,
+    pub strength: Option<f64>,
+    pub shine: Option<bool>,
     pub exclude: Option<Vec<String>>,
 }
 

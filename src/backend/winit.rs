@@ -207,6 +207,7 @@ pub fn init_winit(
             data.tick_window_animations(dt);
             data.tick_text_caret(dt);
             data.tick_wobbly(dt);
+            data.tick_tilt(dt);
             data.tick_cursor_blur();
 
             data.refresh_pointer_focus();

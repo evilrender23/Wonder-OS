@@ -1571,8 +1571,10 @@ pub fn compose_frame(
         // it is left out until the window is back at rest.
         let wobbling = !is_fullscreen
             && target.len() > elem_start
-            && warp::push_wobbling_window(
+            && warp::push_bent_window(
                 &mut state.wobbly,
+                &mut state.tilt,
+                state.config.effects.tilt.shine,
                 state.render.warp_program.as_ref(),
                 renderer,
                 output,

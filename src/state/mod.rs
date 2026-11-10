@@ -43,6 +43,8 @@ mod stage_window;
 mod suspended;
 mod tab_group;
 mod text_caret;
+mod tilt;
+pub use tilt::Tilt;
 mod wobbly;
 pub use wobbly::Wobbly;
 mod viewport;
@@ -1119,6 +1121,8 @@ pub struct DriftWm {
     /// The focused client's text caret and the effect following it.
     pub text_caret: text_caret::TextCaret,
     pub wobbly: wobbly::Wobbly,
+    /// Windows leaning in 3D right now (`[effects.tilt]`).
+    pub tilt: tilt::Tilt,
     pub cursor_blur: crate::render::cursor_smear::CursorBlur,
     /// Whether the last tick saw a smear: one more frame is owed to erase it.
     pub cursor_smear_shown: bool,
