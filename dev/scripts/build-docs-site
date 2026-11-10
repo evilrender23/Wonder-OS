@@ -56,9 +56,9 @@ MD_LINK = re.compile(r"\]\(([^)]+)\)")
 VIDEO_LINE = re.compile(
     r"^https://github\.com/user-attachments/assets/[0-9a-fA-F-]+$"
 )
-# Local asset references only — src="assets/…" or ](assets/…), never the
+# Local asset references only — src="assets/…", srcset="assets/…" or ](assets/…), never the
 # assets/<uuid> tail of a github user-attachments URL.
-ASSET_REF = re.compile(r"""(?:src=["']|\]\()(assets/[^\s"')]+)""")
+ASSET_REF = re.compile(r"""(?:src(?:set)?=["']|\]\()(assets/[^\s"')]+)""")
 
 
 def rewrite_target(target: str) -> str:

@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: shellcheck install.sh dev/scripts/install-wonderlandwm extras/install.sh
-          extras/greeter/install.sh extras/greeter/scripts/wonderland-greeter
+          extras/greeter/install.sh extras/plymouth/install.sh extras/greeter/scripts/wonderland-greeter
           extras/greeter/scripts/wonderland-greeter-ui
       - run: shellcheck -x apps/wonderupdate/src/wonderupdate apps/wonderupdate/src/lib/*.sh apps/wonderupdate/tests/run.sh
       - name: WonderUpdate tests

@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-white.svg">
+    <img src="assets/logo-black.svg" alt="Logo de Wonder OS" width="200">
+  </picture>
+</p>
+
 # Wonder OS
 
 Wonder OS es una distribución Linux basada en CachyOS.
@@ -23,7 +30,7 @@ Wonder OS es una distribución Linux basada en CachyOS.
   - `wonderterm` — terminal
   - `wonderupdate` — WonderUpdate, el actualizador
 - **Escritorio** (`extras/`): configuración, barra y shell en Quickshell, pantalla de inicio de
-  sesión (`greeter`), scripts, temas y fondos de pantalla.
+  sesión (`greeter`), pantalla de arranque (`plymouth`), scripts, temas y fondos de pantalla.
 - **Sesión** (`resources/`): archivos de la sesión de inicio y servicios de systemd.
 
 ## Instalación
@@ -37,6 +44,9 @@ Wonder OS es una distribución Linux basada en CachyOS.
 El instalador pone la pantalla de inicio de sesión de Wonder OS (`extras/greeter`) como gestor de
 inicio de sesión desde el siguiente arranque. `./install.sh --no-greeter` deja el que haya, y
 `extras/greeter/install.sh --disable` vuelve al anterior.
+
+La pantalla de arranque con el logo de Wonder OS (un tema de Plymouth) se instala aparte con
+`extras/plymouth/install.sh`; `extras/plymouth/install.sh --uninstall` vuelve a la anterior.
 
 ## Licencia
 
